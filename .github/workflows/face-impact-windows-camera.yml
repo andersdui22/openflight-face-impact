@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - src/openflight/camera/windows_usb.py
-      - tests/test_windows_usb_camera.py
+      - tests/test_windows_usb_camera.py tests/test_windows_usb_server.py
+      - tests/test_windows_usb_server.py
+      - src/openflight/server.py
       - .github/workflows/face-impact-windows-camera.yml
       - docs/governance/GATE03_WINDOWS_ELP_CAMERA.md
   workflow_dispatch:
