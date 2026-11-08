@@ -137,6 +137,8 @@ class WindowsUsbCamera:
         OpenCV is only needed when preview is requested. This method never
         owns a camera handle or consumes a triggered capture.
         """
+        if not self.is_running or self._stop.is_set():
+            return None
         frame = self.ring.latest_frame
         if frame is None:
             return None
