@@ -1,6 +1,6 @@
 # Active handoff
 
-Snapshot: 2026-11-08. GitHub, once created, is authoritative for current
+Snapshot: 2026-11-08 (updated after remote PR/CI verification). GitHub, once created, is authoritative for current
 repository state. Start every successor session with a read-only audit.
 
 ## Authority and state
@@ -48,3 +48,25 @@ same SHA. Do not touch ConnectorNext.
 Gate 02 Windows bootstrap is only a future proposal, requiring separate user
 authorization after Gate 01 is complete. Recheck source and remote drift
 before any resumed work.
+
+
+## 2026-11-08 remote verification update
+
+A subsequent read-only GitHub verification supersedes the earlier local-preparation
+snapshot above. Gate 01 foundation changes were published and draft PR #1 was
+opened: https://github.com/andersdui22/openflight-face-impact/pull/1 .
+The gate branch and PR head were both verified at
+`a6bee2f0cb8eadd88b40c3e80aff5935c0c5ebbf`; main remained at
+`a3ab081a8abff71fd344d4fd782412d624b99f3f`.
+
+Seven GitHub Actions workflow runs completed successfully on that exact
+pre-document-update SHA: UI, Anti-slop Audit, Face Impact foundation,
+PR Checks, Pylint, Documentation, and Tests. These are CI results,
+not evidence of physical Windows camera capture or impact accuracy.
+The project source and UI were unchanged by PR #1.
+
+IMPORTANT: This handoff update itself changes the branch SHA, so the seven
+previous results cannot be used as final same-SHA closeout evidence.
+Verify the new remote HEAD and await all required CI checks on the final
+documentation SHA before closing Gate 01. No merge, release, physical test,
+or Gate 02 production work is authorized by this update.
