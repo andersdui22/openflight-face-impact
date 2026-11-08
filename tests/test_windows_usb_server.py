@@ -32,3 +32,36 @@ def test_usb_preview_disabled_is_404(monkeypatch):
     monkeypatch.setattr(server, "windows_usb_runtime", None)
     monkeypatch.setattr(server, "camera_capture_runtime", None)
     assert server.app.test_client().get("/api/camera/preview.jpg").status_code == 404
+
+
+def test_usb_status_disabled(monkeypatch):
+    monkeypatch.setattr(server, "windows_usb_runtime", None)
+    response = server.app.test_client().get("/api/camera/usb/status")
+    assert response.status_code == 200
+    assert response.json == {"enabled": False, "state": "disabled"}
+
+
+def test_usb_status_running_does_not_claim_measured_fps(monkeypatch):
+    camera = SimpleNamespace(
+        is_running=True, frames_received=12, last_error=None,
+        negotiated={"width": 640, "height": 400, "reported_fps": 120.0},
+    )
+    monkeypatch.setattr(server, "windows_usb_runtime", camera)
+    response = server.app.test_client().get("/api/camera/usb/status")
+    assert response.status_code == 200
+    assert response.json["state"] == "running"
+    assert response.json["frames_received"] == 12
+    assert response.json["actual_fps_measured"] is False
+    assert response.json["timestamp_source"] == "host_arrival_monotonic"
+
+
+def test_usb_status_reports_disconnect_error(monkeypatch):
+    camera = SimpleNamespace(
+        is_running=False, frames_received=3,
+        last_error="USB camera read failed or disconnected", negotiated=None,
+    )
+    monkeypatch.setattr(server, "windows_usb_runtime", camera)
+    response = server.app.test_client().get("/api/camera/usb/status")
+    assert response.status_code == 200
+    assert response.json["state"] == "error"
+    assert "disconnected" in response.json["last_error"]
