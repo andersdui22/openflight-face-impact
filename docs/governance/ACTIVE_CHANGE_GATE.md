@@ -1,16 +1,16 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 13
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 14
 
-Title: Single-camera synthetic pose observability and uncertainty
-State: ACTIVE — user explicitly approved "Godkendt" after Gate 13 proposal (2026-11-08).
+Title: Synthetic clubface-local coordinate frame
+State: ACTIVE — user explicitly approved "Godkendt" following Gate 14 proposal (2026-11-08).
 Project Law: V1 unchanged.
-Working branch: `gate13/synthetic-pose-observability`.
-Base: Gate 12 HEAD `32e09c5190316c082abe0d724acbeda8d9bc55e0`, six same-SHA successful workflows; draft PR #12 unmerged.
+Working branch: `gate14/synthetic-face-coordinate-frame`.
+Base: Gate 13 `fbbbe9db38dcb4488372493fac1e985b7ae84e66`, six same-SHA successful workflows; draft PR #13 remains unmerged.
 
 ## Authorized scope
-Analyze synthetic model poses at multiple explicitly supplied orientations/translations with one calibrated virtual camera. Quantify silhouette similarity, detect distinct poses with near-identical 2D projections, and fail closed when a unique pose cannot be resolved. Reuse Gate 11 projection and Gate 12 IoU fitting; deterministic synthetic tests and evidence only.
+Define a synthetic clubface center and orthonormal local heel-to-toe and bottom-to-top axes with explicit units, handedness and right-handed surface normal. Transform synthetic 3D points into local face coordinates using an explicit rigid pose, and back. Reuse existing rigid transform conventions from Gates 11–13. Include deterministic tests for identity, rotation, translation, off-plane point, invalid frames and round-trip.
 
-## Acceptance and evidence
-Bounded candidate count, finite and validated rigid transforms, explicit ambiguity threshold, tests for clear and degenerate pose sets and invalid observations. Report observability as a candidate-set-specific synthetic metric, not physical angular accuracy. Same-SHA CI required.
+## Acceptance
+No assumed real clubhead center or face dimensions. Reject nonfinite, degenerate, mirrored or inconsistent geometry and invalid pose. Coordinate units remain millimetres; surface normal direction is explicit. Same-SHA CI required.
 
 ## Exclusions
-No physical camera, 850 nm IR measurement, real pose estimation, radar, impact mm, new UI, restricted clubhead mesh, merge, release or Golden baseline. Stop for new dependencies, incompatible upstream assumptions or unresolved CI.
+No actual ball/club contact measurement, real face recognition, physical camera test, calibrated precision, restricted club mesh, radar, UI, merge, release or Golden baseline. Stop for ambiguous real handedness or unverified asset assumptions.
