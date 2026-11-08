@@ -32,7 +32,8 @@ export function validateOptions(options) {
 export async function waitForHttpReady(target, timeout, child, request = fetch) {
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
-    if (child.spawnError || child.exitCode !== null || child.signalCode !== null) {
+    if (child.spawnError) throw new Error(`OpenFlight backend failed to start: ${child.spawnError.message}`);
+    if (child.exitCode !== null || child.signalCode !== null) {
       throw new Error('OpenFlight backend exited before becoming ready');
     }
     try {
@@ -49,6 +50,7 @@ export async function waitForHttpReady(target, timeout, child, request = fetch) 
 export async function stopProcess(child) {
   if (!child || child.exitCode !== null || child.signalCode !== null) return;
   if (process.platform === 'win32') {
+    if (!child.pid) return;
     // npm.cmd may spawn a process tree. Stop its descendants too.
     await new Promise((resolve) => {
       const killer = spawn('taskkill', ['/PID', String(child.pid), '/T', '/F'], {
@@ -59,6 +61,11 @@ export async function stopProcess(child) {
     });
   } else {
     child.kill('SIGTERM');
+    await Promise.race([
+      new Promise((resolve) => child.once('exit', resolve)),
+      sleep(2000),
+    ]);
+    if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
   }
 }
 
