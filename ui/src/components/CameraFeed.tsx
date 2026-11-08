@@ -305,20 +305,24 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
             <h2 className="camera-feed__title">Camera alignment</h2>
           </div>
           <div className="camera-feed__header-status">
-            {!usbStatus?.enabled && <span
-              className={`camera-feed__exposure-quality camera-feed__exposure-quality--${exposureQuality?.status ?? 'checking'}`}
-              title={exposureQuality?.message ?? 'Analyzing the impact area'}
-            >
-              Auto exposure:{' '}
-              {exposureQuality?.auto_exposure ? AUTO_EXPOSURE_LABELS[exposureQuality.auto_exposure.status] : 'checking'}
-            </span>}
+            {!usbStatus?.enabled && (
+              <span
+                className={`camera-feed__exposure-quality camera-feed__exposure-quality--${exposureQuality?.status ?? 'checking'}`}
+                title={exposureQuality?.message ?? 'Analyzing the impact area'}
+              >
+                Auto exposure:{' '}
+                {exposureQuality?.auto_exposure ? AUTO_EXPOSURE_LABELS[exposureQuality.auto_exposure.status] : 'checking'}
+              </span>
+            )}
             {usbStatus?.enabled && (
               <span className="camera-feed__timestamp" role="status">
                 USB: {usbStatus.state}
                 {usbStatus.last_error ? ` — ${usbStatus.last_error}` : ''}
               </span>
             )}
-            {lastUpdated && previewSrc && <span className="camera-feed__timestamp">preview {lastUpdated.toLocaleTimeString()}</span>}
+            {lastUpdated && previewSrc && (
+              <span className="camera-feed__timestamp">preview {lastUpdated.toLocaleTimeString()}</span>
+            )}
           </div>
         </div>
         <div className="camera-feed__workspace">
