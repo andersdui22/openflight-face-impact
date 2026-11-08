@@ -1,10 +1,10 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 07
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 08
 
-Title: Synthetic golf ball and clubface localization
+Title: IR-style synthetic ball and clubface detection
 State: ACTIVE — explicitly approved by user 2026-11-08 ("Godkendt").
 Project Law: V1, unchanged.
-Working branch: `gate07/synthetic-ball-face-localization`
-Base: Gate 06 `gate06/synthetic-frame-calibration` @ `9522651a6a4be988f8bd8da22447b50cf1779099` (six of six CI successful, draft PR #6 unmerged).
-Scope, acceptance and stop conditions: [GATE07_SYNTHETIC_LOCALIZATION.md](GATE07_SYNTHETIC_LOCALIZATION.md).
+Working branch: `gate08/ir-synthetic-detection`
+Base: Gate 07 `gate07/synthetic-ball-face-localization` @ `cb8d13451dac1648d2f5c4f8921a5663ad9eb621` (six of six CI successful, draft PR #7 unmerged).
+Scope, acceptance and stop conditions: [GATE08_IR_SYNTHETIC_DETECTION.md](GATE08_IR_SYNTHETIC_DETECTION.md).
 
-Synthetic color-coded images only; no real camera recognition, physical tests, Face Impact computation, merge or release.
+Reuse existing IR ball detector in hardware-free synthetic fixtures. No physical ELP test, Face Impact calculation, merge or release.
