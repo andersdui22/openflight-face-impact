@@ -17,6 +17,7 @@ const host = '127.0.0.1';
 const port = Number(process.env.OPENFLIGHT_WEB_PORT ?? '8080');
 const timeoutMs = Number(process.env.OPENFLIGHT_STARTUP_TIMEOUT_MS ?? '30000');
 const python = process.env.OPENFLIGHT_PYTHON || 'python';
+const usbCameraIndex = process.env.OPENFLIGHT_USB_CAMERA_INDEX;
 const url = `http://${host}:${port}`;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -27,6 +28,14 @@ export function validateOptions(options) {
   if (!Number.isFinite(options.timeoutMs) || options.timeoutMs <= 0) {
     throw new Error('OPENFLIGHT_STARTUP_TIMEOUT_MS must be positive');
   }
+}
+
+export function usbCameraArgs(index) {
+  if (index === undefined || index === '') return [];
+  if (!/^(0|[1-9][0-9]*)$/.test(index) || !Number.isSafeInteger(Number(index))) {
+    throw new Error('OPENFLIGHT_USB_CAMERA_INDEX must be a non-negative integer');
+  }
+  return ['--windows-usb-camera', index];
 }
 
 export async function waitForHttpReady(target, timeout, child, request = fetch) {
@@ -71,6 +80,7 @@ export async function stopProcess(child) {
 
 export async function main() {
   validateOptions({ port, timeoutMs });
+  const cameraArgs = usbCameraArgs(usbCameraIndex);
   if (!existsSync(path.join(uiDir, 'node_modules'))) {
     throw new Error('Electron dependencies missing. Run: cd ui && npm ci');
   }
@@ -81,6 +91,7 @@ export async function main() {
   };
   const backend = spawn(python, [
     '-m', 'openflight.server', '--mock', '--host', host, '--web-port', String(port),
+    ...cameraArgs,
   ], { cwd: root, env: environment, stdio: 'inherit', windowsHide: true });
   backend.on('error', (error) => { backend.spawnError = error; });
   let electron;
