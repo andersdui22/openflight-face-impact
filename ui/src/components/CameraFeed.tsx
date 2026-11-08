@@ -311,7 +311,9 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
                 title={exposureQuality?.message ?? 'Analyzing the impact area'}
               >
                 Auto exposure:{' '}
-                {exposureQuality?.auto_exposure ? AUTO_EXPOSURE_LABELS[exposureQuality.auto_exposure.status] : 'checking'}
+                {exposureQuality?.auto_exposure
+                  ? AUTO_EXPOSURE_LABELS[exposureQuality.auto_exposure.status]
+                  : 'checking'}
               </span>
             )}
             {usbStatus?.enabled && (
