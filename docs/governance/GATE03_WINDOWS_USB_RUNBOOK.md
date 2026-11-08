@@ -35,3 +35,7 @@ The reported FPS is a driver-reported property, **not measured delivery FPS**. T
 - The existing camera UI may rely on Pi-specific status, replay and exposure endpoints. Those features have **not** been claimed as compatible with USB.
 - Camera enumeration by stable device name and automatic reconnect are not implemented. Restarting capture after a stop is covered by hardware-free tests.
 - Physical testing, release, merge, Golden, and Face Impact solver development remain outside Gate 03.
+
+## Read-only USB acquisition status
+
+`GET /api/camera/usb/status` returns `enabled`, `state` (`disabled`, `starting`, `running`, `stopped`, or `error`), `frames_received`, `last_error`, driver-reported `negotiated` properties, `timestamp_source`, and `actual_fps_measured: false`. This endpoint does not control the camera, perform additional reads, or claim physical sensor timing. The UI does not yet display this new status.
