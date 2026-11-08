@@ -123,3 +123,22 @@ def test_preview_reads_existing_ring_without_second_device_read(monkeypatch):
     finally:
         camera.stop()
     assert fake.released
+
+
+def test_preview_is_not_served_after_usb_reader_stops(monkeypatch):
+    import sys
+    from types import SimpleNamespace
+
+    fake = FakeCamera()
+    camera = WindowsUsbCamera(
+        UsbCameraSettings(pre_frames=2, post_frames=2),
+        camera_factory=lambda index: fake,
+    )
+    camera.start()
+    wait_until(lambda: camera.frames_received >= 3)
+    monkeypatch.setitem(sys.modules, "cv2", SimpleNamespace(
+        imencode=lambda ext, image: (True, np.frombuffer(b"jpeg", dtype=np.uint8))
+    ))
+    assert camera.capture_preview_jpeg() == b"jpeg"
+    camera.stop()
+    assert camera.capture_preview_jpeg() is None
