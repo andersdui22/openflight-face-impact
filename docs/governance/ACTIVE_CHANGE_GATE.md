@@ -1,10 +1,10 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 08
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 09
 
-Title: IR-style synthetic ball and clubface detection
+Title: Synthetic dual-object ball and clubface pipeline
 State: ACTIVE — explicitly approved by user 2026-11-08 ("Godkendt").
 Project Law: V1, unchanged.
-Working branch: `gate08/ir-synthetic-detection`
-Base: Gate 07 `gate07/synthetic-ball-face-localization` @ `cb8d13451dac1648d2f5c4f8921a5663ad9eb621` (six of six CI successful, draft PR #7 unmerged).
-Scope, acceptance and stop conditions: [GATE08_IR_SYNTHETIC_DETECTION.md](GATE08_IR_SYNTHETIC_DETECTION.md).
+Working branch: `gate09/synthetic-dual-object-pipeline`
+Base: Gate 08 `gate08/ir-synthetic-detection` @ `1bd4ad2919b4817cf3a6a8017f2b4d241684c9ff` (six of six CI successful, draft PR #8 unmerged).
+Scope, acceptance and stop conditions: [GATE09_SYNTHETIC_DUAL_PIPELINE.md](GATE09_SYNTHETIC_DUAL_PIPELINE.md).
 
-Reuse existing IR ball detector in hardware-free synthetic fixtures. No physical ELP test, Face Impact calculation, merge or release.
+Synthetic image-only pipeline; no real camera tests, physical Face Impact calculation, merge or release.

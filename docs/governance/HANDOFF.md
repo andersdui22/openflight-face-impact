@@ -150,3 +150,11 @@ This section supersedes all older "current" instructions above. On every new ses
 - Added `src/openflight/camera/synthetic_ir_face.py::locate_synthetic_ir_face` and `tests/test_synthetic_ir_face.py`. The new isolated fixture-only helper accepts exactly one bright filled axis-aligned rectangle in a uint8 grayscale **face-only crop**, returns inclusive pixel bounds and center, and rejects missing, ambiguous, incomplete or malformed synthetic fixtures. This is NOT natural clubface identification or pose estimation; bright reflections are not proof of a clubface.
 - Latest **pre-handoff** code SHA `1cd7d87de0b52aa8c64d2ed63fd7658f8735effc`. CI snapshot: Documentation and PR Checks successful; Python Tests, Pylint, Face Impact foundation and UI in progress. Do not claim same-SHA CI success before completion.
 - This documentation update advances the branch HEAD again; check the resulting SHA's CI. Keep draft PR #8 stacked on unmerged Gate 07, no physical tests, merge, release or Golden status.
+
+## 2026-11-08 Gate 09 synthetic dual-object pipeline
+
+- User explicitly approved Gate 09 ("Godkendt") for combining existing ball and face synthetic detection in one image process, without physical impact computation or camera testing.
+- Branch `gate09/synthetic-dual-object-pipeline` from Gate 08 exact SHA `1bd4ad2919b4817cf3a6a8017f2b4d241684c9ff`, six of six CI success; draft PR #8 unmerged. Project Law V1 unchanged. Active scope in `docs/governance/GATE09_SYNTHETIC_DUAL_PIPELINE.md`.
+- Added `src/openflight/camera/synthetic_dual_pipeline.py` composing unchanged `BallDetector.detect` and Gate 08 `locate_synthetic_ir_face` with explicitly supplied face-only crop bounds. Returns both detections in full-frame pixel coordinates, plus frame metadata. Rejects malformed/out-of-bounds crop, missing ball/face, extra bright pixels in crop, and synthetic ball/face overlap. No auto-crop discovery, natural image face recognition, geometry or physical impact inference.
+- Added `tests/test_synthetic_dual_pipeline.py` with positive and negative hardware-free fixtures. Last pre-handoff code SHA `69654ddc7f470eb03870d994e4d597d2b92b6484`; CI not yet verified. Create stacked draft PR #9 against Gate 08 and verify all workflows on final SHA.
+- No merge, physical tests, release or Golden baseline authorized.
