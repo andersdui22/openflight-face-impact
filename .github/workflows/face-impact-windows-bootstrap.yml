@@ -6,6 +6,7 @@ on:
       - scripts/windows-bootstrap.mjs
       - tests/windows-bootstrap.test.mjs
       - tests/windows_backend_smoke.py
+      - tests/windows_full_bootstrap_smoke.py
       - pyproject.toml
       - .github/workflows/face-impact-windows-bootstrap.yml
       - docs/governance/GATE02_WINDOWS_BOOTSTRAP.md
@@ -51,3 +52,7 @@ jobs:
         run: |
           npm ci
           npm run build
+      - name: Combined Flask + Electron Windows startup smoke
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: python tests/windows_full_bootstrap_smoke.py
