@@ -98,3 +98,21 @@ Required check results: NOT RUN on project remote; local Linux checks recorded i
 Physical testing: NOT AUTHORIZED
 Merge/release: NOT AUTHORIZED
 Next task after closeout: propose Gate 02 for minimal Windows bootstrap and dependency admission; requires separate authorization.
+
+
+## 2026-11-08 remote progress reconciliation
+
+The initial preparation-state entries above are historical and have been
+superseded by direct remote verification. Draft PR #1 exists at
+https://github.com/andersdui22/openflight-face-impact/pull/1 .
+Its original head was `a6bee2f0cb8eadd88b40c3e80aff5935c0c5ebbf`,
+with seven successful workflows (UI, Anti-slop Audit, Face Impact foundation,
+PR Checks, Pylint, Documentation, Tests) on that exact SHA.
+The verified base remained `a3ab081a8abff71fd344d4fd782412d624b99f3f`.
+
+Documentation reconciliation commits follow the original green CI SHA.
+Consequently Gate 01 is NOT YET CLOSED: reverify the final branch and PR
+head, inspect the complete required CI result set on that exact final SHA,
+and record closeout evidence. Keep the PR draft; no merge or release.
+No camera/Windows product behavior was modified, and no physical Golden
+baseline is claimed. Gate 02 remains unapproved.
