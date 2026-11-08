@@ -186,3 +186,8 @@ User explicitly approved Gate 13. Base Gate 12 SHA `32e09c5190316c082abe0d724acb
 ## Gate 14 — synthetic clubface frame (2026-11-08)
 
 Explicitly approved by user ("Godkendt") after proposal for heel/toe, vertical and center coordinate conventions. Branch `gate14/synthetic-face-coordinate-frame` from Gate 13 SHA `fbbbe9db38dcb4488372493fac1e985b7ae84e66`, six same-SHA successful CI workflows. New `synthetic_face_frame.py` transforms 3D points between world and synthetic clubface coordinates using validated rigid pose and right-handed orthonormal frame; no actual face dimensions, physical center, measurement, camera validation or millimetre impact claim. Tests cover identity, rotation/translation round-trip, signed off-plane distance and fail-closed invalid frames. PR remains draft/unmerged. Gate 14 exact-SHA CI pending.
+
+
+## Gate 15 — synthetic sphere-plane Face Impact foundation (2026-11-08)
+
+Explicit user approval ("Godkendt") for Gate 15. Branch `gate15/synthetic-ball-face-contact` starts from Gate 14 SHA `eb0ab8e28749758db06274a4214eaec1748bb3df` (six successful CI workflows, draft PR #14 unmerged). Added a strictly synthetic ball-to-infinite-planar-face tangency calculation, signed local mm coordinates and heel/toe/high/low labels. Requires explicitly provided ball radius and known rigid face pose; rejects gaps, penetration, wrong-side contact and invalid geometry. No actual clubhead finite face, curvature, measured ball position, physical impact, camera accuracy or release claim. Same-SHA CI pending. All PRs remain draft and unmerged.
