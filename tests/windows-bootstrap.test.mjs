@@ -43,3 +43,30 @@ test('reports an unavailable Python executable without waiting for timeout', asy
     /failed to start: ENOENT/,
   );
 });
+
+test('stopProcess terminates a live child process', async () => {
+  const { spawn } = await import('node:child_process');
+  const { once } = await import('node:events');
+  const { stopProcess } = await import('../scripts/windows-bootstrap.mjs');
+  const child = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], {
+    stdio: 'ignore', windowsHide: true,
+  });
+  try {
+    await Promise.race([
+      once(child, 'spawn'),
+      once(child, 'error').then(([error]) => { throw error; }),
+    ]);
+    assert.ok(child.pid, 'test child must have a PID');
+    await stopProcess(child);
+    if (child.exitCode === null && child.signalCode === null) {
+      await Promise.race([
+        once(child, 'exit'),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('child not terminated')), 5000)),
+      ]);
+    }
+    assert.ok(child.exitCode !== null || child.signalCode !== null,
+      'stopProcess must terminate its child');
+  } finally {
+    if (child.exitCode === null && child.signalCode === null) child.kill();
+  }
+});
