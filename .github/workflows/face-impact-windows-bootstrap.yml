@@ -1,0 +1,35 @@
+name: Face Impact Windows bootstrap
+
+on:
+  pull_request:
+    paths:
+      - scripts/windows-bootstrap.mjs
+      - tests/windows-bootstrap.test.mjs
+      - .github/workflows/face-impact-windows-bootstrap.yml
+      - docs/governance/GATE02_WINDOWS_BOOTSTRAP.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap-unit:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+      - name: Launcher syntax and unit tests
+        run: |
+          node --check scripts/windows-bootstrap.mjs
+          node --test tests/windows-bootstrap.test.mjs
+      - name: Verify existing React production build on Windows
+        if: matrix.os == 'windows-latest'
+        working-directory: ui
+        run: |
+          npm ci
+          npm run build
