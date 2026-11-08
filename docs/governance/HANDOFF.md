@@ -158,3 +158,11 @@ This section supersedes all older "current" instructions above. On every new ses
 - Added `src/openflight/camera/synthetic_dual_pipeline.py` composing unchanged `BallDetector.detect` and Gate 08 `locate_synthetic_ir_face` with explicitly supplied face-only crop bounds. Returns both detections in full-frame pixel coordinates, plus frame metadata. Rejects malformed/out-of-bounds crop, missing ball/face, extra bright pixels in crop, and synthetic ball/face overlap. No auto-crop discovery, natural image face recognition, geometry or physical impact inference.
 - Added `tests/test_synthetic_dual_pipeline.py` with positive and negative hardware-free fixtures. Last pre-handoff code SHA `69654ddc7f470eb03870d994e4d597d2b92b6484`; CI not yet verified. Create stacked draft PR #9 against Gate 08 and verify all workflows on final SHA.
 - No merge, physical tests, release or Golden baseline authorized.
+
+## 2026-11-08 Gate 10 automatic synthetic face candidate proposal
+
+- Explicit user approval "Godkendt" for a hardware-free automatic candidate region proposal on synthetic IR images. Base Gate 09 `c7d881f300b02fc0c6f6f91039e8bbf5f493acf8`, all six latest CI workflows successful; draft PR #9 unmerged. Project Law V1 unchanged.
+- Active scope: `docs/governance/GATE10_SYNTHETIC_FACE_PROPOSAL.md`; branch `gate10/synthetic-face-region-proposal`.
+- Added `src/openflight/camera/synthetic_face_proposal.py::propose_synthetic_ir_face_region`: connected-components scan of synthetic uint8 grayscale full frame, reuse Gate 08 strict filled-rectangle locator, return exactly one interior rectangular component in full-frame pixel coordinates. Reject zero/multiple rectangles and edge-touching rectangular candidates. Other shapes, such as the round synthetic ball, are not candidates. **This is not real clubface identification.**
+- Added `tests/test_synthetic_face_proposal.py` with positive and fail-closed synthetic fixtures. Latest pre-handoff code SHA `420eab7a1ba64c0c6c82c3d2401d4771a65fb5cf`. Same-SHA CI still pending.
+- No physical ELP testing, automatic real-world face detection, impact location, merge, release or Golden baseline authorized.
