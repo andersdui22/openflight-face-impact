@@ -27,7 +27,7 @@ The opt-in environment variable selects an OpenCV DirectShow device **index**, n
 - Windows version, camera model/USB identifier, OpenCV version and tested device index.
 - Requested and negotiated width, height and **driver-reported** FPS from `http://127.0.0.1:8080/api/camera/usb/status`.
 - Preview result, whether frames_received increases over a timed interval, frame interruptions, stop/restart behavior, error messages and relevant log output.
-- **Delivered FPS** requires a timed frame-count measurement with defined start/end timestamps; do not label the driver-reported FPS as delivered FPS.
+- **Delivered FPS** is estimated from a rolling window of up to 256 host-arrival timestamps; it is not sensor exposure FPS and may be unavailable until at least two frames arrive. Compare it with the separately reported driver FPS. A longer timed frame-count test remains useful for sustained throughput.
 - Note whether the camera is in use by another application. Do not perform golf swings or impact measurement in this gate.
 
 ## Limits
