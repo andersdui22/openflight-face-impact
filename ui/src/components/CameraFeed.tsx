@@ -228,6 +228,7 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
     let timer: ReturnType<typeof setInterval> | null = null;
 
     const refresh = async () => {
+      let usbEnabled = false;
       try {
         const statusResponse = await fetch(USB_STATUS_URL, { cache: 'no-store' });
         if (cancelled) return;
@@ -235,6 +236,7 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
           const status = (await statusResponse.json()) as UsbCameraStatus;
           if (cancelled) return;
           setUsbStatus(status);
+          usbEnabled = status.enabled;
           if (status.enabled && status.state !== 'running') {
             if (objectUrl) URL.revokeObjectURL(objectUrl);
             objectUrl = null;
@@ -251,7 +253,7 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
           objectUrl = null;
           setPreviewSrc(null);
           setPreviewState('unavailable');
-          if (timer && !usbStatus?.enabled) clearInterval(timer);
+          if (timer && !usbEnabled) clearInterval(timer);
           return;
         }
         if (!response.ok) {
@@ -269,7 +271,7 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
         setPreviewSrc(nextUrl);
         setLastUpdated(new Date());
         setPreviewState('available');
-        if (!usbStatus?.enabled) {
+        if (!usbEnabled) {
           const qualityResponse = await fetch(`${EXPOSURE_QUALITY_URL}?t=${Date.now()}`, { cache: 'no-store' });
           if (qualityResponse.ok && !cancelled) {
             setExposureQuality(await qualityResponse.json());
