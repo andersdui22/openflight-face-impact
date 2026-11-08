@@ -34,3 +34,12 @@ test('rejects a backend that never responds', async () => {
     /did not become ready/,
   );
 });
+
+test('reports an unavailable Python executable without waiting for timeout', async () => {
+  await assert.rejects(
+    waitForHttpReady('http://127.0.0.1:8080', 100,
+      { exitCode: null, signalCode: null, spawnError: new Error('ENOENT') },
+      async () => ({ ok: true })),
+    /failed to start: ENOENT/,
+  );
+});
