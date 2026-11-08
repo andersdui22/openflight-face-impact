@@ -232,7 +232,7 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
         const statusResponse = await fetch(USB_STATUS_URL, { cache: 'no-store' });
         if (cancelled) return;
         if (statusResponse.ok) {
-          const status = await statusResponse.json() as UsbCameraStatus;
+          const status = (await statusResponse.json()) as UsbCameraStatus;
           if (cancelled) return;
           setUsbStatus(status);
           if (status.enabled && status.state !== 'running') {
@@ -305,7 +305,12 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
               Auto exposure:{' '}
               {exposureQuality?.auto_exposure ? AUTO_EXPOSURE_LABELS[exposureQuality.auto_exposure.status] : 'checking'}
             </span>
-            {usbStatus?.enabled && <span className="camera-feed__timestamp" role="status">USB: {usbStatus.state}{usbStatus.last_error ? ` — ${usbStatus.last_error}` : ''}</span>}
+            {usbStatus?.enabled && (
+              <span className="camera-feed__timestamp" role="status">
+                USB: {usbStatus.state}
+                {usbStatus.last_error ? ` — ${usbStatus.last_error}` : ''}
+              </span>
+            )}
             {lastUpdated && previewSrc && <span className="camera-feed__timestamp">preview {lastUpdated.toLocaleTimeString()}</span>}
           </div>
         </div>
@@ -339,13 +344,19 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
                 </svg>
                 <div className="camera-feed__center-cross" aria-hidden="true" />
                 <div className="camera-feed__overlay">
-                  <div className="camera-feed__status">{usbStatus?.enabled ? 'USB preview (buffered frame)' : 'Rolling buffer remains armed'}</div>
+                  <div className="camera-feed__status">
+                    {usbStatus?.enabled ? 'USB preview (buffered frame)' : 'Rolling buffer remains armed'}
+                  </div>
                 </div>
               </div>
             ) : (
               <div className="camera-feed__message camera-feed__message--preview">
                 <h3>Waiting for camera</h3>
-                <p>{usbStatus?.enabled ? (usbStatus.last_error ?? `USB camera: ${usbStatus.state}`) : 'Fetching the first preview from the capture runtime'}</p>
+                <p>
+                  {usbStatus?.enabled
+                    ? (usbStatus.last_error ?? `USB camera: ${usbStatus.state}`)
+                    : 'Fetching the first preview from the capture runtime'}
+                </p>
               </div>
             )}
           </div>
