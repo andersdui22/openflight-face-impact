@@ -1,5 +1,17 @@
 # AGENTS.md
 
+## OpenFlight Face Impact project authority
+
+This repository is being prepared as a separate single-camera Windows project.
+Read `docs/governance/PROJECT_LAW.md`, `ACTIVE_CHANGE_GATE.md`, `BASELINES.md`,
+`CANDIDATES.md`, and `HANDOFF.md` before any change. Verify the current GitHub
+HEAD, PRs, checks and relevant files; reconcile drift before editing.
+The inherited OpenFlight radar/Pi startup notes below describe upstream, not
+requirements to add radar hardware to this project's product. The active gate
+sets the narrower work scope. ConnectorNext is outside this repository.
+The user authorized one draft project PR as part of Gate 01. This does not
+authorize merge, release, physical testing or third-party comments.
+
 This file provides mandatory guidance to coding agents working in this
 repository. It applies to the entire repository. More specific `AGENTS.md` files,
 such as `ui/AGENTS.md`, add rules for their directories and must also be read.
