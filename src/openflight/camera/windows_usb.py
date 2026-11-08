@@ -129,7 +129,7 @@ class WindowsUsbCamera:
                 ))
                 with self._arrival_lock:
                     self._arrival_times_ns.append(host_ns)
-                self._frames += 1
+                    self._frames += 1
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._last_error = str(exc)
         finally:
