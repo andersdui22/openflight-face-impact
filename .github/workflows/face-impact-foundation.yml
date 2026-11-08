@@ -1,0 +1,84 @@
+name: Face Impact foundation
+
+on:
+  pull_request:
+    paths:
+      - AGENTS.md
+      - UPSTREAM.md
+      - THIRD_PARTY_NOTICES.md
+      - docs/governance/**
+      - docs/evidence/**
+      - .github/workflows/face-impact-foundation.yml
+      - .github/workflows/docs.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-scope:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Require foundation-only diff from audited source
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline=a3ab081a8abff71fd344d4fd782412d624b99f3f
+          git cat-file -e "${baseline}^{commit}"
+          git diff --name-only "$baseline" HEAD > changed-paths.txt
+          while IFS= read -r path; do
+            case "$path" in
+              AGENTS.md|UPSTREAM.md|THIRD_PARTY_NOTICES.md|docs/governance/*|docs/evidence/*|.github/workflows/face-impact-foundation.yml|.github/workflows/docs.yml) ;;
+              *) echo "Out of Gate 01 scope: $path"; exit 1 ;;
+            esac
+          done < changed-paths.txt
+          cat changed-paths.txt
+
+  ui-unit-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - run: npm ci
+        working-directory: ui
+      - run: npm run test
+        working-directory: ui
+
+  windows-diagnostics:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v7
+      - name: Versions and declared platform gap
+        shell: pwsh
+        run: |
+          python --version
+          node --version
+          npm --version
+          uv --version
+          Write-Output 'The inherited pyproject.toml excludes win32 from tool.uv.environments.'
+          Write-Output 'No backend install, Electron startup, USB capture or packaging test is claimed.'
+      - run: npm ci
+        working-directory: ui
+      - run: npm run build
+        working-directory: ui
+      - name: Existing pure geometry tests outside the project resolver
+        shell: pwsh
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
+        run: uv run --no-project --python 3.12 --with pytest --with numpy --with pyserial python -m pytest tests/test_camera_geometry.py -q
