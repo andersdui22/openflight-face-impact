@@ -26,7 +26,7 @@ def locate_synthetic_ir_face(frame: np.ndarray, threshold: int = 180) -> Synthet
     image = np.asarray(frame)
     if image.ndim != 2 or image.dtype != np.uint8 or not image.size:
         raise ValueError("Expected a nonempty uint8 grayscale synthetic crop")
-    if not isinstance(threshold, int) or not 1 <= threshold <= 255:
+    if type(threshold) is not int or not 1 <= threshold <= 255:
         raise ValueError("Threshold must be an integer between 1 and 255")
     mask = image >= threshold
     rows, columns = np.nonzero(mask)
