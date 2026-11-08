@@ -247,8 +247,11 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
         const response = await fetch(`${PREVIEW_URL}?t=${Date.now()}`, { cache: 'no-store' });
         if (cancelled) return;
         if (response.status === 404) {
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          objectUrl = null;
+          setPreviewSrc(null);
           setPreviewState('unavailable');
-          if (timer) clearInterval(timer);
+          if (timer && !usbStatus?.enabled) clearInterval(timer);
           return;
         }
         if (!response.ok) {
@@ -266,9 +269,11 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
         setPreviewSrc(nextUrl);
         setLastUpdated(new Date());
         setPreviewState('available');
-        const qualityResponse = await fetch(`${EXPOSURE_QUALITY_URL}?t=${Date.now()}`, { cache: 'no-store' });
-        if (qualityResponse.ok && !cancelled) {
-          setExposureQuality(await qualityResponse.json());
+        if (!usbStatus?.enabled) {
+          const qualityResponse = await fetch(`${EXPOSURE_QUALITY_URL}?t=${Date.now()}`, { cache: 'no-store' });
+          if (qualityResponse.ok && !cancelled) {
+            setExposureQuality(await qualityResponse.json());
+          }
         }
       } catch {
         // Do not present an old frame as live during a network failure.
@@ -298,13 +303,13 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
             <h2 className="camera-feed__title">Camera alignment</h2>
           </div>
           <div className="camera-feed__header-status">
-            <span
+            {!usbStatus?.enabled && <span
               className={`camera-feed__exposure-quality camera-feed__exposure-quality--${exposureQuality?.status ?? 'checking'}`}
               title={exposureQuality?.message ?? 'Analyzing the impact area'}
             >
               Auto exposure:{' '}
               {exposureQuality?.auto_exposure ? AUTO_EXPOSURE_LABELS[exposureQuality.auto_exposure.status] : 'checking'}
-            </span>
+            </span>}
             {usbStatus?.enabled && (
               <span className="camera-feed__timestamp" role="status">
                 USB: {usbStatus.state}
@@ -360,12 +365,21 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
               </div>
             )}
           </div>
-          <CaptureSettingsPanel
-            settings={captureSettings}
-            exposureQuality={exposureQuality}
-            error={captureSettingsError}
-            onUpdate={onUpdateCaptureSettings}
-          />
+          {usbStatus?.enabled ? (
+            <aside className="camera-settings">
+              <h3>Windows USB camera</h3>
+              <p>State: {usbStatus.state}</p>
+              <p>Frames received: {usbStatus.frames_received ?? 0}</p>
+              <p>Camera exposure and alignment controls are not available for USB capture.</p>
+            </aside>
+          ) : (
+            <CaptureSettingsPanel
+              settings={captureSettings}
+              exposureQuality={exposureQuality}
+              error={captureSettingsError}
+              onUpdate={onUpdateCaptureSettings}
+            />
+          )}
         </div>
       </div>
     );
