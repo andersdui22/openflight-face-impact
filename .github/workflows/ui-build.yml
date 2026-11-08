@@ -61,6 +61,8 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
       - name: Set up Python
@@ -95,3 +97,21 @@ jobs:
             ui/playwright-report
             ui/test-results
           if-no-files-found: ignore
+      - name: Publish Gate 03 browser screenshot to PR branch
+        if: ${{ success() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'gate03/windows-elp-camera' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          screenshot="$(find ui/playwright-report/data -type f -name '*.png' | head -n 1)"
+          test -n "$screenshot"
+          cp "$screenshot" /tmp/gate03-usb-status-playwright.png
+          git fetch origin gate03/windows-elp-camera
+          git checkout -B gate03/windows-elp-camera origin/gate03/windows-elp-camera
+          mkdir -p docs/evidence
+          cp /tmp/gate03-usb-status-playwright.png docs/evidence/gate03-usb-status-playwright.png
+          git add docs/evidence/gate03-usb-status-playwright.png
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'docs(gate03): attach genuine Playwright USB-status screenshot'
+            git push origin HEAD:gate03/windows-elp-camera
+          fi
