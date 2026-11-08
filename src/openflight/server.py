@@ -1672,7 +1672,8 @@ def windows_usb_camera_status():
         "last_error": camera.last_error,
         "negotiated": camera.negotiated,
         "timestamp_source": "host_arrival_monotonic",
-        "actual_fps_measured": False,
+        "actual_fps_measured": getattr(camera, "delivered_fps", None) is not None,
+        "delivered_fps": getattr(camera, "delivered_fps", None),
     })
 
 
