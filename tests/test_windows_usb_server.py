@@ -65,3 +65,24 @@ def test_usb_status_reports_disconnect_error(monkeypatch):
     assert response.status_code == 200
     assert response.json["state"] == "error"
     assert "disconnected" in response.json["last_error"]
+
+
+def test_usb_preview_stopped_returns_503_not_stale_jpeg(monkeypatch):
+    monkeypatch.setattr(
+        server, "windows_usb_runtime",
+        SimpleNamespace(capture_preview_jpeg=lambda: None),
+    )
+    monkeypatch.setattr(server, "camera_capture_runtime", None)
+    response = server.app.test_client().get("/api/camera/preview.jpg")
+    assert response.status_code == 503
+    assert response.mimetype != "image/jpeg"
+
+
+def test_usb_status_starting_before_first_frame(monkeypatch):
+    camera = SimpleNamespace(
+        is_running=True, frames_received=0, last_error=None, negotiated=None,
+    )
+    monkeypatch.setattr(server, "windows_usb_runtime", camera)
+    response = server.app.test_client().get("/api/camera/usb/status")
+    assert response.status_code == 200
+    assert response.json["state"] == "starting"
