@@ -38,4 +38,4 @@ The reported FPS is a driver-reported property, **not measured delivery FPS**. T
 
 ## Read-only USB acquisition status
 
-`GET /api/camera/usb/status` returns `enabled`, `state` (`disabled`, `starting`, `running`, `stopped`, or `error`), `frames_received`, `last_error`, driver-reported `negotiated` properties, `timestamp_source`, and `actual_fps_measured: false`. This endpoint does not control the camera, perform additional reads, or claim physical sensor timing. The UI does not yet display this new status.
+`GET /api/camera/usb/status` returns `enabled`, `state` (`disabled`, `starting`, `running`, `stopped`, or `error`), `frames_received`, `last_error`, driver-reported `negotiated` properties, `timestamp_source`, and `actual_fps_measured: false`. This endpoint does not control the camera, perform additional reads, or claim physical sensor timing. The React camera view displays the read-only USB acquisition state when USB capture is enabled and hides the Raspberry Pi automatic-exposure badge in that mode. This is a code-level observation only; a rendered screenshot and physical Windows USB UI verification remain outstanding.
