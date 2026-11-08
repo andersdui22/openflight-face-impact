@@ -32,7 +32,7 @@ export function validateOptions(options) {
 export async function waitForHttpReady(target, timeout, child, request = fetch) {
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
-    if (child.exitCode !== null || child.signalCode !== null) {
+    if (child.spawnError || child.exitCode !== null || child.signalCode !== null) {
       throw new Error('OpenFlight backend exited before becoming ready');
     }
     try {
@@ -75,6 +75,8 @@ export async function main() {
   const backend = spawn(python, [
     '-m', 'openflight.server', '--mock', '--host', host, '--web-port', String(port),
   ], { cwd: root, env: environment, stdio: 'inherit', windowsHide: true });
+  let backendSpawnError;
+  backend.on('error', (error) => { backendSpawnError = error; backend.spawnError = error; });
   let electron;
   let stopping = false;
   const shutdown = async () => {
@@ -88,6 +90,7 @@ export async function main() {
   process.once('SIGTERM', onSignal);
   try {
     await waitForHttpReady(url, timeoutMs, backend);
+    if (backendSpawnError) throw backendSpawnError;
     if (stopping) return;
     const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     electron = spawn(npm, ['run', 'electron'], {
