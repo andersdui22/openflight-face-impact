@@ -1,12 +1,11 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 03
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 04
 
-Title: Windows ELP OV9281 USB camera acquisition
-State: ACTIVE — implementation and CI pending.
+Title: Windows ELP OV9281 physical camera validation and test preparation
+State: ACTIVE — explicitly approved 2026-11-08.
 Project Law: V1, unchanged.
-Authorization: User explicitly approved Gate 03 on 2026-11-08.
-Working branch: gate03/windows-elp-camera
-Base: gate02/windows-bootstrap @ 546eff3f9a761891e16178de40afc617b29960ed
-Previous Gate 02: all eight workflows success on exact base SHA; PR #2 remains draft and unmerged.
-Full scope, exclusions, acceptance and stop conditions: [GATE03_WINDOWS_ELP_CAMERA.md](GATE03_WINDOWS_ELP_CAMERA.md).
+Working branch: gate04/windows-elp-physical-validation
+Base: gate03/windows-elp-camera @ 387c088cf338ccd1c55a4e1f065980a047d75dbc
+Previous Gate 03: seven of seven CI workflows successful on exact base SHA; draft PR #3 unmerged.
+Scope, acceptance and stop conditions: [GATE04_WINDOWS_ELP_VALIDATION.md](GATE04_WINDOWS_ELP_VALIDATION.md).
 
-Do not implement Face Impact calculation, calibration, clubhead pose or hardware-dependent claims under this gate. No ConnectorNext access, merge, release or physical Golden.
+Prepare reproducible Windows diagnostics before requesting physical camera participation. No Face Impact solver, calibration, Golden, merge or release.
