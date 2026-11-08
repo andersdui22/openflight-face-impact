@@ -1653,6 +1653,29 @@ def init_kld7(
         return False
 
 
+@app.route("/api/camera/usb/status")
+def windows_usb_camera_status():
+    """Report only observed USB acquisition state; no inferred sensor FPS."""
+    camera = windows_usb_runtime
+    if camera is None:
+        return jsonify({"enabled": False, "state": "disabled"})
+    if camera.last_error:
+        state = "error"
+    elif camera.is_running:
+        state = "running" if camera.frames_received > 0 else "starting"
+    else:
+        state = "stopped"
+    return jsonify({
+        "enabled": True,
+        "state": state,
+        "frames_received": camera.frames_received,
+        "last_error": camera.last_error,
+        "negotiated": camera.negotiated,
+        "timestamp_source": "host_arrival_monotonic",
+        "actual_fps_measured": False,
+    })
+
+
 @app.route("/api/camera/preview.jpg")
 def camera_capture_preview():
     """Single still from the capture runtime's concurrent main stream.
