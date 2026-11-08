@@ -19,12 +19,19 @@ interface CaptureSettingsPanelProps {
 }
 
 const PREVIEW_URL = `${getServerOrigin()}/api/camera/preview.jpg`;
+const USB_STATUS_URL = `${getServerOrigin()}/api/camera/usb/status`;
 const EXPOSURE_QUALITY_URL = `${getServerOrigin()}/api/camera/exposure-quality`;
 const PREVIEW_REFRESH_MS = 5000;
 const BALL_GUIDE_X_PCT = 50;
 const BALL_GUIDE_Y_PCT = 78;
 
 type PreviewState = 'checking' | 'available' | 'unavailable';
+type UsbCameraStatus = {
+  enabled: boolean;
+  state: 'disabled' | 'starting' | 'running' | 'stopped' | 'error';
+  frames_received?: number;
+  last_error?: string | null;
+};
 
 interface ExposureQuality {
   sample_available: boolean;
@@ -206,6 +213,7 @@ function CaptureSettingsPanel({ settings, exposureQuality, error, onUpdate }: Ca
 export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCaptureSettings }: CameraFeedProps) {
   useCameraPointerDragScroll();
   const [previewState, setPreviewState] = useState<PreviewState>('checking');
+  const [usbStatus, setUsbStatus] = useState<UsbCameraStatus | null>(null);
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [exposureQuality, setExposureQuality] = useState<ExposureQuality | null>(null);
@@ -220,15 +228,41 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
     let timer: ReturnType<typeof setInterval> | null = null;
 
     const refresh = async () => {
+      let usbEnabled = false;
       try {
+        const statusResponse = await fetch(USB_STATUS_URL, { cache: 'no-store' });
+        if (cancelled) return;
+        if (statusResponse.ok) {
+          const status = (await statusResponse.json()) as UsbCameraStatus;
+          if (cancelled) return;
+          setUsbStatus(status);
+          usbEnabled = status.enabled;
+          if (status.enabled && status.state !== 'running') {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            objectUrl = null;
+            setPreviewSrc(null);
+            setPreviewState('checking');
+            setExposureQuality(null);
+            return;
+          }
+        }
         const response = await fetch(`${PREVIEW_URL}?t=${Date.now()}`, { cache: 'no-store' });
         if (cancelled) return;
         if (response.status === 404) {
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          objectUrl = null;
+          setPreviewSrc(null);
           setPreviewState('unavailable');
-          if (timer) clearInterval(timer);
+          if (timer && !usbEnabled) clearInterval(timer);
           return;
         }
-        if (!response.ok) return;
+        if (!response.ok) {
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          objectUrl = null;
+          setPreviewSrc(null);
+          setPreviewState('checking');
+          return;
+        }
         const blob = await response.blob();
         if (cancelled) return;
         const nextUrl = URL.createObjectURL(blob);
@@ -237,12 +271,19 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
         setPreviewSrc(nextUrl);
         setLastUpdated(new Date());
         setPreviewState('available');
-        const qualityResponse = await fetch(`${EXPOSURE_QUALITY_URL}?t=${Date.now()}`, { cache: 'no-store' });
-        if (qualityResponse.ok && !cancelled) {
-          setExposureQuality(await qualityResponse.json());
+        if (!usbEnabled) {
+          const qualityResponse = await fetch(`${EXPOSURE_QUALITY_URL}?t=${Date.now()}`, { cache: 'no-store' });
+          if (qualityResponse.ok && !cancelled) {
+            setExposureQuality(await qualityResponse.json());
+          }
         }
       } catch {
-        // Keep the last frame and retry after a transient network failure.
+        // Do not present an old frame as live during a network failure.
+        if (cancelled) return;
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+        setPreviewSrc(null);
+        setPreviewState('checking');
       }
     };
 
@@ -264,14 +305,26 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
             <h2 className="camera-feed__title">Camera alignment</h2>
           </div>
           <div className="camera-feed__header-status">
-            <span
-              className={`camera-feed__exposure-quality camera-feed__exposure-quality--${exposureQuality?.status ?? 'checking'}`}
-              title={exposureQuality?.message ?? 'Analyzing the impact area'}
-            >
-              Auto exposure:{' '}
-              {exposureQuality?.auto_exposure ? AUTO_EXPOSURE_LABELS[exposureQuality.auto_exposure.status] : 'checking'}
-            </span>
-            {lastUpdated && <span className="camera-feed__timestamp">preview {lastUpdated.toLocaleTimeString()}</span>}
+            {!usbStatus?.enabled && (
+              <span
+                className={`camera-feed__exposure-quality camera-feed__exposure-quality--${exposureQuality?.status ?? 'checking'}`}
+                title={exposureQuality?.message ?? 'Analyzing the impact area'}
+              >
+                Auto exposure:{' '}
+                {exposureQuality?.auto_exposure
+                  ? AUTO_EXPOSURE_LABELS[exposureQuality.auto_exposure.status]
+                  : 'checking'}
+              </span>
+            )}
+            {usbStatus?.enabled && (
+              <span className="camera-feed__timestamp" role="status">
+                USB: {usbStatus.state}
+                {usbStatus.last_error ? ` — ${usbStatus.last_error}` : ''}
+              </span>
+            )}
+            {lastUpdated && previewSrc && (
+              <span className="camera-feed__timestamp">preview {lastUpdated.toLocaleTimeString()}</span>
+            )}
           </div>
         </div>
         <div className="camera-feed__workspace">
@@ -304,22 +357,37 @@ export function CameraFeed({ captureSettings, captureSettingsError, onUpdateCapt
                 </svg>
                 <div className="camera-feed__center-cross" aria-hidden="true" />
                 <div className="camera-feed__overlay">
-                  <div className="camera-feed__status">Rolling buffer remains armed</div>
+                  <div className="camera-feed__status">
+                    {usbStatus?.enabled ? 'USB preview (buffered frame)' : 'Rolling buffer remains armed'}
+                  </div>
                 </div>
               </div>
             ) : (
               <div className="camera-feed__message camera-feed__message--preview">
                 <h3>Waiting for camera</h3>
-                <p>Fetching the first preview from the capture runtime</p>
+                <p>
+                  {usbStatus?.enabled
+                    ? (usbStatus.last_error ?? `USB camera: ${usbStatus.state}`)
+                    : 'Fetching the first preview from the capture runtime'}
+                </p>
               </div>
             )}
           </div>
-          <CaptureSettingsPanel
-            settings={captureSettings}
-            exposureQuality={exposureQuality}
-            error={captureSettingsError}
-            onUpdate={onUpdateCaptureSettings}
-          />
+          {usbStatus?.enabled ? (
+            <aside className="camera-settings">
+              <h3>Windows USB camera</h3>
+              <p>State: {usbStatus.state}</p>
+              <p>Frames received: {usbStatus.frames_received ?? 0}</p>
+              <p>Camera exposure and alignment controls are not available for USB capture.</p>
+            </aside>
+          ) : (
+            <CaptureSettingsPanel
+              settings={captureSettings}
+              exposureQuality={exposureQuality}
+              error={captureSettingsError}
+              onUpdate={onUpdateCaptureSettings}
+            />
+          )}
         </div>
       </div>
     );
