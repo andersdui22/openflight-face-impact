@@ -97,3 +97,29 @@ def test_unavailable_camera_releases_device():
     with pytest.raises(RuntimeError, match="could not be opened"):
         camera.start()
     assert fake.released
+
+
+def test_preview_reads_existing_ring_without_second_device_read(monkeypatch):
+    import sys
+    from types import SimpleNamespace
+
+    fake = FakeCamera()
+    camera = WindowsUsbCamera(
+        UsbCameraSettings(pre_frames=2, post_frames=2),
+        camera_factory=lambda index: fake,
+    )
+    camera.start()
+    try:
+        wait_until(lambda: camera.frames_received >= 3)
+        observed = []
+
+        def encode(ext, image):
+            observed.append((ext, image.shape))
+            return True, np.frombuffer(b"jpeg-fixture", dtype=np.uint8)
+
+        monkeypatch.setitem(sys.modules, "cv2", SimpleNamespace(imencode=encode))
+        assert camera.capture_preview_jpeg() == b"jpeg-fixture"
+        assert observed == [(".jpg", (8, 12))]
+    finally:
+        camera.stop()
+    assert fake.released
