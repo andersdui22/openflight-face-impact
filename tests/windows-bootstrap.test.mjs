@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateOptions, waitForHttpReady } from '../scripts/windows-bootstrap.mjs';
+import { validateOptions, usbCameraArgs, waitForHttpReady } from '../scripts/windows-bootstrap.mjs';
 
 test('validates port and startup timeout', () => {
   assert.doesNotThrow(() => validateOptions({ port: 8080, timeoutMs: 100 }));
@@ -68,5 +68,15 @@ test('stopProcess terminates a live child process', async () => {
       'stopProcess must terminate its child');
   } finally {
     if (child.exitCode === null && child.signalCode === null) child.kill();
+  }
+});
+
+test('USB camera is disabled by default and only enabled for a valid index', () => {
+  assert.deepEqual(usbCameraArgs(undefined), []);
+  assert.deepEqual(usbCameraArgs(''), []);
+  assert.deepEqual(usbCameraArgs('0'), ['--windows-usb-camera', '0']);
+  assert.deepEqual(usbCameraArgs('2'), ['--windows-usb-camera', '2']);
+  for (const value of ['-1', '1.5', 'abc', '01', '999999999999999999999']) {
+    assert.throws(() => usbCameraArgs(value), /OPENFLIGHT_USB_CAMERA_INDEX/);
   }
 });
