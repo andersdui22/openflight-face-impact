@@ -181,3 +181,8 @@ Approved explicitly by user ("Godkendt"). Branch `gate12/synthetic-mesh-pose` st
 ## Gate 13 — synthetic pose observability (2026-11-08)
 
 User explicitly approved Gate 13. Base Gate 12 SHA `32e09c5190316c082abe0d724acbeda8d9bc55e0` passed six CI workflows. Branch `gate13/synthetic-pose-observability` introduces bounded, candidate-set-specific synthetic silhouette overlap metrics and rejects near-identical orientations as unobservable. Tests include symmetric planar geometry with two distinct rigid orientations yielding identical camera silhouettes. This is NOT a physical angular error estimate, real 6DOF, impact location or a hardware test. Project Law V1, no Golden physical baseline; PR stays draft and unmerged. Exact Gate 13 CI pending.
+
+
+## Gate 14 — synthetic clubface frame (2026-11-08)
+
+Explicitly approved by user ("Godkendt") after proposal for heel/toe, vertical and center coordinate conventions. Branch `gate14/synthetic-face-coordinate-frame` from Gate 13 SHA `fbbbe9db38dcb4488372493fac1e985b7ae84e66`, six same-SHA successful CI workflows. New `synthetic_face_frame.py` transforms 3D points between world and synthetic clubface coordinates using validated rigid pose and right-handed orthonormal frame; no actual face dimensions, physical center, measurement, camera validation or millimetre impact claim. Tests cover identity, rotation/translation round-trip, signed off-plane distance and fail-closed invalid frames. PR remains draft/unmerged. Gate 14 exact-SHA CI pending.
