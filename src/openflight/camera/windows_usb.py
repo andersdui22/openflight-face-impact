@@ -131,6 +131,24 @@ class WindowsUsbCamera:
             self._camera = None
         self._thread = None
 
+    def capture_preview_jpeg(self) -> bytes | None:
+        """Encode the latest buffered frame; never read the device twice.
+
+        OpenCV is only needed when preview is requested. This method never
+        owns a camera handle or consumes a triggered capture.
+        """
+        frame = self.ring.latest_frame
+        if frame is None:
+            return None
+        try:
+            import cv2  # pylint: disable=import-outside-toplevel
+        except ImportError as exc:
+            raise RuntimeError("USB preview requires opencv-python") from exc
+        ok, encoded = cv2.imencode(".jpg", frame.image)
+        if not ok:
+            raise RuntimeError("USB camera JPEG preview encoding failed")
+        return encoded.tobytes()
+
     def trigger(self) -> bool:
         """Explicit software trigger; shot detection is outside Gate 03."""
         return self.ring.trigger(time.monotonic_ns())
