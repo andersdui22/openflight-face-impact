@@ -87,7 +87,7 @@ jobs:
         run: npm run test:e2e
         working-directory: ui
       - name: Upload Playwright artifacts
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: playwright-artifacts
