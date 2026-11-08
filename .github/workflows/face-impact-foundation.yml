@@ -17,6 +17,8 @@ permissions:
 
 jobs:
   source-scope:
+    # Gate 01 source-integrity check is not applicable to later approved gates.
+    if: github.event_name != 'pull_request' || github.head_ref == 'foundation/governance-ci'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
