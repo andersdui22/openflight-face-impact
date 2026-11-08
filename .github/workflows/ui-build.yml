@@ -109,6 +109,10 @@ jobs:
           git fetch origin gate03/windows-elp-camera
           git checkout -B gate03/windows-elp-camera origin/gate03/windows-elp-camera
           mkdir -p docs/evidence
+          if test -f docs/evidence/gate03-usb-status-playwright.png; then
+            echo 'Verified screenshot already committed; avoiding recursive bot commits.'
+            exit 0
+          fi
           cp /tmp/gate03-usb-status-playwright.png docs/evidence/gate03-usb-status-playwright.png
           git add docs/evidence/gate03-usb-status-playwright.png
           if ! git diff --cached --quiet; then
