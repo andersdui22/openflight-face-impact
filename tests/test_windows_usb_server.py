@@ -86,3 +86,18 @@ def test_usb_status_starting_before_first_frame(monkeypatch):
     response = server.app.test_client().get("/api/camera/usb/status")
     assert response.status_code == 200
     assert response.json["state"] == "starting"
+
+def test_usb_status_exposes_observed_fps_only_while_running(monkeypatch):
+    camera = SimpleNamespace(
+        is_running=True, frames_received=12, last_error=None,
+        negotiated={"reported_fps": 120.0}, delivered_fps=87.5,
+    )
+    monkeypatch.setattr(server, "windows_usb_runtime", camera)
+    response = server.app.test_client().get("/api/camera/usb/status")
+    assert response.json["actual_fps_measured"] is True
+    assert response.json["delivered_fps"] == 87.5
+    assert response.json["negotiated"]["reported_fps"] == 120.0
+    camera.is_running = False
+    stopped = server.app.test_client().get("/api/camera/usb/status")
+    assert stopped.json["actual_fps_measured"] is False
+    assert stopped.json["delivered_fps"] is None
