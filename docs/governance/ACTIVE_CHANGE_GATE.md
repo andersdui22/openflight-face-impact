@@ -1,16 +1,16 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 12
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 13
 
-Title: Synthetic silhouette-based clubhead pose candidate estimation
-State: ACTIVE — user explicitly approved "Godkendt" following Gate 12 proposal, 2026-11-08.
+Title: Single-camera synthetic pose observability and uncertainty
+State: ACTIVE — user explicitly approved "Godkendt" after Gate 13 proposal (2026-11-08).
 Project Law: V1 unchanged.
-Working branch: `gate12/synthetic-mesh-pose`.
-Base: Gate 11 `a45bbc93274cac42affe0545b3a06461eb1061a3`; six successful CI workflows on that SHA; draft PR #11 remains unmerged.
+Working branch: `gate13/synthetic-pose-observability`.
+Base: Gate 12 HEAD `32e09c5190316c082abe0d724acbeda8d9bc55e0`, six same-SHA successful workflows; draft PR #12 unmerged.
 
 ## Authorized scope
-Compare a known synthetic observed silhouette against rendered projections of a supplied synthetic triangle mesh, using explicit camera intrinsics/extrinsics and finite candidate poses. Reuse the Gate 11 projection and upstream OpenFlight experimental IoU concept (open-flight/openflight PR #250 `fit.py`), without its radar geometry. Provide deterministic synthetic tests for recovered pose, invalid observations and ambiguity.
+Analyze synthetic model poses at multiple explicitly supplied orientations/translations with one calibrated virtual camera. Quantify silhouette similarity, detect distinct poses with near-identical 2D projections, and fail closed when a unique pose cannot be resolved. Reuse Gate 11 projection and Gate 12 IoU fitting; deterministic synthetic tests and evidence only.
 
-## Acceptance
-No imported restricted 690CB mesh or model; explicit finite candidate set and bounded computation; fail closed on no match, invalid candidates and ambiguous equivalent projections. Keep result labeled synthetic and unvalidated. CI must pass on exact final HEAD.
+## Acceptance and evidence
+Bounded candidate count, finite and validated rigid transforms, explicit ambiguity threshold, tests for clear and degenerate pose sets and invalid observations. Report observability as a candidate-set-specific synthetic metric, not physical angular accuracy. Same-SHA CI required.
 
-## Exclusions and stop conditions
-No real-image detection, physical ELP tests, radar, millimetre Face Impact calculation, actual 6DOF precision claim, UI redesign, merge, release or Golden baseline. Stop if source license, tests or calibration assumptions cannot be verified.
+## Exclusions
+No physical camera, 850 nm IR measurement, real pose estimation, radar, impact mm, new UI, restricted clubhead mesh, merge, release or Golden baseline. Stop for new dependencies, incompatible upstream assumptions or unresolved CI.

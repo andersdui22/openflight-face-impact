@@ -176,3 +176,8 @@ User explicitly approved Gate 11 ("Godkendt") after the camera-only 3D projectio
 ## Gate 12 — 2026-11-08
 
 Approved explicitly by user ("Godkendt"). Branch `gate12/synthetic-mesh-pose` starts from Gate 11 SHA `a45bbc93274cac42affe0545b3a06461eb1061a3`, whose six current PR CI workflows succeeded (prior PR title failure corrected). Gate 11 remains draft and unmerged. New synthetic candidate-only silhouette matching reuses Gate 11 camera projection and adapts the IoU fitting idea from upstream open-flight/openflight PR #250 `fit.py` at `8d244e25e41764bdeb5665a812af40ccf2e37b16`. No radar or restricted 690CB mesh. Results are discrete candidates with ambiguity rejection, not real 6DOF, clubface recognition, or millimetre impact measurements. No physical test, merge or release. Same-SHA Gate 12 CI pending.
+
+
+## Gate 13 — synthetic pose observability (2026-11-08)
+
+User explicitly approved Gate 13. Base Gate 12 SHA `32e09c5190316c082abe0d724acbeda8d9bc55e0` passed six CI workflows. Branch `gate13/synthetic-pose-observability` introduces bounded, candidate-set-specific synthetic silhouette overlap metrics and rejects near-identical orientations as unobservable. Tests include symmetric planar geometry with two distinct rigid orientations yielding identical camera silhouettes. This is NOT a physical angular error estimate, real 6DOF, impact location or a hardware test. Project Law V1, no Golden physical baseline; PR stays draft and unmerged. Exact Gate 13 CI pending.
