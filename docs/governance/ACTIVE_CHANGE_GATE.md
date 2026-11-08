@@ -1,140 +1,24 @@
-# OPENFLIGHT FACE IMPACT - ACTIVE CHANGE GATE 01
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 02
 
-Title: Repository, governance and CI foundation
-State: ACTIVE; FOUNDATION DIFF AND CI PENDING, NOT CLOSED
-Law: Project Law V1 adopted with this gate
-Authorization: Anders Nørgaard, `Det er godkendt. Fortsæt` (2026-11-08),
-in response to the explicit Gate 01 approval request.
-Destination: `andersdui22/openflight-face-impact`, public fork of official
-OpenFlight, created 2026-11-08 under the only connected owner. Its main HEAD
-is the verified source baseline.
-Working branch: `foundation/governance-ci` (created remotely at source SHA)
-Project remote `main` HEAD: `a3ab081a8abff71fd344d4fd782412d624b99f3f`
-Project remote gate branch: created at source baseline; foundation commit pending
-Source baseline: `open-flight/openflight@a3ab081a8abff71fd344d4fd782412d624b99f3f`
+Title: Windows Bootstrap
+State: ACTIVE — technical acceptance verified on pre-closeout SHA; final documentation CI pending.
+Law: Project Law V1 (unchanged)
+Authorization: User explicitly approved Gate 02 after Gate 01, 2026-11-08.
+Repository: andersdui22/openflight-face-impact
+Working branch: gate02/windows-bootstrap
+Base: foundation/governance-ci @ bf2111aadc834373b5a072197d6c82b40b675d6c
+Draft PR: https://github.com/andersdui22/openflight-face-impact/pull/2
+Previous gate: Gate 01 passed seven workflows on bf2111aa; PR #1 remains unmerged.
+Full gate scope, exclusions, acceptance and stop conditions: [GATE02_WINDOWS_BOOTSTRAP.md](GATE02_WINDOWS_BOOTSTRAP.md).
 
-## Purpose
+## Verification snapshot
 
-Establish an authoritative, reviewable project and verification foundation while preserving OpenFlight's existing software unchanged. This gate does not implement the Windows app or validate camera-only impact measurement.
+- Tested Gate 02 SHA: `cbc7843242e7dfc19833074b4a6665b6a13fe18f`.
+- Eight GitHub Actions workflows completed successfully on that exact SHA: Anti-slop Audit, Documentation, Face Impact foundation, Face Impact Windows bootstrap, PR Checks, Pylint, Tests, UI.
+- Windows bootstrap workflow passed both Windows and Ubuntu jobs. Windows installed the inherited Python backend, exercised its mock Flask server, built the existing React UI and ran the combined Flask/Electron startup smoke. The launcher unit tests also exercised live child termination on Windows and Linux.
+- These are CI checks only. Electron presence was observed as a process, not a human-verified rendered UI. Physical ELP camera capture, impact accuracy, packaged Windows installer and physical Golden remain unverified.
+- The documentation update that records this evidence changes the branch SHA. **Do not claim final same-SHA closeout until all required checks pass again on the resulting documentation commit.**
 
-## Approved scope
+## Boundaries and next step
 
-The user approved adoption of Project Law V1, creation of the new repository,
-non-destructive baseline seeding from the re-audited official source, and a
-foundation branch containing governance/documentation plus CI-only changes.
-Public visibility was the proposal for public upstream code and project
-documents. Creation capability and branch access must be established before an
-external write. No secrets, personal capture data or restricted mesh assets may
-be uploaded.
-
-No merge or release authorization is included. The initial reference seeding is explicitly part of this proposal and must not be treated as a general merge exception.
-
-## Mandatory preflight
-
-1. Read the approved law, gate and audit; record the user's approval evidence.
-2. Reverify official default branch, remote HEAD, PR #245/#250 and known candidate heads. If upstream has moved, audit the delta before adopting a different baseline.
-3. Confirm exact new owner/name, visibility and create/write access. Check that the target does not already contain work; never overwrite an existing repository.
-4. Inspect existing CI, GitHub governance, workflows and upstream license. Search for equivalent project documents before adding them.
-5. Verify existing source hashes and prepare the smallest allowed diff.
-
-## Allowed changes
-
-| Location / action | Allowed purpose |
-| --- | --- |
-| New repository and initial refs | Preserve upstream history and seed the verified source baseline without rewriting upstream. |
-| `AGENTS.md` | Minimal project-specific entry guidance and pointers to the law/gate; keep relevant upstream attribution. |
-| `docs/governance/PROJECT_LAW.md` | Adopt V1 as approved. |
-| `docs/governance/ACTIVE_CHANGE_GATE.md` | Record Gate 01 authorization, SHA scope and acceptance evidence. |
-| `docs/governance/BASELINES.md` | Source baseline plus an explicitly empty physical-Golden register. |
-| `docs/governance/CANDIDATES.md` | Pinned experimental candidates, dependencies, duplicates, provenance and no implicit admission. |
-| `docs/governance/HANDOFF.md` and evidence/decision/test records | Knowledge rebuild and same-SHA closeout. |
-| `UPSTREAM.md`, `THIRD_PARTY_NOTICES.md` | Attribution, license position and restricted assets; do not replace upstream LICENSE. |
-| `.github/workflows/face-impact-foundation.yml` | Scoped verification with Linux and Windows jobs; no release or publish action. |
-| New foundation-only CI support, if strictly necessary | Documented narrow scripts that inspect policy/source and run existing checks; no app behavior. |
-
-All existing application source, UI behavior, models, package/dependency manifests and lockfiles remain byte-identical to the source baseline. Existing unrelated upstream workflows must be reviewed before enabling; do not enable deploy/cloud/publish jobs by accident. Any necessary workflow-enablement change must be explained as CI configuration, not product development.
-
-## Explicit exclusions
-
-No camera adapter, production bootstrap, solver/pose changes, experimental code import, calibration, new UI, branding redesign, dependency upgrades, radar/Bluetooth work, ConnectorNext access, hardware test, branch deletion, history rewrite, merge, release or release-candidate publication.
-
-No empty placeholder production modules. A file path in the proposed repository structure is not permission to create it.
-
-## Acceptance criteria
-
-1. The new remote repository exists at the agreed destination. Its initial source commit and provenance match the reverified upstream baseline, with history and AGPL preserved.
-2. The approved law, active gate, baseline/candidate/evidence registers and next-session startup procedure are present and internally consistent.
-3. A diff against the source baseline shows only the allowed governance, documentation and CI changes. Application source, assets, manifests and lockfiles are unchanged.
-4. Linux CI runs the existing applicable backend tests and UI lint/test/build. Findings are classified; failures are not hidden or fixed by expanding this gate. Baseline failures blocking acceptance require a scoped amendment or later gate.
-5. Windows CI builds the existing React UI and records Python/Node/dependency environment diagnostics. Reuse a focused existing pure backend test subset when the environment supports it. Document exactly what ran. Do not claim Electron/backend startup, USB acquisition or packaging from these checks. The main resolver's declared Windows exclusion is a recorded product gap, not a reason to alter the manifest under this gate.
-6. CI has no release/deploy steps and runs are bounded by relevant paths or explicit dispatch. Obtain one complete required result set on the final gate SHA; unnecessary repeated runs are avoided.
-7. A draft PR contains the concrete foundation diff and honest validation. Opening this project PR is included in Gate 01 if the approved destination and permissions allow it; no comments to third parties are authorized.
-8. Closeout re-fetches the gate branch, PR head and checks. The recorded final SHA is the same one reviewed and tested. Remaining unknowns and the next proposed gate are documented.
-9. Physical-Golden register remains empty. No merge or release occurs.
-
-## Test/evidence plan
-
-Record baseline HEAD and required checks before changes. Run focused governance/source-integrity checks, existing relevant backend regression on Linux, UI lint/test/build and Windows UI build. Capture exact commands, tool versions, SHA, pass/fail/skip counts and CI URLs. A missing dependency is environmental until investigated; do not classify it as product correctness or silently substitute a mock.
-
-Source integrity, not a new behavior test suite, verifies that this foundation gate preserved production files. Windows compatibility remains partial until the later bootstrap/camera gates pass their own tests.
-
-## Stops and blockers
-
-Stop the affected action for missing approval, absent create/write access, ambiguous owner, existing target work, remote drift not reconciled, required source-integrity failure, unrelated workflows with unsafe publication side effects, or any requested production change. Continue independent authorized documentation and read-only analysis. Never use access to ConnectorNext as a substitute destination.
-
-Phase 0 attempted no repository creation. Gate 01 created the fork and verified
-its source SHA. Anders added this specific repository to the existing GitHub
-integration; branch creation then succeeded at the source baseline. Publishing
-the foundation diff, project CI and draft PR remain pending.
-
-## Closeout fields to fill during execution
-
-Approval evidence: User's 2026-11-08 `Det er godkendt. Fortsæt`, following the Gate 01 request.
-Actual owner/name and visibility: `andersdui22/openflight-face-impact`, public fork created.
-Baseline remote SHA: `a3ab081a8abff71fd344d4fd782412d624b99f3f`, matched official main and local full-history partial clone.
-Final gate remote SHA: PENDING - remote branch currently at source baseline
-Draft PR: NONE
-Required check results: NOT RUN on project remote; local Linux checks recorded in `docs/evidence/GATE01_PREFLIGHT.md`.
-Physical testing: NOT AUTHORIZED
-Merge/release: NOT AUTHORIZED
-Next task after closeout: propose Gate 02 for minimal Windows bootstrap and dependency admission; requires separate authorization.
-
-
-## 2026-11-08 remote progress reconciliation
-
-The initial preparation-state entries above are historical and have been
-superseded by direct remote verification. Draft PR #1 exists at
-https://github.com/andersdui22/openflight-face-impact/pull/1 .
-Its original head was `a6bee2f0cb8eadd88b40c3e80aff5935c0c5ebbf`,
-with seven successful workflows (UI, Anti-slop Audit, Face Impact foundation,
-PR Checks, Pylint, Documentation, Tests) on that exact SHA.
-The verified base remained `a3ab081a8abff71fd344d4fd782412d624b99f3f`.
-
-Documentation reconciliation commits follow the original green CI SHA.
-Consequently Gate 01 is NOT YET CLOSED: reverify the final branch and PR
-head, inspect the complete required CI result set on that exact final SHA,
-and record closeout evidence. Keep the PR draft; no merge or release.
-No camera/Windows product behavior was modified, and no physical Golden
-baseline is claimed. Gate 02 remains unapproved.
-
-## Gate 01 same-SHA verification record — 2026-11-08
-
-Before this closeout-documentation edit, remote branch and draft PR #1 both
-pointed to `1bae73beac5fbf8f53980390c37a72a5902aee2c`.
-All seven workflows on that exact SHA completed successfully: Face Impact
-foundation, PR Checks, Pylint, Documentation, UI, Tests, Anti-slop Audit.
-The branch base was upstream source `a3ab081a8abff71fd344d4fd782412d624b99f3f`.
-The earlier scope-only CI and reviewed PR diff found no application code
-changes. No physical Golden, merge, or release is claimed.
-
-Gate 01 technical acceptance is verified at the SHA above. This appended
-record creates a new commit, so final gate closeout remains **pending**
-same-SHA CI on the new head. A future successor must check it and update
-the gate state without misrepresenting the older CI as final-head CI.
-
-User separately approved the **future Gate 02 Windows Bootstrap** in chat
-on 2026-11-08. This does not permit Gate 02 changes until Gate 01
-is closed. Gate 02 scope: minimal Windows Python-backend startup in
-hardware-free mode, existing Electron/React UI launch, lifecycle and
-failure handling, and Windows startup tests/CI. Excludes camera capture,
-3D Face Impact logic, ConnectorNext, merges and releases.
+No camera adapter, solver/pose changes, hardware tests, ConnectorNext changes, merge, release, or Golden designation are authorized in Gate 02. After same-SHA verification, record the closeout and propose a separately approved Gate 03 for ELP OV9281 Windows camera acquisition. Do not begin Gate 03 implementation without its explicit approval.
