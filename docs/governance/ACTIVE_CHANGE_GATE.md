@@ -1,10 +1,10 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 06
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 07
 
-Title: Synthetic frame-to-calibration integration
+Title: Synthetic golf ball and clubface localization
 State: ACTIVE — explicitly approved by user 2026-11-08 ("Godkendt").
 Project Law: V1, unchanged.
-Working branch: `gate06/synthetic-frame-calibration`
-Base: Gate 05 `gate05/synthetic-camera-calibration` @ `631c7bbb008da94c13a42c8596e4c7a9e589eb80` (six of six CI successful, draft PR #5 unmerged).
-Scope, acceptance and stop conditions: [GATE06_SYNTHETIC_FRAME_INTEGRATION.md](GATE06_SYNTHETIC_FRAME_INTEGRATION.md).
+Working branch: `gate07/synthetic-ball-face-localization`
+Base: Gate 06 `gate06/synthetic-frame-calibration` @ `9522651a6a4be988f8bd8da22447b50cf1779099` (six of six CI successful, draft PR #6 unmerged).
+Scope, acceptance and stop conditions: [GATE07_SYNTHETIC_LOCALIZATION.md](GATE07_SYNTHETIC_LOCALIZATION.md).
 
-Hardware-free synthetic frame adapter and tests only; no automatic detection, Face Impact calculation, physical test, merge or release.
+Synthetic color-coded images only; no real camera recognition, physical tests, Face Impact computation, merge or release.
