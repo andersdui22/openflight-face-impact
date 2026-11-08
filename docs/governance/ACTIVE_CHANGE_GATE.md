@@ -1,10 +1,10 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 09
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 10
 
-Title: Synthetic dual-object ball and clubface pipeline
+Title: Automatic synthetic IR face-region proposal
 State: ACTIVE — explicitly approved by user 2026-11-08 ("Godkendt").
 Project Law: V1, unchanged.
-Working branch: `gate09/synthetic-dual-object-pipeline`
-Base: Gate 08 `gate08/ir-synthetic-detection` @ `1bd4ad2919b4817cf3a6a8017f2b4d241684c9ff` (six of six CI successful, draft PR #8 unmerged).
-Scope, acceptance and stop conditions: [GATE09_SYNTHETIC_DUAL_PIPELINE.md](GATE09_SYNTHETIC_DUAL_PIPELINE.md).
+Working branch: `gate10/synthetic-face-region-proposal`
+Base: Gate 09 `gate09/synthetic-dual-object-pipeline` @ `c7d881f300b02fc0c6f6f91039e8bbf5f493acf8` (six of six latest CI successful, draft PR #9 unmerged).
+Scope, acceptance and stop conditions: [GATE10_SYNTHETIC_FACE_PROPOSAL.md](GATE10_SYNTHETIC_FACE_PROPOSAL.md).
 
-Synthetic image-only pipeline; no real camera tests, physical Face Impact calculation, merge or release.
+Synthetic fixture-only automatic rectangle candidate proposal; no physical camera testing, real face identification, Face Impact calculation, merge or release.
