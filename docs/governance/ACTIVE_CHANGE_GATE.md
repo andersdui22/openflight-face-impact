@@ -116,3 +116,25 @@ head, inspect the complete required CI result set on that exact final SHA,
 and record closeout evidence. Keep the PR draft; no merge or release.
 No camera/Windows product behavior was modified, and no physical Golden
 baseline is claimed. Gate 02 remains unapproved.
+
+## Gate 01 same-SHA verification record — 2026-11-08
+
+Before this closeout-documentation edit, remote branch and draft PR #1 both
+pointed to `1bae73beac5fbf8f53980390c37a72a5902aee2c`.
+All seven workflows on that exact SHA completed successfully: Face Impact
+foundation, PR Checks, Pylint, Documentation, UI, Tests, Anti-slop Audit.
+The branch base was upstream source `a3ab081a8abff71fd344d4fd782412d624b99f3f`.
+The earlier scope-only CI and reviewed PR diff found no application code
+changes. No physical Golden, merge, or release is claimed.
+
+Gate 01 technical acceptance is verified at the SHA above. This appended
+record creates a new commit, so final gate closeout remains **pending**
+same-SHA CI on the new head. A future successor must check it and update
+the gate state without misrepresenting the older CI as final-head CI.
+
+User separately approved the **future Gate 02 Windows Bootstrap** in chat
+on 2026-11-08. This does not permit Gate 02 changes until Gate 01
+is closed. Gate 02 scope: minimal Windows Python-backend startup in
+hardware-free mode, existing Electron/React UI launch, lifecycle and
+failure handling, and Windows startup tests/CI. Excludes camera capture,
+3D Face Impact logic, ConnectorNext, merges and releases.
