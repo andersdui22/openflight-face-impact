@@ -142,3 +142,17 @@ def test_preview_is_not_served_after_usb_reader_stops(monkeypatch):
     assert camera.capture_preview_jpeg() == b"jpeg"
     camera.stop()
     assert camera.capture_preview_jpeg() is None
+
+def test_delivered_fps_is_observed_and_reset_on_restart():
+    fake = FakeCamera()
+    camera = WindowsUsbCamera(camera_factory=lambda index: fake)
+    assert camera.delivered_fps is None
+    camera.start()
+    try:
+        wait_until(lambda: camera.frames_received >= 5)
+        assert camera.delivered_fps is not None
+        assert camera.delivered_fps > 0
+        assert camera.negotiated["reported_fps"] == 120.0
+    finally:
+        camera.stop()
+    assert camera.delivered_fps is not None

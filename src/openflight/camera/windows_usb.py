@@ -6,6 +6,7 @@ tests. Timestamps are host arrival times, never camera exposure timestamps.
 from __future__ import annotations
 
 import threading
+from collections import deque
 import time
 from dataclasses import dataclass
 from typing import Callable
@@ -39,6 +40,8 @@ class WindowsUsbCamera:
         self._last_error: str | None = None
         self.negotiated: dict[str, float] | None = None
         self._frames = 0
+        self._arrival_times_ns = deque(maxlen=256)
+        self._arrival_lock = threading.Lock()
 
     @property
     def last_error(self) -> str | None:
@@ -51,6 +54,15 @@ class WindowsUsbCamera:
     @property
     def frames_received(self) -> int:
         return self._frames
+
+    @property
+    def delivered_fps(self) -> float | None:
+        """Observed frame arrivals over a rolling window, not sensor FPS."""
+        with self._arrival_lock:
+            samples = tuple(self._arrival_times_ns)
+        if len(samples) < 2 or samples[-1] <= samples[0]:
+            return None
+        return (len(samples) - 1) * 1_000_000_000 / (samples[-1] - samples[0])
 
     def start(self) -> None:
         if self.is_running:
@@ -86,6 +98,8 @@ class WindowsUsbCamera:
             raise
         self._camera = camera
         self._last_error = None
+        with self._arrival_lock:
+            self._arrival_times_ns.clear()
         self._stop.clear()
         self._thread = threading.Thread(target=self._read_loop, name="openflight-usb-reader", daemon=True)
         self._thread.start()
@@ -113,7 +127,9 @@ class WindowsUsbCamera:
                     exposure_us=0,  # unknown until hardware controls are validated
                     analogue_gain=0.0,  # unknown
                 ))
-                self._frames += 1
+                with self._arrival_lock:
+                    self._arrival_times_ns.append(host_ns)
+                    self._frames += 1
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._last_error = str(exc)
         finally:

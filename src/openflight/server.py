@@ -1665,6 +1665,7 @@ def windows_usb_camera_status():
         state = "running" if camera.frames_received > 0 else "starting"
     else:
         state = "stopped"
+    measured_fps = getattr(camera, "delivered_fps", None) if state == "running" else None
     return jsonify({
         "enabled": True,
         "state": state,
@@ -1672,7 +1673,8 @@ def windows_usb_camera_status():
         "last_error": camera.last_error,
         "negotiated": camera.negotiated,
         "timestamp_source": "host_arrival_monotonic",
-        "actual_fps_measured": False,
+        "actual_fps_measured": measured_fps is not None,
+        "delivered_fps": measured_fps,
     })
 
 
