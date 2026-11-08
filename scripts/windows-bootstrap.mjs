@@ -82,8 +82,7 @@ export async function main() {
   const backend = spawn(python, [
     '-m', 'openflight.server', '--mock', '--host', host, '--web-port', String(port),
   ], { cwd: root, env: environment, stdio: 'inherit', windowsHide: true });
-  let backendSpawnError;
-  backend.on('error', (error) => { backendSpawnError = error; backend.spawnError = error; });
+  backend.on('error', (error) => { backend.spawnError = error; });
   let electron;
   let stopping = false;
   const shutdown = async () => {
@@ -97,7 +96,6 @@ export async function main() {
   process.once('SIGTERM', onSignal);
   try {
     await waitForHttpReady(url, timeoutMs, backend);
-    if (backendSpawnError) throw backendSpawnError;
     if (stopping) return;
     const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     electron = spawn(npm, ['run', 'electron'], {
