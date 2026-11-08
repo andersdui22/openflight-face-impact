@@ -150,6 +150,7 @@ kld7_horizontal = None
 iwr6843_runtime = None
 iwr6843_runtime_config: dict = {"enabled": False}
 camera_capture_runtime = None
+windows_usb_runtime = None  # Optional independent USB source; never opened by Pi runtime.
 camera_capture_config: dict = {"enabled": False}
 camera_replay_manager = None
 camera_reference_ball_tracker = None
@@ -467,6 +468,8 @@ def _cleanup_hardware_for_shutdown() -> bool:
         _run_shutdown_step("battery monitor stop", power_monitor.stop)
     if camera_capture_runtime:
         _run_shutdown_step("camera capture stop", camera_capture_runtime.stop)
+    if windows_usb_runtime:
+        _run_shutdown_step("Windows USB camera stop", windows_usb_runtime.stop)
     if ble_publisher:
         _run_shutdown_step("BLE publisher stop", ble_publisher.stop)
 
@@ -1657,9 +1660,14 @@ def camera_capture_preview():
     Served from the processed YUV stream while the raw rolling buffer keeps
     running, so shots are never missed while the camera tab polls this.
     """
-    if camera_capture_runtime is None:
+    source = windows_usb_runtime if windows_usb_runtime is not None else camera_capture_runtime
+    if source is None:
         return "Camera capture not enabled", 404
-    jpeg = camera_capture_runtime.capture_preview_jpeg()
+    try:
+        jpeg = source.capture_preview_jpeg()
+    except RuntimeError as exc:
+        logger.warning("[CAMERA] Preview unavailable: %s", exc)
+        return "Camera preview unavailable", 503
     if jpeg is None:
         return "Camera not running", 503
     return Response(jpeg, mimetype="image/jpeg", headers={"Cache-Control": "no-store"})
@@ -4957,6 +4965,11 @@ def main():
         ),
     )
     parser.add_argument("--mock", "-m", action="store_true", help="Run in mock mode without radar")
+    parser.add_argument("--windows-usb-camera", type=int, default=None, metavar="INDEX",
+                        help="Open one Windows USB camera index for buffered JPEG preview")
+    parser.add_argument("--windows-usb-width", type=int, default=640)
+    parser.add_argument("--windows-usb-height", type=int, default=400)
+    parser.add_argument("--windows-usb-fps", type=float, default=120.0)
     parser.add_argument(
         "--mock-swing-speed",
         action="store_true",
@@ -5405,6 +5418,8 @@ def main():
     _apply_kld7_device_defaults(args)
     if args.camera_shot_analysis:
         args.camera_capture = True
+    if args.windows_usb_camera is not None and args.camera_capture:
+        parser.error("--windows-usb-camera cannot run alongside --camera-capture")
 
     if args.trigger_threshold is not None and args.trigger_threshold < 0:
         parser.error("--trigger-threshold must be non-negative")
@@ -5576,6 +5591,19 @@ def main():
         "cooldown_ms": args.swing_speed_cooldown_ms,
         "rejected_cooldown_ms": args.swing_speed_rejected_cooldown_ms,
     }
+
+    if args.windows_usb_camera is not None:
+        global windows_usb_runtime  # pylint: disable=global-statement
+        from .camera.windows_usb import UsbCameraSettings, WindowsUsbCamera
+
+        windows_usb_runtime = WindowsUsbCamera(UsbCameraSettings(
+            device_index=args.windows_usb_camera,
+            width=args.windows_usb_width,
+            height=args.windows_usb_height,
+            requested_fps=args.windows_usb_fps,
+        ))
+        windows_usb_runtime.start()
+        logger.info("[CAMERA] Windows USB camera reported mode: %s", windows_usb_runtime.negotiated)
 
     if args.camera_capture:
         startup_status.start("camera", "Connecting high-speed camera")
