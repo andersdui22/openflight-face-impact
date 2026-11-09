@@ -24,8 +24,8 @@ describe('FaceImpactView', () => {
       />
     );
     expect(html).toContain('Test data only');
-    expect(html).toContain('12.0 mm');
-    expect(html).toContain('5.0 mm');
+    expect(html.replace(/<!-- -->/g, '')).toContain('12.0 mm');
+    expect(html.replace(/<!-- -->/g, '')).toContain('5.0 mm');
     expect(html).toContain('toe / high');
     expect(html).toContain('synthetic-impact-marker');
     expect(html).toContain('<polygon');
