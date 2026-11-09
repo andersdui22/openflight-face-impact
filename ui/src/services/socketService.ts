@@ -1,4 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
+import { isSyntheticFaceImpactResponse, type SyntheticFaceImpactResponse } from '../types/syntheticFaceImpact';
 import { useSystemStore } from '../stores/useSystemStore';
 import { useShotStore } from '../stores/useShotStore';
 import { useCameraStore, type CameraCaptureSettings } from '../stores/useCameraStore';
@@ -192,6 +193,28 @@ class SocketService {
     return () => {
       this.sessionClearedListeners.delete(listener);
     };
+  }
+
+  requestSyntheticFaceImpact(caseId: string): Promise<SyntheticFaceImpactResponse> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket?.connected) {
+        reject(new Error('OpenFlight backend is disconnected'));
+        return;
+      }
+      this.socket
+        .timeout(5000)
+        .emit('get_synthetic_face_impact', { case_id: caseId }, (error: Error | null, response: unknown) => {
+          if (error || !isSyntheticFaceImpactResponse(response)) {
+            reject(new Error('Synthetic Face Impact response unavailable or invalid'));
+            return;
+          }
+          if (response.ok && response.case_id !== caseId) {
+            reject(new Error('Synthetic Face Impact response case mismatch'));
+            return;
+          }
+          resolve(response);
+        });
+    });
   }
 
   clearSession(profileId: string) {
