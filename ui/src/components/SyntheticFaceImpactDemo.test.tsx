@@ -22,4 +22,14 @@ describe('SyntheticFaceImpactDemo', () => {
       }
     }
   });
+  it('diagnostic: capture canonical fixture JSON formatting', async () => {
+    const prettier = await import('prettier');
+    const fs = await import('node:fs');
+    const path = 'src/data/syntheticFaceImpactCases.json';
+    const source = fs.readFileSync(path, 'utf8');
+    const config = await prettier.resolveConfig(path);
+    const formatted = await prettier.format(source, { ...config, filepath: path });
+    console.log('GATE20_JSON_START' + JSON.stringify(formatted) + 'GATE20_JSON_END');
+    expect(formatted.length).toBeGreaterThan(0);
+  });
 });
