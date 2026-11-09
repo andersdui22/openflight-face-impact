@@ -1,16 +1,16 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 17
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 18
 
-Title: Synthetic polygonal clubface footprint
+Title: Integrated synthetic Face Impact calculation pipeline
 State: ACTIVE — user explicitly approved "Godkendt" (2026-11-09).
 Project Law: V1 unchanged.
-Working branch: `gate17/synthetic-face-polygon`.
-Base: Gate 16 `8915eb7f418b1eebf08e2c92a56e87edabee5ba7`, six successful same-SHA workflows; draft PR #16 unmerged.
+Working branch: `gate18/synthetic-impact-pipeline`.
+Base: Gate 17 `bb4b6338edbdb1c3135db5d4e01d2b7f38f81dbc`, six successful same-SHA workflows; draft PR #17 unmerged.
 
 ## Authorized scope
-Represent a synthetic planar clubface boundary by explicit 2D local (heel/toe, vertical) vertices in millimetres. Support convex and concave simple polygons, including asymmetric shapes, with inclusive edges and corners. Reject malformed, degenerate, self-intersecting or nonfinite polygon geometry. Reuse Gate 15 sphere-plane tangent point and Gate 14 coordinate conventions. Deterministic tests for center, edges, corners, asymmetric concave cutout, exterior points and invalid geometry.
+Provide a single synthetic calculation entry point that receives an explicitly known 3D ball center, radius, clubface frame, rigid pose and polygonal footprint; reuses Gate 17 and Gate 15 calculations; returns structured successful Face Impact X/Y in millimetres, heel/toe and high/low, or a structured rejection reason. Test success, transformed pose, outside footprint, non-tangency and invalid inputs. Preserve failure distinctions and do not fabricate measurements.
 
 ## Acceptance
-Boundary containment is exact up to documented floating-point numerical considerations, without widening the synthetic shape. Same-SHA CI required.
+Deterministic synthetic tests and six same-SHA CI successes. Clear result contract and rejection status.
 
 ## Exclusions
-No real clubface geometry, camera calibration or physical validation, curvature, radar, UI, merge, release or Golden baseline.
+No camera integration, actual pose estimation, measured impact, physical test, radar, UI, merge, release or Golden baseline.
