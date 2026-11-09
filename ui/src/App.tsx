@@ -176,7 +176,7 @@ function AppContent() {
   );
 
   const [currentView, setCurrentView] = useState<PanelView>('live');
-  const [dashboardOpen, setDashboardOpen] = useState(true);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState('driver');
   const [selectedTrainingImplement, setSelectedTrainingImplement] = useState('driver');
   const [menuOpen, setMenuOpen] = useState(false);
