@@ -1,16 +1,16 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 21
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 22
 
-Title: Synthetic Face Impact request/response over existing Flask-SocketIO channel
+Title: Automated synthetic Socket.IO integration and reconnection verification
 State: ACTIVE — explicitly approved by user (2026-11-09).
 Project Law: V1 unchanged.
-Working branch: `gate21/synthetic-socket-bridge`.
-Base: Gate 20 `ca4e5ebe6ba872ed30383f20bc3fe2c7ef3c6fe2`, all six workflows passed on same SHA; draft PR #20 unmerged.
+Working branch: `gate22/socket-integration-tests`.
+Base: Gate 21 `beaa98cb2b634945b696f6bac6f25bfb6c5d01dc`, seven successful same-SHA workflows; draft PR #21 unmerged.
 
 ## Authorized scope
-Reuse the existing Python Flask-SocketIO server and React socket.io-client connection. Add a narrowly scoped, explicitly synthetic request/response event that runs Gate 18 `calculate_synthetic_face_impact` on bounded, server-defined deterministic geometry cases. Return versioned structured results and finite face polygon in millimetres; reject unknown case identifiers without invented measurements. React must request and display only server-returned results, with honest disconnected/error states, and no second socket connection. Test both backend and UI behavior.
+Test the existing Flask-SocketIO server request handler using Flask-SocketIO's in-process test client, including successful synthetic calculations, rejected contacts, malformed case IDs and disconnect/reconnect. Test the existing React socketService client with a mocked Socket.IO transport for acknowledgement, invalid response, timeout/disconnect and reconnection, without introducing a second connection. Preserve existing behavior; any production change must be minimal and evidenced by tests.
 
 ## Acceptance
-Automated tests for known success/rejection, unknown case, schema, no hardware access, UI error behavior, and all six same-SHA CI workflows. Preserve original OpenFlight shell and existing socket behavior.
+Tests explicitly distinguish real in-process server transport from mocked browser transport, no hardware access, CI green on the exact gate SHA, and no fabricated contact results.
 
 ## Exclusions
-No ELP camera acquisition, live measurements, physical testing, radar, ConnectorNext, unrelated server changes, merge, release or Golden baseline.
+No live camera, physical tests, external network service, ConnectorNext, MLM2PRO, merges, releases or Golden baseline.
