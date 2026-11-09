@@ -1,16 +1,16 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 16
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 17
 
-Title: Synthetic finite rectangular clubface boundary validation
-State: ACTIVE — user explicitly approved "Godkendt" following Gate 16 proposal (2026-11-09).
+Title: Synthetic polygonal clubface footprint
+State: ACTIVE — user explicitly approved "Godkendt" (2026-11-09).
 Project Law: V1 unchanged.
-Working branch: `gate16/synthetic-finite-face-bounds`.
-Base: Gate 15 `2bb7039112f4089170df916410a565e5900bedff`, six successful same-SHA workflows; draft PR #15 remains unmerged.
+Working branch: `gate17/synthetic-face-polygon`.
+Base: Gate 16 `8915eb7f418b1eebf08e2c92a56e87edabee5ba7`, six successful same-SHA workflows; draft PR #16 unmerged.
 
 ## Authorized scope
-Define explicit positive finite synthetic face width and height in millimetres, centered on the Gate 14 face frame. Validate the Gate 15 synthetic contact point against finite rectangular face boundaries. Fail closed outside the face, with deterministic tests for center, edges, corners, just-outside positions and invalid dimensions. Reuse the existing synthetic sphere-plane contact logic rather than duplicating it.
+Represent a synthetic planar clubface boundary by explicit 2D local (heel/toe, vertical) vertices in millimetres. Support convex and concave simple polygons, including asymmetric shapes, with inclusive edges and corners. Reject malformed, degenerate, self-intersecting or nonfinite polygon geometry. Reuse Gate 15 sphere-plane tangent point and Gate 14 coordinate conventions. Deterministic tests for center, edges, corners, asymmetric concave cutout, exterior points and invalid geometry.
 
 ## Acceptance
-Clear inclusive boundary semantics and numerical tolerance; no inferred clubhead dimensions or physical precision. Same-SHA CI must pass.
+Boundary containment is exact up to documented floating-point numerical considerations, without widening the synthetic shape. Same-SHA CI required.
 
 ## Exclusions
-No curved face, grooves, actual clubhead mesh, real ball tracking, physical camera or accuracy validation, radar, UI, merge, release or Golden baseline.
+No real clubface geometry, camera calibration or physical validation, curvature, radar, UI, merge, release or Golden baseline.
