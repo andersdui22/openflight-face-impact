@@ -2,6 +2,13 @@
 
 Current snapshot: 2026-11-09. GitHub is authoritative. Start each session with a read-only audit.
 
+## Gate 28 continuation point — 2026-11-09
+
+- Project Law V1. Anders approved offline ray conversion of synthetic ball and clubface observations.
+- Branch `gate28/calibrated-optical-rays` starts from Gate 27 `3fde3dfa53dd8fb40683ebf694abcbb4a5aebc20`. Draft PR #27 recorded seven successful workflows.
+- [Gate 28 evidence](GATE28_CALIBRATED_RAYS.md) describes Brown-five correction, synthetic known-ray verification and rejection checks. [Draft PR #28](https://github.com/andersdui22/openflight-face-impact/pull/28) records the final SHA and CI.
+- Gate 26 physical testing remains deferred. Depth, world pose and hardware validation remain open. A new gate requires explicit approval.
+
 ## Gate 27 continuation point — 2026-11-09
 
 - Project Law V1. Anders explicitly deferred all physical tests and approved offline checkerboard calibration on synthetic images.
