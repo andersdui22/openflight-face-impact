@@ -65,4 +65,14 @@ describe('SyntheticFaceImpactDemo', () => {
       })
     ).toBe(false);
   });
+  it('diagnostic: capture canonical SocketIO service formatting', async () => {
+    const prettier = await import('prettier');
+    const fs = await import('node:fs');
+    const path = 'src/services/socketService.ts';
+    const source = fs.readFileSync(path, 'utf8');
+    const config = await prettier.resolveConfig(path);
+    const formatted = await prettier.format(source, { ...config, filepath: path });
+    console.log('GATE21_SERVICE_START' + JSON.stringify(formatted) + 'GATE21_SERVICE_END');
+    expect(formatted.length).toBeGreaterThan(0);
+  });
 });
