@@ -696,3 +696,19 @@ test('tabbing to a menu segmented control shows a real keyboard focus ring, not 
   // The individual button's own outline stays suppressed — no double ring.
   await expect(metricButton).toHaveCSS('outline-style', 'none');
 });
+
+
+test('opens reference-inspired Face Impact dashboard without inventing camera readings', async ({ page }) => {
+  await gotoApp(page);
+  await dismissPicker(page);
+  await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
+  const dashboard = page.getByRole('region', { name: 'Face Impact dashboard' });
+  await expect(dashboard).toBeVisible();
+  await expect(dashboard.locator('.impact-workspace__tile')).toHaveCount(6);
+  await expect(dashboard.locator('.impact-workspace__metric')).toHaveCount(8);
+  await expect(dashboard.getByText('No measured impacts yet')).toBeVisible();
+  await expect(dashboard.getByText('not measured')).toHaveCount(7);
+  await expect(dashboard.getByLabel('Synthetic Face Impact test case')).toBeVisible();
+  await page.getByRole('button', { name: 'OPEN CLASSIC LIVE VIEW' }).click();
+  await expect(page.locator('.live-panel')).toBeVisible();
+});
