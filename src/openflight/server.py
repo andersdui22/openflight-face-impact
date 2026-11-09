@@ -1814,6 +1814,15 @@ def _camera_capture_settings_payload() -> dict:
     return payload
 
 
+@socketio.on("get_synthetic_face_impact")
+def handle_get_synthetic_face_impact(data=None):
+    """Return one synthetic calculation over the existing client socket."""
+    from .camera.synthetic_impact_socket import synthetic_face_impact_response
+
+    case_id = data.get("case_id") if isinstance(data, dict) else None
+    return synthetic_face_impact_response(case_id)
+
+
 @socketio.on("get_camera_capture_settings")
 def handle_get_camera_capture_settings():
     """Send current high-speed capture settings to the requesting UI."""
