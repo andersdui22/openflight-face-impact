@@ -709,6 +709,8 @@ test('opens reference-inspired Face Impact dashboard without inventing camera re
   await expect(dashboard.getByText('No measured impacts yet')).toBeVisible();
   await expect(dashboard.getByText('not measured')).toHaveCount(7);
   await expect(dashboard.getByLabel('Synthetic Face Impact test case')).toBeVisible();
+  // Produce a real browser-rendered screenshot for visual review in the CI artifacts.
+  await page.screenshot({ path: 'test-results/gate32-dashboard.png', fullPage: true });
   await page.getByRole('button', { name: 'OPEN CLASSIC LIVE VIEW' }).click();
   await expect(page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' })).toBeVisible();
 });
