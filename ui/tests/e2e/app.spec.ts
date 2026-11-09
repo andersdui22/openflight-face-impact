@@ -710,5 +710,5 @@ test('opens reference-inspired Face Impact dashboard without inventing camera re
   await expect(dashboard.getByText('not measured')).toHaveCount(7);
   await expect(dashboard.getByLabel('Synthetic Face Impact test case')).toBeVisible();
   await page.getByRole('button', { name: 'OPEN CLASSIC LIVE VIEW' }).click();
-  await expect(page.locator('.live-panel')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' })).toBeVisible();
 });
