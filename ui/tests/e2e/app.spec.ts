@@ -730,5 +730,9 @@ test('keeps Face Impact dashboard accessible at tablet and narrow widths', async
     await expect(dashboard.getByText('not measured')).toHaveCount(7);
     await expect(dashboard.getByLabel('Synthetic Face Impact test case')).toBeVisible();
     await page.screenshot({ path: `test-results/gate32-dashboard-${width}px.png`, fullPage: true });
+    // A narrow viewport hides the sidebar, so top navigation must remain usable.
+    await expect(dashboard.getByRole('button', { name: 'SWING' })).toBeVisible();
   }
+  await dashboard.getByRole('button', { name: 'SWING' }).click();
+  await expect(page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' })).toBeVisible();
 });
