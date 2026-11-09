@@ -78,16 +78,4 @@ describe('FaceImpactView', () => {
     expect(html).toContain('No ball-to-face contact');
     expect(html).toContain('<polygon');
   });
-  it('diagnostic: print canonical Prettier formatting for Gate 19', async () => {
-    const prettier = await import('prettier');
-    const fs = await import('node:fs');
-    const path = 'src/components/FaceImpactView.tsx';
-    const source = fs.readFileSync(path, 'utf8');
-    const config = await prettier.resolveConfig(path);
-    const formatted = await prettier.format(source, { ...config, filepath: path });
-    if (source !== formatted) {
-      console.log('GATE19_PRETTIER_START' + JSON.stringify(formatted) + 'GATE19_PRETTIER_END');
-    }
-    expect(formatted.length).toBeGreaterThan(0);
-  });
 });
