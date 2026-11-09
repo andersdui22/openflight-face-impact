@@ -196,3 +196,8 @@ Explicit user approval ("Godkendt") for Gate 15. Branch `gate15/synthetic-ball-f
 ## Gate 16 — finite synthetic clubface bounds (2026-11-09)
 
 User explicitly approved Gate 16 ("Godkendt"). Branch `gate16/synthetic-finite-face-bounds` from Gate 15 SHA `2bb7039112f4089170df916410a565e5900bedff` with six successful same-SHA CI workflows; draft PR #15 unmerged. Adds an explicit positive finite rectangular face width and height (mm), validates Gate 15 tangent point inside inclusive centered edges/corners, rejects outside contact without expanding boundaries by tangency tolerance. Tests cover center, all edges/corners, outside by 0.001 mm, invalid dimensions, rotated face and Gate 15 non-tangency. This is synthetic-only; no real clubhead geometry or camera accuracy. No Golden physical baseline, merge or release. Exact Gate 16 CI pending.
+
+
+## Gate 17 — synthetic polygonal face footprint (2026-11-09)
+
+Explicit user approval ("Godkendt"). Branch `gate17/synthetic-face-polygon` from Gate 16 SHA `8915eb7f418b1eebf08e2c92a56e87edabee5ba7`, six same-SHA CI successes, draft PR #16 unmerged. Added finite simple polygon boundary in local face millimetres, including asymmetric and concave shapes, inclusive edges and corners, invalid/self-intersecting geometry rejection; reuses Gate 15 tangent calculation and Gate 14 face frame. Synthetic only, no actual clubhead asset, measured impact, physical camera, merge, release or Golden baseline. Same-SHA CI pending.
