@@ -34,10 +34,8 @@ const reasons: Record<Exclude<FaceImpactDisplayResult['status'], 'ok'>, string> 
 };
 
 export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
-  const validPolygon =
-    polygon.length >= 3 && polygon.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
-  const validImpact =
-    result.status === 'ok' && Number.isFinite(result.x_mm) && Number.isFinite(result.y_mm);
+  const validPolygon = polygon.length >= 3 && polygon.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
+  const validImpact = result.status === 'ok' && Number.isFinite(result.x_mm) && Number.isFinite(result.y_mm);
   const xs = polygon.map(([x]) => x);
   const ys = polygon.map(([, y]) => y);
   const minX = validPolygon ? Math.min(...xs) : -50;
@@ -69,9 +67,7 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
       <svg
         viewBox="0 0 320 170"
         role="img"
-        aria-label={
-          rejection ? `No impact: ${rejection}` : 'Synthetic clubface and impact location'
-        }
+        aria-label={rejection ? `No impact: ${rejection}` : 'Synthetic clubface and impact location'}
         style={{ display: 'block', width: '100%', maxHeight: 260 }}
       >
         <rect x="0" y="0" width="320" height="170" rx="4" fill="var(--color-bg)" />
