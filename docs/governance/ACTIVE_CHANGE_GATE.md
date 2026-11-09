@@ -1,20 +1,21 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 25
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 26
 
-Title: Windows desktop runtime and hardware-free camera test preparation
-State: Approved by Anders on 2026-11-09. Closeout requires final same-SHA CI
-and the evidence recorded in draft PR #25.
+Title: Controlled physical ELP OV9281 acquisition on Windows
+State: Active. Operator evidence pending.
+Approval: Anders explicitly approved the physical procedure on 2026-11-09.
 Project Law: V1.
-Branch: `gate25/windows-desktop-runtime`.
-Base: Gate 24 `e022c2f2348e80d29e4ff3e627669c3dcfa8c645` (six required workflows successful).
+Branch: `gate26/elp-operator-test`.
+Base: Gate 25 `4bcb6d311949aa8c3763c957538b419b61f67200` (eight workflows successful).
 
 ## Scope and acceptance
 
-See [Gate 25 Windows desktop runtime](GATE25_WINDOWS_DESKTOP_RUNTIME.md).
-Allowed files are the Windows tests, existing Windows bootstrap workflow,
-and governance/runbook. A minimal change in the existing launcher or Electron
-entry point is allowed only if a reproduced failure requires it. Reuse the
-existing app and dependencies. Verify the Electron renderer, Python synthetic
-result, camera disabled, window close and restart on the same port.
+Follow [Gate 26 ELP operator test](GATE26_ELP_OPERATOR_TEST.md). Use the
+existing launcher, USB adapter, camera tab and loopback status endpoint.
+Allowed changes cover the operator runbook, a read-only status sampler and
+governance records. Obtain 60 seconds of evidence at the existing requested
+mode and verify one restart. Report driver FPS and host-arrival FPS separately.
 
-No physical camera, driver changes, measurements, Golden baseline, merge,
-release or packaging.
+Stop on incorrect camera, unavailable preview, stalled stream or failed
+restart. Preserve evidence and diagnose before continuing. Driver changes,
+golf shots, calibration, impact accuracy, Golden, merge and release are outside
+this gate.
