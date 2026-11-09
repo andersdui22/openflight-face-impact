@@ -27,11 +27,9 @@ def socket_client():
     ("no-tangency", "no_tangency", None),
 ])
 def test_synthetic_ack_through_socketio_dispatch(socket_client, case_id, status, coordinates):
-    acknowledgements = socket_client.emit(
+    payload = socket_client.emit(
         "get_synthetic_face_impact", {"case_id": case_id}, callback=True,
     )
-    assert len(acknowledgements) == 1
-    payload = acknowledgements[0]
     assert payload["schema_version"] == 1
     assert payload["source"] == "synthetic_python_pipeline"
     assert payload["case_id"] == case_id
@@ -62,7 +60,7 @@ def test_invalid_case_ack_contains_no_measurement(socket_client, case_payload):
 def test_reconnect_creates_fresh_socket_session_and_still_serves_requests(socket_client):
     before = socket_client.emit(
         "get_synthetic_face_impact", {"case_id": "toe-high"}, callback=True,
-    )[0]
+    )
     assert before["result"]["status"] == "ok"
     socket_client.disconnect()
     assert not socket_client.is_connected()
@@ -71,7 +69,7 @@ def test_reconnect_creates_fresh_socket_session_and_still_serves_requests(socket
         assert reconnect.is_connected()
         after = reconnect.emit(
             "get_synthetic_face_impact", {"case_id": "heel-low"}, callback=True,
-        )[0]
+        )
         assert after["result"]["status"] == "ok"
         assert after["result"]["x_mm"] == -12
     finally:
