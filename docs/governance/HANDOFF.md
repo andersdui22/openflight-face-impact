@@ -2,6 +2,13 @@
 
 Current snapshot: 2026-11-09. GitHub is authoritative. Start each session with a read-only audit.
 
+## Gate 31 continuation point — 2026-11-09
+
+- Project Law V1. Anders approved one offline integration from supplied synthetic ball-rim and labelled face pixels to the existing finite-face contact result.
+- Branch `gate31/synthetic-observed-impact` starts from Gate 30 `3f91831bd62bd208b131559aa19cac56c41f85f5`. Draft PR #30 recorded seven successful workflows on that exact SHA and remains unmerged.
+- [Gate 31 evidence](GATE31_SYNTHETIC_OBSERVED_IMPACT.md) states the input and tolerance contracts. Its draft PR records final same-SHA checks after publication; reverify GitHub before closeout.
+- Gate 26 physical testing remains deferred. The current scope does not infer a contact frame or detect real image features. No physical Golden baseline. Next gate requires separate approval.
+
 ## Gate 30 continuation point — 2026-11-09
 
 - Project Law V1. Anders approved synthetic planar face pose estimation with labelled correspondences and ambiguity rejection.
