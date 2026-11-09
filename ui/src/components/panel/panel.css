@@ -1654,11 +1654,11 @@
   background: #192334;
   color: #e7edf7;
   font-family: inherit;
-  font-size:12px
+  font-size:12px;
 }
 .impact-workspace button {
   font: inherit;
-  cursor:pointer
+  cursor:pointer;
 }
 .impact-workspace__sidebar {
   display: flex;
@@ -1667,19 +1667,19 @@
   min-width: 0;
   background: #253146;
   border-right: 1px solid #47546b;
-  padding:12px 9px
+  padding:12px 9px;
 }
 .impact-workspace__brand {
   font-weight: 800;
   font-size: 14px;
   letter-spacing: 0.06em;
-  padding:5px 2px 19px
+  padding:5px 2px 19px;
 }
 .impact-workspace__brand span {
   display: block;
   color: #8ed8f2;
   font-size: 10px;
-  letter-spacing:0.16em
+  letter-spacing:0.16em;
 }
 .impact-workspace__sidebar-title {
   display: flex;
@@ -1690,7 +1690,7 @@
   color: #b9d8f2;
   font-weight: 700;
   font-size: 10px;
-  letter-spacing:0.08em
+  letter-spacing:0.08em;
 }
 .impact-workspace__session, .impact-workspace__sidebar-link {
   border: 1px solid #52617a;
@@ -1699,26 +1699,26 @@
   text-align: left;
   padding: 11px 9px;
   font-weight: 700;
-  font-size:11px
+  font-size:11px;
 }
 .impact-workspace__session {
   display: flex;
-  justify-content:space-between
+  justify-content:space-between;
 }
 .impact-workspace__sidebar-link:hover, .impact-workspace__session:hover {
-  background:#3b5373
+  background:#3b5373;
 }
 .impact-workspace__sidebar-note {
   color: #aab7c9;
   font-size: 11px;
   line-height: 1.5;
-  padding:5px
+  padding:5px;
 }
 .impact-workspace__content {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  min-width:0
+  min-width:0;
 }
 .impact-workspace__topbar {
   min-height: 40px;
@@ -1728,13 +1728,13 @@
   gap: 12px;
   background: #303d55;
   border-bottom: 1px solid #5d6c85;
-  padding:0 13px
+  padding:0 13px;
 }
 .impact-workspace__topbar nav {
   display: flex;
   gap: 2px;
   align-items: center;
-  overflow-x:auto
+  overflow-x:auto;
 }
 .impact-workspace__topbar button, .impact-workspace__active {
   border: 0;
@@ -1744,29 +1744,29 @@
   white-space: nowrap;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing:0.05em
+  letter-spacing:0.05em;
 }
 .impact-workspace__active {
   background: #536b91;
-  color:white
+  color:white;
 }
 .impact-workspace__topbar button:hover {
-  background:#455875
+  background:#455875;
 }
 .impact-workspace__connection {
   font-size: 10px;
   color: #92d3df;
-  white-space:nowrap
+  white-space:nowrap;
 }
 .impact-workspace__tiles {
   display: grid;
-  grid-template-columns: repeat(3,minmax(0,1fr));
-  grid-template-rows: repeat(2,minmax(260px,1fr));
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  grid-template-rows: repeat(2, minmax(260px,1fr));
   gap: 5px;
   padding: 6px;
   flex: 1;
   min-height: 0;
-  overflow:auto
+  overflow:auto;
 }
 .impact-workspace__tile {
   position: relative;
@@ -1776,7 +1776,7 @@
   min-height: 0;
   overflow: auto;
   border: 1px solid #506685;
-  background:linear-gradient(145deg,#26374e,#1a283b)
+  background:linear-gradient(145deg, #26374e, #1a283b);
 }
 .impact-workspace__tile-heading {
   background: #506b93;
@@ -1784,37 +1784,37 @@
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  padding:6px 9px
+  padding:6px 9px;
 }
 .impact-workspace__tile-subtitle {
   font-size: 10px;
   color: #9cb8d6;
-  padding:8px 10px
+  padding:8px 10px;
 }
 .impact-workspace__face {
   padding: 0 8px 8px;
   min-height: 0;
   overflow: auto;
   scrollbar-width: thin;
-  scrollbar-color:#7295b8 #1a283b
+  scrollbar-color:#7295b8 #1a283b;
 }
 .impact-workspace__face label, .impact-workspace__face p {
-  font-size:11px
+  font-size:11px;
 }
 .impact-workspace__face section {
   background: #1a283b !important;
   border-color: #465b78 !important;
-  padding:8px!important
+  padding:8px!important;
 }
 .impact-workspace__face h3 {
-  font-size:12px
+  font-size:12px;
 }
 .impact-workspace__face select, .impact-workspace__face button {
   background: #354c6b;
   color: #fff;
   border: 1px solid #6982a5;
   padding: 5px;
-  border-radius:3px
+  border-radius:3px;
 }
 .impact-workspace__empty {
   display: flex;
@@ -1825,7 +1825,7 @@
   gap: 12px;
   color: #a5b8cd;
   text-align: center;
-  padding:15px
+  padding:15px;
 }
 .impact-workspace__empty button {
   border: 1px solid #6c88ac;
@@ -1833,16 +1833,16 @@
   color: #eaf4ff;
   padding: 8px 12px;
   font-size: 10px;
-  font-weight:700
+  font-weight:700;
 }
 .impact-workspace__crosshair {
   font-size: 64px;
   font-weight: 200;
-  color:#577da0
+  color:#577da0;
 }
 .impact-workspace__play {
   font-size: 55px;
-  color:#7a9cbd
+  color:#7a9cbd;
 }
 .impact-workspace__distribution {
   display: flex;
@@ -1853,20 +1853,20 @@
   flex-direction: column;
   gap: 8px;
   color: #9fb4cd;
-  font-size:11px
+  font-size:11px;
 }
 .impact-workspace__rings {
   width: min(75%,250px);
   aspect-ratio: 1.5;
-  background: repeating-radial-gradient(ellipse at center,transparent 0 22px,#5a758b 23px 24px,transparent 25px 45px),linear-gradient(90deg,transparent calc(50% - 0.5px),#62839a 50%,transparent calc(50% + 0.5px));
-  border:1px solid #51687c
+  background: repeating-radial-gradient(ellipse at center, transparent 0 22px, #5a758b 23px 24px, transparent 25px 45px), linear-gradient(90deg, transparent calc(50% - 0.5px), #62839a 50%, transparent calc(50% + 0.5px));
+  border:1px solid #51687c;
 }
 .impact-workspace__metrics {
   display: grid;
-  grid-template-columns: repeat(8,minmax(0,1fr));
+  grid-template-columns: repeat(8, minmax(0,1fr));
   background: #34435b;
   border-top: 1px solid #6a7d99;
-  min-height:83px
+  min-height:83px;
 }
 .impact-workspace__metric {
   display: flex;
@@ -1876,22 +1876,22 @@
   gap: 3px;
   min-width: 0;
   border-right: 1px solid #55647a;
-  padding:8px
+  padding:8px;
 }
 .impact-workspace__metric span {
   font-size: 9px;
   font-weight: 800;
-  color:#79c5d4
+  color:#79c5d4;
 }
 .impact-workspace__metric strong {
   font-size: 21px;
   line-height: 1.1;
   color: #f2f5fb;
-  font-variant-numeric:tabular-nums
+  font-variant-numeric:tabular-nums;
 }
 .impact-workspace__metric small {
   font-size: 9px;
-  color:#aab9ca
+  color:#aab9ca;
 }
 .impact-workspace__return {
   position: absolute;
@@ -1905,35 +1905,35 @@
   border-radius: 3px;
   font-size: 10px;
   font-weight: 800;
-  cursor:pointer
+  cursor:pointer;
 }
 @media(max-width:1100px) {
 .impact-workspace {
-    grid-template-columns:145px minmax(0,1fr)
+    grid-template-columns:145px minmax(0,1fr);
   }
 .impact-workspace__tiles {
-    grid-template-columns: repeat(2,minmax(0,1fr));
-    grid-template-rows:none
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    grid-template-rows:none;
   }
 .impact-workspace__metrics {
-    grid-template-columns:repeat(4,minmax(0,1fr))
+    grid-template-columns:repeat(4, minmax(0,1fr));
   }
 }
 @media(max-width:650px) {
 .impact-workspace {
-    grid-template-columns:minmax(0,1fr)
+    grid-template-columns:minmax(0,1fr);
   }
 .impact-workspace__sidebar {
-    display:none
+    display:none;
   }
 .impact-workspace__tiles {
-    grid-template-columns:minmax(0,1fr)
+    grid-template-columns:minmax(0,1fr);
   }
 .impact-workspace__topbar {
     flex-wrap: wrap;
-    padding:5px
+    padding:5px;
   }
 .impact-workspace__metrics {
-    grid-template-columns:repeat(2,minmax(0,1fr))
+    grid-template-columns:repeat(2, minmax(0,1fr));
   }
 }
