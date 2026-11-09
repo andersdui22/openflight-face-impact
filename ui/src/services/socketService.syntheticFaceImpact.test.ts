@@ -71,7 +71,10 @@ describe('synthetic Socket.IO client integration (mock transport)', () => {
   it('rejects invalid, mismatched and timed-out backend acknowledgements', async () => {
     socketService.connect();
     transport.socket.connected = true;
-    for (const response of [{ ...validResult, case_id: 'heel-low' }, { ...validResult, result: { status: 'ok' } }]) {
+    for (const response of [
+      { ...validResult, case_id: 'heel-low' },
+      { ...validResult, result: { status: 'ok' } },
+    ]) {
       const pending = socketService.requestSyntheticFaceImpact('toe-high');
       const call = transport.socket.emit.mock.calls.at(-1);
       (call?.[2] as Ack)(null, response);
