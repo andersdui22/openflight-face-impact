@@ -2,6 +2,13 @@
 
 Current snapshot: 2026-11-09. GitHub is authoritative. Start each session with a read-only audit.
 
+## Gate 30 continuation point — 2026-11-09
+
+- Project Law V1. Anders approved synthetic planar face pose estimation with labelled correspondences and ambiguity rejection.
+- Branch `gate30/synthetic-face-landmark-pose` starts from Gate 29 `9e924d5874f00f51792dddf620624f49a6587d62`. Draft PR #29 recorded seven successful workflows.
+- [Gate 30 evidence](GATE30_SYNTHETIC_FACE_POSE.md) describes pose conventions, known metric tests and rejection criteria. [Draft PR #30](https://github.com/andersdui22/openflight-face-impact/pull/30) records the final SHA and CI.
+- Gate 26 physical testing remains deferred. Physical landmark detection and end-to-end contact integration remain open. A new gate requires explicit approval.
+
 ## Gate 29 continuation point — 2026-11-09
 
 - Project Law V1. Anders approved offline synthetic ball centre estimation from calibrated silhouette rays and an explicit radius.
