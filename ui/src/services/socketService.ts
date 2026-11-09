@@ -1,5 +1,8 @@
 import { io, type Socket } from 'socket.io-client';
-import { isSyntheticFaceImpactResponse, type SyntheticFaceImpactResponse } from '../types/syntheticFaceImpact';
+import {
+  isSyntheticFaceImpactResponse,
+  type SyntheticFaceImpactResponse,
+} from '../types/syntheticFaceImpact';
 import { useSystemStore } from '../stores/useSystemStore';
 import { useShotStore } from '../stores/useShotStore';
 import { useCameraStore, type CameraCaptureSettings } from '../stores/useCameraStore';
