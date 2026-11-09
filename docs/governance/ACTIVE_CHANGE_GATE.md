@@ -1,16 +1,16 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 20
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 21
 
-Title: Synthetic Python-to-React Face Impact result contract and selectable fixtures
-State: ACTIVE — user explicitly approved Gate 20 (2026-11-09).
+Title: Synthetic Face Impact request/response over existing Flask-SocketIO channel
+State: ACTIVE — explicitly approved by user (2026-11-09).
 Project Law: V1 unchanged.
-Working branch: `gate20/synthetic-impact-contract`.
-Base: Gate 19 `70daacd6dc72a9e86f2e952b0d584055ea49b45a`, six same-SHA successful workflows; draft PR #19 unmerged.
+Working branch: `gate21/synthetic-socket-bridge`.
+Base: Gate 20 `ca4e5ebe6ba872ed30383f20bc3fe2c7ef3c6fe2`, all six workflows passed on same SHA; draft PR #20 unmerged.
 
 ## Authorized scope
-Define a deterministic JSON-shaped shared synthetic Face Impact result contract using the existing Gate 18 Python pipeline output. Verify fixture parity against actual Python calculation and consume the same fixtures in the original React/Electron diagnostic panel, with selectable success/rejection scenarios. Preserve the existing renderer and original UI. Tests must ensure the renderer does not fabricate contact coordinates for rejected results.
+Reuse the existing Python Flask-SocketIO server and React socket.io-client connection. Add a narrowly scoped, explicitly synthetic request/response event that runs Gate 18 `calculate_synthetic_face_impact` on bounded, server-defined deterministic geometry cases. Return versioned structured results and finite face polygon in millimetres; reject unknown case identifiers without invented measurements. React must request and display only server-returned results, with honest disconnected/error states, and no second socket connection. Test both backend and UI behavior.
 
 ## Acceptance
-Python fixture parity, React scenario tests, no new measurement solver in UI, six successful workflows on identical Gate 20 SHA.
+Automated tests for known success/rejection, unknown case, schema, no hardware access, UI error behavior, and all six same-SHA CI workflows. Preserve original OpenFlight shell and existing socket behavior.
 
 ## Exclusions
-No runtime backend API or live camera connection, real measurements, physical tests, ConnectorNext, MLM2PRO, radar, merge, release or Golden baseline.
+No ELP camera acquisition, live measurements, physical testing, radar, ConnectorNext, unrelated server changes, merge, release or Golden baseline.
