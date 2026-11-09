@@ -201,3 +201,8 @@ User explicitly approved Gate 16 ("Godkendt"). Branch `gate16/synthetic-finite-f
 ## Gate 17 — synthetic polygonal face footprint (2026-11-09)
 
 Explicit user approval ("Godkendt"). Branch `gate17/synthetic-face-polygon` from Gate 16 SHA `8915eb7f418b1eebf08e2c92a56e87edabee5ba7`, six same-SHA CI successes, draft PR #16 unmerged. Added finite simple polygon boundary in local face millimetres, including asymmetric and concave shapes, inclusive edges and corners, invalid/self-intersecting geometry rejection; reuses Gate 15 tangent calculation and Gate 14 face frame. Synthetic only, no actual clubhead asset, measured impact, physical camera, merge, release or Golden baseline. Same-SHA CI pending.
+
+
+## Gate 18 — integrated synthetic Face Impact pipeline (2026-11-09)
+
+Explicit user approval ("Godkendt"). Branch `gate18/synthetic-impact-pipeline` from Gate 17 SHA `bb4b6338edbdb1c3135db5d4e01d2b7f38f81dbc`, six same-SHA CI successes; draft PR #17 unmerged. Added `calculate_synthetic_face_impact` composing existing Gate 17 polygon containment and Gate 15 sphere tangency, returning either signed X/Y in mm with heel/toe/high/low labels, or structured outside-face/no-tangency/invalid-geometry rejection without partial coordinates. Synthetic-only known ball/face geometry; no real camera observations, actual pose accuracy, physical impact, merge, release or Golden baseline. Gate 18 exact-SHA CI pending.

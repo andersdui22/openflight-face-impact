@@ -1,0 +1,85 @@
+"""Gate 18: synthetic Face Impact pipeline success and rejection tests."""
+
+import numpy as np
+import pytest
+
+from openflight.camera.synthetic_face_frame import SyntheticFaceFrame
+from openflight.camera.synthetic_face_polygon import SyntheticFacePolygon
+from openflight.camera.synthetic_impact_pipeline import (
+    SyntheticImpactStatus,
+    calculate_synthetic_face_impact,
+)
+from openflight.camera.synthetic_mesh_pose import SyntheticPoseCandidate
+
+
+FRAME = SyntheticFaceFrame(
+    np.zeros(3), np.array([1., 0., 0.]),
+    np.array([0., 1., 0.]), np.array([0., 0., 1.])
+)
+POSE = SyntheticPoseCandidate(np.eye(3), np.zeros(3))
+POLYGON = SyntheticFacePolygon(np.array([
+    [-50., -25.], [50., -25.], [40., 25.], [-40., 25.]
+]))
+
+
+def impact(center, radius=21., frame=FRAME, pose=POSE, polygon=POLYGON):
+    return calculate_synthetic_face_impact(
+        np.asarray(center, dtype=float), radius, frame, pose, polygon
+    )
+
+
+@pytest.mark.parametrize(("center", "x", "y", "horizontal", "vertical"), [
+    ([0., 0., 21.], 0., 0., "center", "center"),
+    ([12., 5., 21.], 12., 5., "toe", "high"),
+    ([-12., -5., 21.], -12., -5., "heel", "low"),
+])
+def test_valid_contact_result(center, x, y, horizontal, vertical):
+    result = impact(center)
+    assert result.status is SyntheticImpactStatus.OK
+    assert result.x_mm == x
+    assert result.y_mm == y
+    assert result.horizontal_region == horizontal
+    assert result.vertical_region == vertical
+    assert result.rejection_reason is None
+
+
+def test_rotated_translated_pose_result():
+    rotation = np.array([
+        [0., 0., 1.], [0., 1., 0.], [-1., 0., 0.]
+    ])
+    pose = SyntheticPoseCandidate(rotation, np.array([100., 50., 0.]))
+    result = impact([121., 54., 8.], pose=pose)
+    assert result.status is SyntheticImpactStatus.OK
+    assert result.x_mm == pytest.approx(-8.)
+    assert result.y_mm == pytest.approx(4.)
+
+
+def test_outside_polygon_returns_explicit_rejection():
+    result = impact([49., 25., 21.])
+    assert result.status is SyntheticImpactStatus.OUTSIDE_FACE
+    assert result.x_mm is None and result.y_mm is None
+    assert result.horizontal_region is None
+    assert result.rejection_reason is not None
+
+
+@pytest.mark.parametrize("z", [20., 22., -21.])
+def test_non_tangency_returns_explicit_rejection(z):
+    result = impact([0., 0., z])
+    assert result.status is SyntheticImpactStatus.NO_TANGENCY
+    assert result.x_mm is None
+    assert result.vertical_region is None
+
+
+def test_invalid_radius_returns_invalid_geometry():
+    result = impact([0., 0., 21.], radius=-1.)
+    assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert result.x_mm is None
+
+
+def test_invalid_polygon_returns_invalid_geometry():
+    polygon = SyntheticFacePolygon(np.array([
+        [0., 0.], [1., 1.], [2., 2.]
+    ]))
+    result = impact([0., 0., 21.], polygon=polygon)
+    assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert result.y_mm is None
