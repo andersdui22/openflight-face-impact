@@ -1,18 +1,18 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 28
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 29
 
-Title: Optical rays from calibrated synthetic ball and face pixels
-State: Approved by Anders on 2026-11-09. Closeout requires same-SHA CI in draft PR #28.
+Title: Synthetic ball 3D position from angular silhouette size
+State: Approved by Anders on 2026-11-09. Closeout requires same-SHA CI in draft PR #29.
 Project Law: V1.
-Branch: `gate28/calibrated-optical-rays`.
-Base: Gate 27 `3fde3dfa53dd8fb40683ebf694abcbb4a5aebc20` (seven workflows successful).
+Branch: `gate29/synthetic-ball-silhouette-range`.
+Base: Gate 28 `60a4232463aed9352cfe7a631394ef6ff26a166f` (seven workflows successful).
 
 ## Scope and acceptance
 
-Follow [Gate 28 calibrated optical rays](GATE28_CALIBRATED_RAYS.md).
-Reuse the offline checkerboard result and the existing OpenCV camera extra.
-Allow an offline ray helper, synthetic tests and governance documentation.
-Recover known optical directions in input order, reject invalid points
-and mismatched dimensions, and verify GitHub CI on the final commit.
+Follow [Gate 29 synthetic ball range](GATE29_SYNTHETIC_BALL_RANGE.md).
+Use the existing angular-size relation and Gate 28 optical rays. Allow an
+offline sphere centre estimate, focused synthetic tests and governance
+documentation. Recover known centres and reject weak or inconsistent rim
+observations. Verify final commit CI.
 
-Stop for new dependencies, unlicensed source or assets, physical capture,
-or expansion into detection, 3D pose, contact or runtime integration.
+Stop for physical capture, hardware evidence, new dependencies or expansion
+into detection, clubface pose, contact, calibration or runtime integration.
