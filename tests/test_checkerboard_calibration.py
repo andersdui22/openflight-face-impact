@@ -4,6 +4,7 @@ import cv2 as cv
 import numpy as np
 import pytest
 
+from openflight.camera.calibrated_rays import calibrated_pixel_rays
 from openflight.camera.checkerboard_calibration import Checkerboard, calibrate_checkerboard
 
 BOARD = Checkerboard(8, 6, 24.0)
@@ -102,3 +103,13 @@ def test_rejects_frontoparallel_fit_views(render_board, board_views):
     ]
     with pytest.raises(ValueError, match="more variation|invalid camera parameters"):
         calibrate_checkerboard(BOARD, flat, board_views[10:], max_validation_rms_px=0.6)
+
+
+def test_calibration_to_synthetic_ball_and_face_rays(board_views):
+    fit = calibrate_checkerboard(BOARD, board_views[:10], board_views[10:], max_validation_rms_px=0.6)
+    # Known optical directions for a synthetic ball centre and two face points.
+    scene = np.array([[-0.42, 0.17, 1.0], [0.32, -0.21, 1.0], [0.47, 0.23, 1.0]])
+    pixels, _ = cv.projectPoints(scene, np.zeros(3), np.zeros(3), MATRIX, DISTORTION)
+    rays = calibrated_pixel_rays(fit, pixels.reshape(-1, 2), image_size=SIZE)
+    expected = scene / np.linalg.norm(scene, axis=1, keepdims=True)
+    np.testing.assert_allclose(rays, expected, atol=0.021)
