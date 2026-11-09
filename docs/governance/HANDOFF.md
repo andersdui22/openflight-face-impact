@@ -191,3 +191,8 @@ Explicitly approved by user ("Godkendt") after proposal for heel/toe, vertical a
 ## Gate 15 — synthetic sphere-plane Face Impact foundation (2026-11-08)
 
 Explicit user approval ("Godkendt") for Gate 15. Branch `gate15/synthetic-ball-face-contact` starts from Gate 14 SHA `eb0ab8e28749758db06274a4214eaec1748bb3df` (six successful CI workflows, draft PR #14 unmerged). Added a strictly synthetic ball-to-infinite-planar-face tangency calculation, signed local mm coordinates and heel/toe/high/low labels. Requires explicitly provided ball radius and known rigid face pose; rejects gaps, penetration, wrong-side contact and invalid geometry. No actual clubhead finite face, curvature, measured ball position, physical impact, camera accuracy or release claim. Same-SHA CI pending. All PRs remain draft and unmerged.
+
+
+## Gate 16 — finite synthetic clubface bounds (2026-11-09)
+
+User explicitly approved Gate 16 ("Godkendt"). Branch `gate16/synthetic-finite-face-bounds` from Gate 15 SHA `2bb7039112f4089170df916410a565e5900bedff` with six successful same-SHA CI workflows; draft PR #15 unmerged. Adds an explicit positive finite rectangular face width and height (mm), validates Gate 15 tangent point inside inclusive centered edges/corners, rejects outside contact without expanding boundaries by tangency tolerance. Tests cover center, all edges/corners, outside by 0.001 mm, invalid dimensions, rotated face and Gate 15 non-tangency. This is synthetic-only; no real clubhead geometry or camera accuracy. No Golden physical baseline, merge or release. Exact Gate 16 CI pending.
