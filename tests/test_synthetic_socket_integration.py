@@ -47,11 +47,9 @@ def test_synthetic_ack_through_socketio_dispatch(socket_client, case_id, status,
     {"case_id": "not-registered"}, {"case_id": None}, {"case_id": []}, {},
 ])
 def test_invalid_case_ack_contains_no_measurement(socket_client, case_payload):
-    acknowledgements = socket_client.emit(
+    payload = socket_client.emit(
         "get_synthetic_face_impact", case_payload, callback=True,
     )
-    assert len(acknowledgements) == 1
-    payload = acknowledgements[0]
     assert payload["ok"] is False
     assert "result" not in payload
     assert "polygon_face_mm" not in payload
