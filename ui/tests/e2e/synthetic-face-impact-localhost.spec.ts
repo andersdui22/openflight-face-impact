@@ -16,7 +16,7 @@ async function openSyntheticDebug(page: import('@playwright/test').Page) {
 
 test('real React Socket.IO client receives synthetic successes and rejections from Python', async ({ page }) => {
   await openSyntheticDebug(page);
-  const preview = page.getByLabel('Synthetic Face Impact');
+  const preview = page.locator('section[aria-label="Synthetic Face Impact"]');
   const cases = page.getByLabel('Synthetic Face Impact test case');
 
   await expect(preview.getByText('X: 12.0 mm')).toBeVisible();
@@ -37,7 +37,7 @@ test('real React Socket.IO client receives synthetic successes and rejections fr
 
 test('real React client reports offline errors and recovers after reconnection', async ({ page, context }) => {
   await openSyntheticDebug(page);
-  const preview = page.getByLabel('Synthetic Face Impact');
+  const preview = page.locator('section[aria-label="Synthetic Face Impact"]');
   await expect(preview.getByText('X: 12.0 mm')).toBeVisible();
 
   await context.setOffline(true);
