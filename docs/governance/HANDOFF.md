@@ -1,7 +1,16 @@
 # Active handoff
 
-Snapshot: 2026-11-08 (updated after remote PR/CI verification). GitHub, once created, is authoritative for current
-repository state. Start every successor session with a read-only audit.
+Current snapshot: 2026-11-09. GitHub is authoritative. Start each session with a read-only audit.
+
+## Current continuation point
+
+- Repository: `andersdui22/openflight-face-impact`. Main: `a3ab081a8abff71fd344d4fd782412d624b99f3f`.
+- Project Law V1. Gate 24 implementation is complete. Final closeout is effective after same-SHA CI verification on this documentation commit, recorded on [draft PR #24](https://github.com/andersdui22/openflight-face-impact/pull/24).
+- Branch `gate24/react-python-localhost-e2e`, based on Gate 23 `8555d933e781458be5dfae205d1545a9d0369750`. Previously verified implementation HEAD `372aa1707fefba4b158ebeff5c30916f653c5073` passed six required workflows plus Anti-slop Audit. PRs #1–#24 were open, draft and unmerged at audit.
+- Gate 24 verifies actual React-to-Python Socket.IO over localhost for synthetic accepted and rejected results, offline error and reconnection. Windows desktop lifecycle and physical measurements remain unverified by these tests. No physical Golden baseline.
+- Next: read-only Gate 25 planning for Windows runtime and camera test preparation. Implementation requires separate explicit approval.
+
+The sections below are historical snapshots.
 
 ## Authority and state
 
@@ -235,4 +244,4 @@ Explicit approval for synthetic-only localhost network tests. Branch `gate23/loc
 
 ## Gate 24 — actual React browser-to-Python localhost (2026-11-09)
 
-User expressly approved browser/Socket.IO integration. Branch `gate24/react-python-localhost-e2e` stacked on Gate 23 `8555d933e781458be5dfae205d1545a9d0369750` (six successful same-SHA workflows, PR #23 draft/unmerged). Reuses existing Playwright webServer configuration launching the Python backend in mock mode at 127.0.0.1:8080 and Vite React at 127.0.0.1:5173. New `ui/tests/e2e/synthetic-face-impact-localhost.spec.ts` drives the real debug panel and real browser Socket.IO client for accepted and rejected synthetic Face Impact, offline error and recovery. No browser transport mocks, new production code, camera or physical hardware. CI pending. Browser test is not Electron packaging or Windows startup proof. No merge, release or Golden baseline.
+User expressly approved browser/Socket.IO integration. Branch `gate24/react-python-localhost-e2e` stacked on Gate 23 `8555d933e781458be5dfae205d1545a9d0369750` (six successful same-SHA workflows, PR #23 draft/unmerged). Reuses existing Playwright webServer configuration launching the Python backend in mock mode at 127.0.0.1:8080 and Vite React at 127.0.0.1:5173. New `ui/tests/e2e/synthetic-face-impact-localhost.spec.ts` drives the real debug panel and real browser Socket.IO client for accepted and rejected synthetic Face Impact, offline error and recovery. No browser transport mocks, new production code, camera or physical hardware. See the current continuation point above for CI evidence. Browser test is not Electron packaging or Windows startup proof. No merge, release or Golden baseline.
