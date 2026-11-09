@@ -51,12 +51,7 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
   ];
   const outline = validPolygon ? polygon.map((point) => toScreen(point).join(',')).join(' ') : '';
   const impactPoint = validImpact ? toScreen([result.x_mm, result.y_mm]) : null;
-  const rejection =
-    result.status !== 'ok'
-      ? reasons[result.status]
-      : validImpact
-        ? null
-        : 'Invalid impact coordinates';
+  const rejection = result.status !== 'ok' ? reasons[result.status] : validImpact ? null : 'Invalid impact coordinates';
 
   return (
     <section style={surface} aria-label="Synthetic Face Impact">
@@ -72,12 +67,7 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
       >
         <rect x="0" y="0" width="320" height="170" rx="4" fill="var(--color-bg)" />
         {validPolygon && (
-          <polygon
-            points={outline}
-            fill="var(--color-surface)"
-            stroke="var(--color-text-muted)"
-            strokeWidth="2"
-          />
+          <polygon points={outline} fill="var(--color-surface)" stroke="var(--color-text-muted)" strokeWidth="2" />
         )}
         {impactPoint && (
           <circle
@@ -99,8 +89,8 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
       </svg>
       {validImpact && result.status === 'ok' && (
         <p style={{ margin: 'var(--space-sm) 0 0' }} aria-live="polite">
-          X: {result.x_mm.toFixed(1)} mm · Y: {result.y_mm.toFixed(1)} mm ·{' '}
-          {result.horizontal_region} / {result.vertical_region}
+          X: {result.x_mm.toFixed(1)} mm · Y: {result.y_mm.toFixed(1)} mm · {result.horizontal_region} /{' '}
+          {result.vertical_region}
         </p>
       )}
       {rejection && (
