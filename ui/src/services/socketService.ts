@@ -1,8 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
-import {
-  isSyntheticFaceImpactResponse,
-  type SyntheticFaceImpactResponse,
-} from '../types/syntheticFaceImpact';
+import { isSyntheticFaceImpactResponse, type SyntheticFaceImpactResponse } from '../types/syntheticFaceImpact';
 import { useSystemStore } from '../stores/useSystemStore';
 import { useShotStore } from '../stores/useShotStore';
 import { useCameraStore, type CameraCaptureSettings } from '../stores/useCameraStore';
@@ -204,10 +201,9 @@ class SocketService {
         reject(new Error('OpenFlight backend is disconnected'));
         return;
       }
-      this.socket.timeout(5000).emit(
-        'get_synthetic_face_impact',
-        { case_id: caseId },
-        (error: Error | null, response: unknown) => {
+      this.socket
+        .timeout(5000)
+        .emit('get_synthetic_face_impact', { case_id: caseId }, (error: Error | null, response: unknown) => {
           if (error || !isSyntheticFaceImpactResponse(response)) {
             reject(new Error('Synthetic Face Impact response unavailable or invalid'));
             return;
@@ -217,8 +213,7 @@ class SocketService {
             return;
           }
           resolve(response);
-        }
-      );
+        });
     });
   }
 
