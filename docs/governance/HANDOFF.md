@@ -2,7 +2,14 @@
 
 Current snapshot: 2026-11-09. GitHub is authoritative. Start each session with a read-only audit.
 
-## Current continuation point
+## Gate 25 continuation point — 2026-11-09
+
+- Project Law V1. Anders explicitly approved the Windows desktop smoke and camera test preparation.
+- Branch `gate25/windows-desktop-runtime` is based on Gate 24 `e022c2f2348e80d29e4ff3e627669c3dcfa8c645`, with six required successful workflows. PRs #1–#24 were open drafts at startup audit.
+- Scope, Windows setup and automated acceptance are in [Gate 25 Windows desktop runtime](GATE25_WINDOWS_DESKTOP_RUNTIME.md). [Draft PR #25](https://github.com/andersdui22/openflight-face-impact/pull/25) records the verified head and CI.
+- Physical camera evidence and physical Golden baseline are outstanding. The next physical validation procedure requires separate explicit approval.
+
+## Gate 24 continuation point
 
 - Repository: `andersdui22/openflight-face-impact`. Main: `a3ab081a8abff71fd344d4fd782412d624b99f3f`.
 - Project Law V1. Gate 24 implementation is complete. Final closeout is effective after same-SHA CI verification on this documentation commit, recorded on [draft PR #24](https://github.com/andersdui22/openflight-face-impact/pull/24).
