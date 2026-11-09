@@ -90,8 +90,12 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
             data-testid="synthetic-impact-marker"
           />
         )}
-        <text x="10" y="162" fontSize="11" fill="var(--color-text-muted)">HEEL</text>
-        <text x="280" y="162" fontSize="11" fill="var(--color-text-muted)">TOE</text>
+        <text x="10" y="162" fontSize="11" fill="var(--color-text-muted)">
+          HEEL
+        </text>
+        <text x="280" y="162" fontSize="11" fill="var(--color-text-muted)">
+          TOE
+        </text>
       </svg>
       {validImpact && result.status === 'ok' && (
         <p style={{ margin: 'var(--space-sm) 0 0' }} aria-live="polite">
