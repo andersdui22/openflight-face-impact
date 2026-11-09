@@ -2,6 +2,13 @@
 
 Current snapshot: 2026-11-09. GitHub is authoritative. Start each session with a read-only audit.
 
+## Gate 26 continuation point — 2026-11-09
+
+- Project Law V1. Anders approved the physical ELP operator procedure. Scope and commands are in [Gate 26 ELP operator test](GATE26_ELP_OPERATOR_TEST.md).
+- Branch `gate26/elp-operator-test` is based on Gate 25 `4bcb6d311949aa8c3763c957538b419b61f67200`, with eight successful workflows. PR #25 remains an open draft.
+- [Draft PR #26](https://github.com/andersdui22/openflight-face-impact/pull/26) records the SHA and CI. Verify them before using the runbook.
+- Await the user-operated Windows ELP test. No physical evidence or Golden baseline has been collected.
+
 ## Gate 25 continuation point — 2026-11-09
 
 - Project Law V1. Anders explicitly approved the Windows desktop smoke and camera test preparation.
