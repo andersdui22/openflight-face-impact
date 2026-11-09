@@ -45,12 +45,12 @@ def test_synthetic_ack_through_socketio_dispatch(socket_client, case_id, status,
         assert (payload["result"]["x_mm"], payload["result"]["y_mm"]) == coordinates
 
 
-@pytest.mark.parametrize("request", [
+@pytest.mark.parametrize("case_payload", [
     {"case_id": "not-registered"}, {"case_id": None}, {"case_id": []}, {},
 ])
-def test_invalid_case_ack_contains_no_measurement(socket_client, request):
+def test_invalid_case_ack_contains_no_measurement(socket_client, case_payload):
     acknowledgements = socket_client.emit(
-        "get_synthetic_face_impact", request, callback=True,
+        "get_synthetic_face_impact", case_payload, callback=True,
     )
     assert len(acknowledgements) == 1
     payload = acknowledgements[0]
