@@ -1,21 +1,16 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 31
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 32
 
-Title: Synthetic image observation to Face Impact contact
-State: Approved by Anders on 2026-11-09. Closeout requires same-SHA CI in a draft PR.
-Project Law: V1.
-Branch: `gate31/synthetic-observed-impact`.
-Base: Gate 30 `3f91831bd62bd208b131559aa19cac56c41f85f5` (seven workflows successful).
+Title: Reference-inspired Face Impact dashboard UI
+State: APPROVED — user explicitly approved "Gate 32 – Dashboard UI 1:1" on 2026-11-09.
+Project Law: V1 unchanged.
+Working branch: `gate32/face-impact-dashboard`.
+Base: Gate 31 `cc6f2099f8bbdf2c0f678063fe07e74d492d1aa8`, seven successful same-SHA workflows, draft PR #31 unmerged.
 
-## Scope and acceptance
+## Authorized scope
+Implement a close visual layout adaptation of the user-provided golf-analysis screenshot in the existing React UI: dark blue-gray compact navigation, left shot/session sidebar, six dashboard tiles, and a lower metrics strip. Use original CSS/SVG only, not copyrighted screenshots or proprietary assets. Reuse the existing FaceImpactView and SyntheticFaceImpactDemo. Show explicit unavailable states for metrics the single ELP camera cannot provide. Preserve the existing Live, Debug, Shots, Camera, Stats, Profiles flows, backend, and socket contracts.
 
-Follow [Gate 31 synthetic observed impact](GATE31_SYNTHETIC_OBSERVED_IMPACT.md).
-Compose existing calibrated rays, ball centre, face pose and finite face
-contact for one supplied synthetic candidate frame. Allow one offline
-orchestration function, independent known-geometry tests and governance
-documentation. Recover signed impact coordinates in millimetres and reject
-non-tangency, outside-face contact and invalid observations without coordinates.
-Verify final commit CI on the draft PR.
+## Acceptance
+Responsive dashboard accessible in the real app; synthetic impact can be requested without misleading physical claims; legacy navigation remains available; automated UI build, lint, tests and browser smoke pass on the final SHA. The screenshot is a layout reference, not permission to invent sensor measurements.
 
-Stop for physical capture, new dependencies, automatic detection, contact
-frame timing, runtime/UI integration or physical accuracy claims. Gate 26
-physical testing remains deferred.
+## Exclusions and stop conditions
+No physical camera testing, new measurement algorithms, backend or protocol changes, new dependencies, Windows packaging, merges, releases, Golden baselines, upstream repository changes or ConnectorNext work. Stop for any required scope expansion. Keep the PR draft and stacked on Gate 31.

@@ -696,3 +696,43 @@ test('tabbing to a menu segmented control shows a real keyboard focus ring, not 
   // The individual button's own outline stays suppressed — no double ring.
   await expect(metricButton).toHaveCSS('outline-style', 'none');
 });
+
+
+test('opens reference-inspired Face Impact dashboard without inventing camera readings', async ({ page }) => {
+  await gotoApp(page);
+  await dismissPicker(page);
+  await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
+  const dashboard = page.getByRole('region', { name: 'Face Impact dashboard' });
+  await expect(dashboard).toBeVisible();
+  await expect(dashboard.locator('.impact-workspace__tile')).toHaveCount(6);
+  await expect(dashboard.locator('.impact-workspace__metric')).toHaveCount(8);
+  await expect(dashboard.getByText('No measured impacts yet')).toBeVisible();
+  await expect(dashboard.getByText('not measured')).toHaveCount(7);
+  await expect(dashboard.getByLabel('Synthetic Face Impact test case')).toBeVisible();
+  // Produce a real browser-rendered screenshot for visual review in the CI artifacts.
+  await page.screenshot({ path: 'test-results/gate32-dashboard.png', fullPage: true });
+  await page.getByRole('button', { name: 'OPEN CLASSIC LIVE VIEW' }).click();
+  await expect(page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' })).toBeVisible();
+});
+
+
+test('keeps Face Impact dashboard accessible at tablet and narrow widths', async ({ page }) => {
+  await gotoApp(page);
+  await dismissPicker(page);
+  await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
+  const dashboard = page.getByRole('region', { name: 'Face Impact dashboard' });
+  for (const width of [800, 390]) {
+    await page.setViewportSize({ width, height: 800 });
+    await expect(dashboard).toBeVisible();
+    await expect(dashboard.locator('.impact-workspace__tile')).toHaveCount(6);
+    await expect(dashboard.locator('.impact-workspace__metric')).toHaveCount(8);
+    await expect(dashboard.getByText('No measured impacts yet')).toBeVisible();
+    await expect(dashboard.getByText('not measured')).toHaveCount(7);
+    await expect(dashboard.getByLabel('Synthetic Face Impact test case')).toBeVisible();
+    await page.screenshot({ path: `test-results/gate32-dashboard-${width}px.png`, fullPage: true });
+    // A narrow viewport hides the sidebar, so top navigation must remain usable.
+    await expect(dashboard.getByRole('button', { name: 'SWING' })).toBeVisible();
+  }
+  await dashboard.getByRole('button', { name: 'SWING' }).click();
+  await expect(page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' })).toBeVisible();
+});
