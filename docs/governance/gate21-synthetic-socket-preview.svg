@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" role="img" aria-label="Illustrative Gate 21 synthetic SocketIO UI concept, not a running application screenshot">
+  <rect width="640" height="380" fill="#101113"/>
+  <rect x="16" y="16" width="608" height="348" rx="8" fill="#1b1d20" stroke="#777"/>
+  <text x="32" y="49" font-size="22" font-family="Arial" fill="#fff">Face Impact — synthetic preview</text>
+  <text x="32" y="78" font-size="15" font-family="Arial" fill="#ccc">Python backend synthetic calculation · Not a camera measurement</text>
+  <text x="32" y="112" font-size="16" font-family="Arial" fill="#fff">Synthetic Face Impact test case</text>
+  <rect x="32" y="121" width="270" height="35" rx="4" fill="#34383d" stroke="#999"/>
+  <text x="45" y="144" font-size="15" font-family="Arial" fill="#fff">Toe / high</text>
+  <rect x="320" y="121" width="274" height="35" rx="4" fill="#39444d" stroke="#bbb"/>
+  <text x="331" y="144" font-size="15" font-family="Arial" fill="#fff">Request synthetic result</text>
+  <polygon points="145,304 510,304 480,176 175,176" fill="#202326" stroke="#ddd" stroke-width="3"/>
+  <circle cx="360" cy="224" r="8" fill="#ffd400" stroke="#fff" stroke-width="2"/>
+  <text x="48" y="319" font-size="14" font-family="Arial" fill="#ddd">HEEL</text>
+  <text x="550" y="319" font-size="14" font-family="Arial" fill="#ddd">TOE</text>
+  <text x="32" y="349" font-size="16" font-family="Arial" fill="#fff">X: 12.0 mm · Y: 5.0 mm · toe / high</text>
+</svg>
