@@ -211,3 +211,8 @@ Explicit user approval ("Godkendt"). Branch `gate18/synthetic-impact-pipeline` f
 ## Gate 19 — synthetic Face Impact UI preview (2026-11-09)
 
 Explicit user approval ("Godkendt"). Branch `gate19/synthetic-face-impact-ui` from Gate 18 SHA `fd96259236cc36b69af369e75416731a6dad8444`, six same-SHA CI successes, draft PR #18 unmerged. Added `ui/src/components/FaceImpactView.tsx` with SVG polygon, synthetic marker, signed X/Y millimetres, region labels and rejection state; wired an explicitly synthetic sample into the existing debug panel without replacing original OpenFlight React/Electron UI. Added server-rendered UI component tests. This is not a live backend feed or measured impact; no physical tests, merge, release or Golden baseline. Exact Gate 19 CI pending.
+
+
+## Gate 20 — synthetic Python-to-React contract (2026-11-09)
+
+User explicitly approved Gate 20 after Gate 19 six-workflow same-SHA success at `70daacd6dc72a9e86f2e952b0d584055ea49b45a`. Branch `gate20/synthetic-impact-contract` stacked on unmerged Gate 19. Gate 20 adds versioned static JSON scenarios `ui/src/data/syntheticFaceImpactCases.json`, Python tests proving the JSON outcomes exactly match `calculate_synthetic_face_impact`, and a React scenario selector inside the original debug panel. The UI displays the backend-shaped results but does not calculate Face Impact or receive a live backend stream. No camera, physical accuracy, merge, release or Golden baseline. Verify Gate 20 remote HEAD and same-SHA CI; this paragraph is a snapshot, not proof of completed checks.
