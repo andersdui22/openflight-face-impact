@@ -9,7 +9,9 @@ async function openSyntheticDebug(page: import('@playwright/test').Page) {
   }
   await expect(page.getByLabel('Server connected')).toBeVisible();
   await page.getByRole('button', { name: 'Debug' }).click();
-  await expect(page.getByLabel('Synthetic Face Impact')).toBeVisible();
+  await expect(page.getByLabel('Synthetic Face Impact test case')).toBeVisible();
+  // The demo can mount before the asynchronous Socket.IO handshake completes.
+  await page.getByRole('button', { name: 'Request synthetic result' }).click();
 }
 
 test('real React Socket.IO client receives synthetic successes and rejections from Python', async ({ page }) => {
