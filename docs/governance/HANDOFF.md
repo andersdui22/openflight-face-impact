@@ -2,6 +2,13 @@
 
 Current snapshot: 2026-11-09. GitHub is authoritative. Start each session with a read-only audit.
 
+## Gate 29 continuation point — 2026-11-09
+
+- Project Law V1. Anders approved offline synthetic ball centre estimation from calibrated silhouette rays and an explicit radius.
+- Branch `gate29/synthetic-ball-silhouette-range` starts from Gate 28 `60a4232463aed9352cfe7a631394ef6ff26a166f`. Draft PR #28 recorded seven successful workflows.
+- [Gate 29 evidence](GATE29_SYNTHETIC_BALL_RANGE.md) describes source reuse, the synthetic range contract and its rejection criteria. [Draft PR #29](https://github.com/andersdui22/openflight-face-impact/pull/29) records the final SHA and CI.
+- Gate 26 physical testing remains deferred. Real edge detection, clubface pose and impact remain unverified. A new gate requires explicit approval.
+
 ## Gate 28 continuation point — 2026-11-09
 
 - Project Law V1. Anders approved offline ray conversion of synthetic ball and clubface observations.
