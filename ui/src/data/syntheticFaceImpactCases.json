@@ -2,32 +2,16 @@
   "schema_version": 1,
   "source": "synthetic_python_pipeline_fixture",
   "polygon_face_mm": [
-    [
-      -50,
-      -25
-    ],
-    [
-      50,
-      -25
-    ],
-    [
-      40,
-      25
-    ],
-    [
-      -40,
-      25
-    ]
+    [-50, -25],
+    [50, -25],
+    [40, 25],
+    [-40, 25]
   ],
   "cases": [
     {
       "id": "toe-high",
       "label": "Toe / high",
-      "ball_center_world_mm": [
-        12,
-        5,
-        21
-      ],
+      "ball_center_world_mm": [12, 5, 21],
       "ball_radius_mm": 21,
       "result": {
         "status": "ok",
@@ -40,11 +24,7 @@
     {
       "id": "heel-low",
       "label": "Heel / low",
-      "ball_center_world_mm": [
-        -12,
-        -5,
-        21
-      ],
+      "ball_center_world_mm": [-12, -5, 21],
       "ball_radius_mm": 21,
       "result": {
         "status": "ok",
@@ -57,11 +37,7 @@
     {
       "id": "outside-face",
       "label": "Outside face",
-      "ball_center_world_mm": [
-        49,
-        25,
-        21
-      ],
+      "ball_center_world_mm": [49, 25, 21],
       "ball_radius_mm": 21,
       "result": {
         "status": "outside_face",
@@ -71,11 +47,7 @@
     {
       "id": "no-tangency",
       "label": "No tangency",
-      "ball_center_world_mm": [
-        0,
-        0,
-        22
-      ],
+      "ball_center_world_mm": [0, 0, 22],
       "ball_radius_mm": 21,
       "result": {
         "status": "no_tangency",
