@@ -34,7 +34,8 @@ const reasons: Record<Exclude<FaceImpactDisplayResult['status'], 'ok'>, string> 
 };
 
 export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
-  const validPolygon = polygon.length >= 3 && polygon.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
+  const validPolygon =
+    polygon.length >= 3 && polygon.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
   const validImpact =
     result.status === 'ok' && Number.isFinite(result.x_mm) && Number.isFinite(result.y_mm);
   const xs = polygon.map(([x]) => x);
@@ -50,9 +51,7 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
     160 + (x - (minX + maxX) / 2) * scale,
     85 - (y - (minY + maxY) / 2) * scale,
   ];
-  const outline = validPolygon
-    ? polygon.map((point) => toScreen(point).join(',')).join(' ')
-    : '';
+  const outline = validPolygon ? polygon.map((point) => toScreen(point).join(',')).join(' ') : '';
   const impactPoint = validImpact ? toScreen([result.x_mm, result.y_mm]) : null;
   const rejection =
     result.status !== 'ok'
@@ -70,7 +69,9 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
       <svg
         viewBox="0 0 320 170"
         role="img"
-        aria-label={rejection ? `No impact: ${rejection}` : 'Synthetic clubface and impact location'}
+        aria-label={
+          rejection ? `No impact: ${rejection}` : 'Synthetic clubface and impact location'
+        }
         style={{ display: 'block', width: '100%', maxHeight: 260 }}
       >
         <rect x="0" y="0" width="320" height="170" rx="4" fill="var(--color-bg)" />
@@ -103,10 +104,7 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
         </p>
       )}
       {rejection && (
-        <p
-          role="status"
-          style={{ color: 'var(--color-warning)', margin: 'var(--space-sm) 0 0' }}
-        >
+        <p role="status" style={{ color: 'var(--color-warning)', margin: 'var(--space-sm) 0 0' }}>
           {rejection}
         </p>
       )}
