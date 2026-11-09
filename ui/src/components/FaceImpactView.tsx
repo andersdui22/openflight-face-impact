@@ -34,13 +34,9 @@ const reasons: Record<Exclude<FaceImpactDisplayResult['status'], 'ok'>, string> 
 };
 
 export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
-  const validPolygon =
-    polygon.length >= 3 &&
-    polygon.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
+  const validPolygon = polygon.length >= 3 && polygon.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
   const validImpact =
-    result.status === 'ok' &&
-    Number.isFinite(result.x_mm) &&
-    Number.isFinite(result.y_mm);
+    result.status === 'ok' && Number.isFinite(result.x_mm) && Number.isFinite(result.y_mm);
   const xs = polygon.map(([x]) => x);
   const ys = polygon.map(([, y]) => y);
   const minX = validPolygon ? Math.min(...xs) : -50;
@@ -107,7 +103,10 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
         </p>
       )}
       {rejection && (
-        <p role="status" style={{ color: 'var(--color-warning)', margin: 'var(--space-sm) 0 0' }}>
+        <p
+          role="status"
+          style={{ color: 'var(--color-warning)', margin: 'var(--space-sm) 0 0' }}
+        >
           {rejection}
         </p>
       )}
