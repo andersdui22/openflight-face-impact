@@ -1667,7 +1667,7 @@
 .impact-workspace__tile{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:auto;border:1px solid #506685;background:linear-gradient(145deg,#26374e,#1a283b)}
 .impact-workspace__tile-heading{background:#506b93;color:#eaf4ff;font-size:11px;font-weight:800;text-transform:uppercase;padding:6px 9px}
 .impact-workspace__tile-subtitle{font-size:10px;color:#9cb8d6;padding:8px 10px}
-.impact-workspace__face{padding:0 8px 8px;min-height:0;overflow:auto}
+.impact-workspace__face{padding:0 8px 8px;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#7295b8 #1a283b}
 .impact-workspace__face label,.impact-workspace__face p{font-size:11px}
 .impact-workspace__face section{background:#1a283b!important;border-color:#465b78!important;padding:8px!important}
 .impact-workspace__face h3{font-size:12px}
