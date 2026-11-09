@@ -1,16 +1,16 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 15
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 16
 
-Title: Synthetic sphere-to-planar-clubface contact geometry
-State: ACTIVE — user explicitly approved "Godkendt" after Gate 15 proposal (2026-11-08).
+Title: Synthetic finite rectangular clubface boundary validation
+State: ACTIVE — user explicitly approved "Godkendt" following Gate 16 proposal (2026-11-09).
 Project Law: V1 unchanged.
-Working branch: `gate15/synthetic-ball-face-contact`.
-Base: Gate 14 `eb0ab8e28749758db06274a4214eaec1748bb3df`, six successful same-SHA workflows; draft PR #14 unmerged.
+Working branch: `gate16/synthetic-finite-face-bounds`.
+Base: Gate 15 `2bb7039112f4089170df916410a565e5900bedff`, six successful same-SHA workflows; draft PR #15 remains unmerged.
 
 ## Authorized scope
-Calculate the synthetic contact point of a sphere with an infinite planar face of explicit outward normal and center. Use Gate 14 local heel/toe and vertical axes to return signed millimetre offsets and a simple direction classification. Require explicit positive ball radius, sphere center and an actual tangent configuration within a numerical tolerance. Reject gaps, interpenetration, wrong-side geometry, invalid frames, unknown radius and ambiguous states. Deterministic synthetic tests for center, heel/toe, high/low, transformed pose, gaps and invalid geometry.
+Define explicit positive finite synthetic face width and height in millimetres, centered on the Gate 14 face frame. Validate the Gate 15 synthetic contact point against finite rectangular face boundaries. Fail closed outside the face, with deterministic tests for center, edges, corners, just-outside positions and invalid dimensions. Reuse the existing synthetic sphere-plane contact logic rather than duplicating it.
 
 ## Acceptance
-No inferred ball radius, actual face dimensions, clubhead shape or physical impact. Report only a unique synthetic tangent point; no extrapolation from nearby but non-contacting states. Keep mm and model convention explicit. Same-SHA CI required.
+Clear inclusive boundary semantics and numerical tolerance; no inferred clubhead dimensions or physical precision. Same-SHA CI must pass.
 
 ## Exclusions
-No real ball detection, motion inference, camera validation, real clubface surface curvature, impact dynamics, physical test, radar, UI, merge, release or Golden baseline.
+No curved face, grooves, actual clubhead mesh, real ball tracking, physical camera or accuracy validation, radar, UI, merge, release or Golden baseline.
