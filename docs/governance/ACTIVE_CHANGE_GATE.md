@@ -1,16 +1,16 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 19
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 20
 
-Title: Synthetic Face Impact visualization in existing OpenFlight React UI
-State: ACTIVE — user explicitly approved "Godkendt" (2026-11-09).
+Title: Synthetic Python-to-React Face Impact result contract and selectable fixtures
+State: ACTIVE — user explicitly approved Gate 20 (2026-11-09).
 Project Law: V1 unchanged.
-Working branch: `gate19/synthetic-face-impact-ui`.
-Base: Gate 18 `fd96259236cc36b69af369e75416731a6dad8444`, six successful same-SHA CI workflows; draft PR #18 unmerged.
+Working branch: `gate20/synthetic-impact-contract`.
+Base: Gate 19 `70daacd6dc72a9e86f2e952b0d584055ea49b45a`, six same-SHA successful workflows; draft PR #19 unmerged.
 
 ## Authorized scope
-Create an accessible, self-contained React Face Impact visual component using explicit synthetic polygon vertices and Gate 18 result-shaped fixture data. Render face outline, impact point, X/Y in millimetres, heel/toe and high/low, and clear rejection messages without plotting a rejected impact. Add component to the existing OpenFlight UI in a visibly synthetic-only diagnostic context, retaining the original React/Electron shell and navigation. Include deterministic component tests.
+Define a deterministic JSON-shaped shared synthetic Face Impact result contract using the existing Gate 18 Python pipeline output. Verify fixture parity against actual Python calculation and consume the same fixtures in the original React/Electron diagnostic panel, with selectable success/rejection scenarios. Preserve the existing renderer and original UI. Tests must ensure the renderer does not fabricate contact coordinates for rejected results.
 
 ## Acceptance
-Synthetic fixture clearly labelled and not presented as a real camera measurement. Preserve existing UI and workflows. Same-SHA CI required.
+Python fixture parity, React scenario tests, no new measurement solver in UI, six successful workflows on identical Gate 20 SHA.
 
 ## Exclusions
-No backend API/wire protocol, live camera observations, physical accuracy, real clubface mesh, production impact stream, radar, merge, release or Golden baseline.
+No runtime backend API or live camera connection, real measurements, physical tests, ConnectorNext, MLM2PRO, radar, merge, release or Golden baseline.
