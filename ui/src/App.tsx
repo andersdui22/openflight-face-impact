@@ -10,6 +10,7 @@ import { useHeroMetricStore } from './stores/useHeroMetricStore';
 import { useCameraReplayController } from './hooks/useCameraReplayController';
 import { socketService } from './services/socketService';
 import { DebugPanel } from './components/DebugPanel';
+import { FaceImpactView } from './components/FaceImpactView';
 import { DisplayMode } from './components/DisplayMode';
 import { SimShotBadges } from './components/SimShotBadges';
 import { ShotProcessingArea } from './components/ShotProcessingArea';
@@ -380,6 +381,21 @@ function AppContent() {
               actions={debugRecordAction}
             />
             <div className="panel__body panel-app__debug">
+              <FaceImpactView
+                polygon={[
+                  [-50, -25],
+                  [50, -25],
+                  [40, 25],
+                  [-40, 25],
+                ]}
+                result={{
+                  status: 'ok',
+                  x_mm: 12,
+                  y_mm: 5,
+                  horizontal_region: 'toe',
+                  vertical_region: 'high',
+                }}
+              />
               <DebugPanel
                 enabled={debugMode}
                 readings={debugReadings}

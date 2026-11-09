@@ -206,3 +206,8 @@ Explicit user approval ("Godkendt"). Branch `gate17/synthetic-face-polygon` from
 ## Gate 18 — integrated synthetic Face Impact pipeline (2026-11-09)
 
 Explicit user approval ("Godkendt"). Branch `gate18/synthetic-impact-pipeline` from Gate 17 SHA `bb4b6338edbdb1c3135db5d4e01d2b7f38f81dbc`, six same-SHA CI successes; draft PR #17 unmerged. Added `calculate_synthetic_face_impact` composing existing Gate 17 polygon containment and Gate 15 sphere tangency, returning either signed X/Y in mm with heel/toe/high/low labels, or structured outside-face/no-tangency/invalid-geometry rejection without partial coordinates. Synthetic-only known ball/face geometry; no real camera observations, actual pose accuracy, physical impact, merge, release or Golden baseline. Gate 18 exact-SHA CI pending.
+
+
+## Gate 19 — synthetic Face Impact UI preview (2026-11-09)
+
+Explicit user approval ("Godkendt"). Branch `gate19/synthetic-face-impact-ui` from Gate 18 SHA `fd96259236cc36b69af369e75416731a6dad8444`, six same-SHA CI successes, draft PR #18 unmerged. Added `ui/src/components/FaceImpactView.tsx` with SVG polygon, synthetic marker, signed X/Y millimetres, region labels and rejection state; wired an explicitly synthetic sample into the existing debug panel without replacing original OpenFlight React/Electron UI. Added server-rendered UI component tests. This is not a live backend feed or measured impact; no physical tests, merge, release or Golden baseline. Exact Gate 19 CI pending.

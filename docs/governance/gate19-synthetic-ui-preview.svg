@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 370" role="img" aria-label="Synthetic Face Impact UI design preview">
+  <rect width="640" height="370" fill="#0e0f10"/>
+  <rect x="16" y="16" width="608" height="338" rx="8" fill="#16181a" stroke="#777"/>
+  <text x="34" y="50" fill="#fff" font-family="Arial" font-size="22">Face Impact — synthetic preview</text>
+  <text x="34" y="76" fill="#ccc" font-family="Arial" font-size="15">Test data only · Not a camera measurement</text>
+  <rect x="34" y="94" width="572" height="198" fill="#0e0f10"/>
+  <polygon points="130,245 510,245 472,128 168,128" fill="#16181a" stroke="#ccc" stroke-width="3"/>
+  <circle cx="364" cy="177" r="8" fill="#ffd400" stroke="#fff" stroke-width="2"/>
+  <text x="47" y="280" fill="#ccc" font-family="Arial" font-size="15">HEEL</text>
+  <text x="548" y="280" fill="#ccc" font-family="Arial" font-size="15">TOE</text>
+  <text x="34" y="325" fill="#fff" font-family="Arial" font-size="17">X: 12.0 mm · Y: 5.0 mm · toe / high</text>
+</svg>
