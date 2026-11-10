@@ -58,17 +58,6 @@ jobs:
       - name: Check formatting
         run: npm run format:check
         working-directory: ui
-      - name: Generate Gate 09 Prettier diagnostic artifact
-        if: ${{ failure() && github.head_ref == 'mdp-v1.2/phase2-gate09-demo-mode' }}
-        run: npx prettier --write src/App.tsx
-        working-directory: ui
-      - name: Upload Gate 09 formatted App.tsx
-        if: ${{ failure() && github.head_ref == 'mdp-v1.2/phase2-gate09-demo-mode' }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: gate09-prettier-app
-          path: ui/src/App.tsx
-          if-no-files-found: error
 
   e2e:
     runs-on: ubuntu-latest
