@@ -11,7 +11,16 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'npm run build failed' }
 } finally { Pop-Location }
 $electron = Join-Path $ui 'node_modules/electron/dist'
-if (!(Test-Path (Join-Path $electron 'electron.exe'))) { throw 'Electron Windows binary missing' }
+if (!(Test-Path (Join-Path $electron 'electron.exe'))) {
+  # npm installations with restricted lifecycle scripts can skip Electron's
+  # postinstall download. Invoke its official install script explicitly.
+  Push-Location $ui
+  try {
+    node node_modules/electron/install.js
+    if ($LASTEXITCODE -ne 0) { throw 'Electron runtime installation failed' }
+  } finally { Pop-Location }
+}
+if (!(Test-Path (Join-Path $electron 'electron.exe'))) { throw 'Electron Windows binary missing after install' }
 $output = Join-Path $root 'out/OpenFlight-Face-Impact-Windows'
 if (Test-Path $output) { Remove-Item $output -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $output | Out-Null
