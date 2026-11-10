@@ -7,7 +7,7 @@
 - Project Law V1: `docs/governance/PROJECT_LAW.md`. Approved Master Development Plan V1.2: 8 phases, 35 Gates.
 - **Current authorization: Phase 2 Gate 09 OPEN**. User approved opening Gate09 after explicitly closing Gate08 on `5c71d6a5c599a7fde17bbfc34bbc834160666e70`.
 - Active branch: `mdp-v1.2/phase2-gate09-demo-mode`, stacked on Gate08 branch `mdp-v1.2/phase2-gate08-ui-contract`. Draft PR **#37**: https://github.com/andersdui22/openflight-face-impact/pull/37. PRs #35 (Gate07) and #36 (Gate08) remain draft/unmerged.
-- **Last code commit before this handoff update:** `c15bb140d5ea4e513e05f1e9d3b4e1f8da6d1f82`. Fetch latest HEAD and reverify; handoff update itself changes HEAD.
+- **Latest known branch commit before this handoff update:** `33e42f7c2003184b4344612c0b2c21e740cf96dd`. Fetch latest HEAD and reverify; handoff update itself changes HEAD.
 - `Fortsæt` permits autonomous work within Gate09 only. No Gate10, merge, release or physical tests without separate user approval. Keep PR draft.
 
 ## Implemented in active Gate09
@@ -18,10 +18,11 @@
 - No real measurements, physical testing, hardware camera acquisition, release or merge.
 
 ## Verified CI and outstanding work
-- On `c15bb140d5ea4e513e05f1e9d3b4e1f8da6d1f82`: E2E, UI build, lint, UI unit, Python tests 3.10/3.11/3.12, pylint, Windows diagnostics, conventional PR title, audit PR quality and tests included **passed**. **Prettier format failed** (file `ui/src/App.tsx`); must fix and verify on new exact SHA.
-- PR description completeness **failed** solely in the previously deferred screenshot-in-description requirement. User explicitly deferred screenshot; never claim waived, bypassed or passed, and do not repeatedly request it.
-- Prettier config `ui/.prettierrc` uses `printWidth: 120`, single quotes, trailingComma es5. Previous manual formatting attempts have not passed. Prefer running exact Prettier 3.9.10 locally on fetched file before another push; do not keep guessing formatting and triggering paid CI.
-- Recheck latest HEAD, resolve formatting and verify same-SHA CI. Update handoff with actual results, prepare Gate09 closeout evidence and request explicit user approval before closing Gate09 or opening Gate10.
+- On `c15bb140d5ea4e513e05f1e9d3b4e1f8da6d1f82`: E2E, UI build, lint, UI unit, Python tests 3.10/3.11/3.12, pylint and Windows diagnostics passed; Prettier failed on `ui/src/App.tsx`.
+- GitHub Actions UI workflow run `42807074528` generated artifact `gate09-prettier-app` (artifact ID `13758513819`) containing exact Prettier-formatted `App.tsx`. On `c102635326f4d614d4b4ccb2aa68fb1323e803f6`, the resulting two formatting differences were applied to `App.tsx`; the final same-SHA format result was still pending at last check.
+- Temporary diagnostic steps were **removed** from `.github/workflows/ui-build.yml` in `33e42f7c2003184b4344612c0b2c21e740cf96dd`. The original `npm run format:check` and all other CI checks remain active.
+- PR description completeness **fails** due to the previously deferred screenshot-in-description requirement. User explicitly deferred screenshot; never claim waived, bypassed or passed, and do not repeatedly request it.
+- **Next:** verify exact HEAD CI including Prettier, E2E, all Python versions, UI unit, build, lint and Windows diagnostics. Prepare Gate09 closeout evidence only after verification. Ask explicit user approval before closing Gate09 or opening Gate10.
 - Minimize unnecessary GitHub Actions runs by batching meaningful changes. Do not disable CI checks without approval.
 
 ## Future Gates (NOT authorized)
