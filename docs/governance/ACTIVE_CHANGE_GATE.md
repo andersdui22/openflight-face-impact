@@ -1,16 +1,18 @@
-# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE 32
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE
 
-Title: Reference-inspired Face Impact dashboard UI
-State: APPROVED — user explicitly approved "Gate 32 – Dashboard UI 1:1" on 2026-11-09.
-Project Law: V1 unchanged.
-Working branch: `gate32/face-impact-dashboard`.
-Base: Gate 31 `cc6f2099f8bbdf2c0f678063fe07e74d492d1aa8`, seven successful same-SHA workflows, draft PR #31 unmerged.
+Current plan: Master Development Plan V1.2
+Current gate: Phase 2 / Gate 05 — standalone Face Impact project isolation
+Status: APPROVED for bounded implementation, 2026-11-10 (user authorization in conversation).
+Project Law: V1
+Approved base: `d78fb3cbef96e10e75eb9b03c0a0370257cea3ae`
+Working branch: `mdp-v1.2/phase2-gate05-isolation`
+Gate detail: [MDP_V1_2_PHASE2_GATE05.md](MDP_V1_2_PHASE2_GATE05.md)
 
-## Authorized scope
-Implement a close visual layout adaptation of the user-provided golf-analysis screenshot in the existing React UI: dark blue-gray compact navigation, left shot/session sidebar, six dashboard tiles, and a lower metrics strip. Use original CSS/SVG only, not copyrighted screenshots or proprietary assets. Reuse the existing FaceImpactView and SyntheticFaceImpactDemo. Show explicit unavailable states for metrics the single ELP camera cannot provide. Preserve the existing Live, Debug, Shots, Camera, Stats, Profiles flows, backend, and socket contracts.
+Authorized: governance alignment, additive `src/face_impact/` package skeleton and focused import-isolation tests.
+Excluded: changes to `src/openflight/`, `ui/`, dependency manifests, build scripts, measurement algorithms, hardware tests, merges, releases, other repositories, and all ConnectorNext work.
+Acceptance: no import-time dependency on OpenFlight/radar/camera hardware, relevant tests and same-SHA verification; no behavior regression.
+Stop: unapproved scope expansion, unknown license/dependency, conflicting remote changes or insufficient evidence.
 
-## Acceptance
-Responsive dashboard accessible in the real app; synthetic impact can be requested without misleading physical claims; legacy navigation remains available; automated UI build, lint, tests and browser smoke pass on the final SHA. The screenshot is a layout reference, not permission to invent sensor measurements.
-
-## Exclusions and stop conditions
-No physical camera testing, new measurement algorithms, backend or protocol changes, new dependencies, Windows packaging, merges, releases, Golden baselines, upstream repository changes or ConnectorNext work. Stop for any required scope expansion. Keep the PR draft and stacked on Gate 31.
+## Legacy gate preservation
+The former Gate 32 dashboard authorization and stacked draft PR #32 remain historical evidence, not authority for this new Gate 05. Original legacy gate text at the approved base commit:
+https://github.com/andersdui22/openflight-face-impact/blob/d78fb3cbef96e10e75eb9b03c0a0370257cea3ae/docs/governance/ACTIVE_CHANGE_GATE.md
