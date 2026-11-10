@@ -10,10 +10,12 @@
 ## Active project and authority
 - Repo: `andersdui22/openflight-face-impact`. Work only in this repo; ConnectorNext and upstream OpenFlight are read-only references.
 - Project Law V1: `docs/governance/PROJECT_LAW.md`; approved Master Development Plan V1.2: 8 phases / 35 Gates.
-- Current phase/gate: **Phase 2, Gate 08 OPEN** — UI actions, navigation and settings. Gate 07 was separately approved CLOSED.
+- Current phase/gate: **Phase 2, Gate 09 OPEN** — simulated shots, sessions, impact points and statistics. Gate 08 CLOSED by user approval at `5c71d6a5c599a7fde17bbfc34bbc834160666e70`.
 - Gate 08 branch: `mdp-v1.2/phase2-gate08-ui-contract`; **draft PR #36**: https://github.com/andersdui22/openflight-face-impact/pull/36 ; base branch `mdp-v1.2/phase2-gate07-complete-ui`.
 - Approved Gate 07 base SHA: `78e81f99930eb2420955a6b846c02e24085ddbbf`. Gate 08 scope: `docs/governance/MDP_V1_2_PHASE2_GATE08_PROPOSAL.md`; active gate: `docs/governance/ACTIVE_CHANGE_GATE.md`.
 - Latest test commit before this handoff update: `619712db615b8c805877834f91f194d99aaad424` (Face Impact camera explicitly OFFLINE even if server is connected; E2E assertion). **Reverify branch HEAD and CI after this handoff commit**.
+
+**Gate 09 (2026-11-10):** branch `mdp-v1.2/phase2-gate09-demo-mode` created from approved Gate 08 closeout. Local-only `FaceImpactSessionDemo.tsx` added and rendered in dashboard: enter/exit demo, deterministic X/Y sample shots in mm, shot history, averages, reset. Explicit synthetic labeling; not real measurements. Commits `40c5df6a7ed4c2dcdc5101999039326148955d14`, `f78ce3be557e1586ee9825d5dbe85829b154057c`. Active gate governance updated at `df92e25507d3aeb17b87cdd53ab25ac9e9449585`. Next: E2E tests, visualization in panels, CI verification. No merges, releases, physical tests; screenshot check remains deferred.
 
 ## Implemented
 - Gate 07 six-panel dark dashboard: Side Impact, Front Impact, Top Impact, Impact Distribution, Camera Preview, Shot Replay.
