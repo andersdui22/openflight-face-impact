@@ -75,3 +75,38 @@ def test_gate15_single_slot_backpressure_rejects_unconsumed_capture():
     assert second is not None
     assert second.shot_id != first.shot_id
     assert second.session_id == first.session_id
+
+
+def test_gate15_replay_preserves_trigger_snapshot_after_new_frames():
+    ring = TriggeredFrameBuffer(pre_trigger_frames=2, post_trigger_frames=1)
+    ring.add_frame(frame(11))
+    ring.add_frame(frame(12))
+    assert ring.trigger(host_timestamp_ns=13)
+    ring.add_frame(frame(14))
+    capture = ring.pop_capture()
+    assert capture is not None
+    snapshot = tuple(f.host_timestamp_ns for f in capture.frames)
+    ring.add_frame(frame(15))
+    ring.add_frame(frame(16))
+    assert snapshot == (11, 12, 14)
+    assert tuple(f.host_timestamp_ns for f in capture.frames) == snapshot
+    assert capture.shot_id
+    assert capture.session_id
+
+
+def test_gate15_rejected_trigger_does_not_allocate_another_shot():
+    ring = TriggeredFrameBuffer(pre_trigger_frames=1, post_trigger_frames=1)
+    ring.add_frame(frame(21))
+    assert ring.trigger(host_timestamp_ns=22)
+    assert not ring.trigger(host_timestamp_ns=23)
+    ring.add_frame(frame(24))
+    first = ring.pop_capture()
+    assert first is not None
+    assert first.trigger_host_timestamp_ns == 22
+    ring.add_frame(frame(25))
+    assert ring.trigger(host_timestamp_ns=26)
+    ring.add_frame(frame(27))
+    second = ring.pop_capture()
+    assert second is not None
+    assert first.shot_id != second.shot_id
+    assert first.session_id == second.session_id
