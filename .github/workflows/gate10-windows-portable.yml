@@ -2,6 +2,12 @@ name: Gate 10 Windows portable EXE (manual validation)
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - scripts/build-face-impact-windows.ps1
+      - ui/electron/main.js
+      - ui/vite.config.ts
+      - .github/workflows/gate10-windows-portable.yml
 
 jobs:
   portable-exe:
