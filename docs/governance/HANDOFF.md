@@ -17,6 +17,8 @@
 
 **Gate 09 (2026-11-10):** branch `mdp-v1.2/phase2-gate09-demo-mode` created from approved Gate 08 closeout. Local-only `FaceImpactSessionDemo.tsx` added and rendered in dashboard: enter/exit demo, deterministic X/Y sample shots in mm, shot history, averages, reset. Explicit synthetic labeling; not real measurements. Commits `40c5df6a7ed4c2dcdc5101999039326148955d14`, `f78ce3be557e1586ee9825d5dbe85829b154057c`. Active gate governance updated at `df92e25507d3aeb17b87cdd53ab25ac9e9449585`. Next: E2E tests, visualization in panels, CI verification. No merges, releases, physical tests; screenshot check remains deferred.
 
+**Gate09 continued (2026-11-10):** Shared demo state now drives Impact Distribution SVG (commit `76128ffe...`), E2E coverage (`d7506d56...`), and separate clearly labeled dashboard demo statistics (commit `6c4ce6c3...`; test `d7881578...`). Real measurement metrics remain unchanged. E2E/build/format/CI have NOT yet been confirmed on current HEAD; inspect CI before claiming success. Gate09 remains OPEN; no merges/releases/physical tests.
+
 ## Implemented
 - Gate 07 six-panel dark dashboard: Side Impact, Front Impact, Top Impact, Impact Distribution, Camera Preview, Shot Replay.
 - Gate 07 four control tabs: Camera setup, Calibration, Capture, Replay. Handedness, camera position, overlay are local-only; future physical actions are explicitly disabled.
