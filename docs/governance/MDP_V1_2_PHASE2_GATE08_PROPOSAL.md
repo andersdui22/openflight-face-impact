@@ -30,3 +30,23 @@ Allowed: existing React UI action wiring, navigation, local settings state, hone
 
 ## Known inherited exception
 PR #35 screenshot description completeness check remains failing because user deferred embedding the screenshot. It is not waived. Gate 07 technical CI passed at `78e81f99930eb2420955a6b846c02e24085ddbbf`. Draft PRs remain unmerged.
+
+## UI action inventory — audited 2026-11-10
+
+| UI surface | Enabled action | Verified or expected UI outcome | Boundary |
+| --- | --- | --- | --- |
+| Dashboard sidebar | CURRENT SESSION, SHOT HISTORY | Navigate to existing Shots view | Existing OpenFlight view; no Face Impact recording implied |
+| Dashboard sidebar | OPEN CLASSIC LIVE VIEW | Exit Face Impact dashboard into existing Live view | No hardware activation |
+| Dashboard sidebar | CAMERA SETTINGS | Navigate to existing Camera view | Existing OpenFlight camera settings, **not** ELP Face Impact camera integration |
+| Dashboard topbar | SWING, VIDEO, HISTORY, STATS | Navigate respectively to classic Live, Camera, Shots, Stats | SUMMARY is current-view text, not an inert button |
+| Camera Preview panel | OPEN CAMERA SETTINGS | Navigate to existing Camera view | Preview remains offline |
+| Shot Replay panel | OPEN SHOT HISTORY | Navigate to existing Shots view | No Face Impact replay data claimed |
+| Face Impact controls | Camera setup, Calibration, Capture, Replay tabs | Switch the visible local configuration section | Tab state local to mounted dashboard |
+| Camera setup | Handedness, Camera position, Show alignment overlay | Update local React UI state only | No device commands; no persistence |
+| Camera setup | RESET LOCAL SETTINGS | Restore right-handed, face-on, overlay enabled | Does not alter global OpenFlight preferences |
+| Camera setup | CONNECT CAMERA | Disabled, explicitly unavailable | Future hardware gate |
+| Calibration | START CALIBRATION, SAVE CALIBRATION | Disabled, explicitly unavailable | Future calibrated observation gate |
+| Capture | START CAPTURE, STOP CAPTURE | Disabled, explicitly unavailable | Future capture gate |
+| Replay | PLAY, FRAME STEP, EXPORT | Disabled, explicitly unavailable | Future validated recordings gate |
+
+**Acceptance caveat:** A passing navigation test proves routing, not that the existing Camera view configures the ELP OV9281. Gate 08 must not represent existing OpenFlight camera controls as Face Impact hardware support. Gate 09 synthetic session/statistics and Gate 10 EXE remain unopened.
