@@ -7,7 +7,12 @@ const points = [
   { x: 11, y: 6 },
 ];
 
-export function FaceImpactSessionDemo({ enabled, setEnabled, shots, setShots }: {
+export function FaceImpactSessionDemo({
+  enabled,
+  setEnabled,
+  shots,
+  setShots,
+}: {
   enabled: boolean;
   setEnabled: (enabled: boolean) => void;
   shots: DemoShot[];
@@ -21,10 +26,14 @@ export function FaceImpactSessionDemo({ enabled, setEnabled, shots, setShots }: 
       <strong>SIMULATED SESSION — DEMO ONLY</strong>
       <p>Sample coordinates in mm. Not camera measurements or recorded shots.</p>
       <div className="impact-controls__fields">
-        <button type="button" aria-pressed={enabled} onClick={() => {
+        <button
+          type="button"
+          aria-pressed={enabled}
+          onClick={() => {
             if (enabled) setShots(() => []);
             setEnabled(!enabled);
-          }}>
+          }}
+        >
           {enabled ? 'EXIT DEMO MODE' : 'ENTER DEMO MODE'}
         </button>
         <button
