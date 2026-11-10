@@ -57,11 +57,16 @@ function FaceImpactDashboard({
 }) {
   const [demoEnabled, setDemoEnabled] = useState(false);
   const [demoShots, setDemoShots] = useState<DemoShot[]>([]);
+  const demoAverage = (axis: 'x' | 'y') =>
+    demoShots.length
+      ? (demoShots.reduce((sum, shot) => sum + shot[axis], 0) / demoShots.length).toFixed(1)
+      : '—';
+  const latestDemoShot = demoShots[demoShots.length - 1];
   const panels = [
     { title: 'Side Impact', subtitle: 'Clubface contact', content: 'face' },
     { title: 'Front Impact', subtitle: 'Heel / toe · high / low', content: 'target' },
     { title: 'Top Impact', subtitle: 'Camera-derived geometry', content: 'target' },
-    { title: 'Impact Distribution', subtitle: 'Awaiting validated shot history', content: 'distribution' },
+    { title: 'Impact Distribution', subtitle: demoEnabled ? 'Simulated demo session · not measured' : 'Awaiting validated shot history', content: 'distribution' },
     { title: 'Camera Preview', subtitle: 'ELP OV9281', content: 'camera' },
     { title: 'Shot Replay', subtitle: 'Select a captured shot', content: 'replay' },
   ] as const;
@@ -134,6 +139,7 @@ function FaceImpactDashboard({
                         <text x="150" y="14" textAnchor="middle" fontSize="10" fill="#e5f4ff">SIMULATED IMPACT MAP · DEMO ONLY</text>
                       </svg>
                       <span>SIMULATED SHOTS: {demoShots.length} · NOT MEASURED</span>
+                      <span>DEMO AVERAGE X: {demoAverage('x')} mm · Y: {demoAverage('y')} mm</span>
                     </>
                   ) : (
                     <>
@@ -166,7 +172,19 @@ function FaceImpactDashboard({
         </div>
         <FaceImpactSessionDemo enabled={demoEnabled} setEnabled={setDemoEnabled} shots={demoShots} setShots={setDemoShots} />
         <FaceImpactControls />
-        <div className="impact-workspace__metrics" aria-label="Face Impact metrics">
+        {demoEnabled && (
+          <section className="impact-controls" aria-label="Simulated Face Impact metrics">
+            <strong>DEMO METRICS — SIMULATED, NOT MEASURED</strong>
+            <div className="impact-controls__fields">
+              <span>DEMO SHOT COUNT: {demoShots.length}</span>
+              <span>DEMO LAST X: {latestDemoShot?.x ?? '—'} mm</span>
+              <span>DEMO LAST Y: {latestDemoShot?.y ?? '—'} mm</span>
+              <span>DEMO AVERAGE X: {demoAverage('x')} mm</span>
+              <span>DEMO AVERAGE Y: {demoAverage('y')} mm</span>
+            </div>
+          </section>
+        )}
+        <div className="impact-workspace__metrics" role="region" aria-label="Face Impact metrics">
           {[
             'HEEL / TOE',
             'HIGH / LOW',
