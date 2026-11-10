@@ -2,6 +2,22 @@
 
 Plan: Master Development Plan V1.2; Project Law V1.
 
+## CURRENT ACTIVE AUTHORIZATION — PHASE 3 GATE 13 (2026-11-10)
+
+User explicitly approved Gate 13: connect the six-panel Camera Preview to existing `/api/camera/preview.jpg`, report actual backend camera state from `/api/camera/usb/status`, preserve the existing single-owner reader and buffered JPEG, show offline backend honestly, and add simulated camera integration tests.
+
+Branch: `mdp-v1.2/phase3-gate13-camera-preview`. Draft stacked PR #39, based on user-technically-closed Gate 12 SHA `fa142ca893a375f9c45a3ef8d962296f92b460dc`; PR #38 remains unmerged.
+
+On exact code SHA `db67c925e3a6cd1ded4dfffb70c53b6ca26ce872`, UI build, lint, format, Playwright E2E, Python 3.10–3.12, Pylint and other technical checks passed. The PR screenshot-description requirement remains user-deferred, **not waived or passed**. Later documentation commits require new exact-HEAD CI verification.
+
+Scope boundaries: no new camera capture loop, physical ELP test, merge, release or Gate 14 implementation without separate approval. Python backend is not bundled in portable Electron EXE. No calibrated impact measurements or real camera verification. Gate 13 is **open** pending remaining work and explicit closeout.
+
+---
+
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE
+
+Plan: Master Development Plan V1.2; Project Law V1.
+
 ## CURRENT ACTIVE AUTHORIZATION — PHASE 3 GATE 12 (2026-11-10)
 
 User explicitly approved Gate 12 scoped development under Project Law V1: single-owner Windows ELP USB camera architecture inventory, existing Python/React API contracts, camera lifecycle/status, and hardware-free tests. No Gate 13 implementation, physical testing, merges or releases authorized. Branch `mdp-v1.2/phase3-gate12-camera-architecture`, draft PR #38, based on Phase 2 technical closeout `79549289b7de332a3752f90911850346bcd9fcf0`.
