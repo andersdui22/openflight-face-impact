@@ -5,10 +5,17 @@
 ## Active project and governance
 - Repository: `andersdui22/openflight-face-impact`. Never modify upstream OpenFlight or ConnectorNext.
 - Project Law V1: `docs/governance/PROJECT_LAW.md`. Approved Master Development Plan V1.2: 8 phases, 35 Gates.
-- **Current authorization: Phase 2 Gate 09 OPEN**. User approved opening Gate09 after explicitly closing Gate08 on `5c71d6a5c599a7fde17bbfc34bbc834160666e70`.
+- **Current authorization: Phase 2 Gates 09–11 bundled development approved**. User approved completing remaining Phase 2 gates consecutively on 2026-11-10.
 - Active branch: `mdp-v1.2/phase2-gate09-demo-mode`, stacked on Gate08 branch `mdp-v1.2/phase2-gate08-ui-contract`. Draft PR **#37**: https://github.com/andersdui22/openflight-face-impact/pull/37. PRs #35 (Gate07) and #36 (Gate08) remain draft/unmerged.
 - **Latest known branch commit before this handoff update:** `43842063c4668d0dc7c8b0f3fbee03215cb30531`. Fetch latest HEAD and reverify; handoff update itself changes HEAD.
-- `Fortsæt` permits autonomous work within Gate09 only. No Gate10, merge, release or physical tests without separate user approval. Keep PR draft.
+- `Fortsæt` permits autonomous work within Phase 2 Gates 09–11. No merge, release, physical tests or later phases without separate user approval. Keep PR draft.
+
+## Phase 2 bundled authorization — Gates 09–11 (2026-11-10)
+User explicitly approved continuing all remaining Phase 2 Gates 09–11 and fixing GitHub CI errors afterward, without per-Gate pauses. This authorization does **not** include merges, releases or physical testing. Governance recorded in `docs/governance/ACTIVE_CHANGE_GATE.md`.
+- Gate09 demo CI passed all technical checks on `2bb8e76271ef4bef217edfab9b92f8c110db5e94`. Screenshot-in-PR-description check remains deferred, not waived.
+- Gate10 implementation now includes `scripts/build-face-impact-windows.ps1`, relative Vite asset paths, Electron local-file startup for portable mode, and manual-only `.github/workflows/gate10-windows-portable.yml` with bundle artifact validation. This produces a **folder-based EXE**, not a single-file installer, and excludes the Python backend. Windows runtime has **not** been verified.
+- Gate11 acceptance checklist in `docs/governance/MDP_V1_2_PHASE2_GATES10_11_ACCEPTANCE.md`; pending new exact-HEAD CI and Windows EXE runtime/visual acceptance.
+- Last known commit before this handoff update: `4f121a52b61d32b82d0931212bdd8aa11d7e7673`; fetch authoritative HEAD. PR #37 remains draft and unmerged. Avoid implying packaging is tested or Gate11 is accepted.
 
 ## Implemented in active Gate09
 - `ui/src/components/FaceImpactSessionDemo.tsx`: deterministic, local React-only simulated shots with mm X/Y sample coordinates; enter/exit, add, reset, shot history, count and averages. Exiting demo clears synthetic session.
