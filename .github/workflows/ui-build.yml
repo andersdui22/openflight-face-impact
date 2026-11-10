@@ -55,14 +55,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
         working-directory: ui
-      - name: Check formatting and show exact Gate 13 diff on failure
+      - name: Check formatting
+        run: npm run format:check
         working-directory: ui
-        run: |
-          if ! npm run format:check; then
-            npx prettier src/components/FaceImpactCameraPreview.tsx > /tmp/gate13-prettier.tsx
-            diff -u src/components/FaceImpactCameraPreview.tsx /tmp/gate13-prettier.tsx || true
-            exit 1
-          fi
 
   e2e:
     runs-on: ubuntu-latest
