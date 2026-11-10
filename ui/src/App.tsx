@@ -66,7 +66,11 @@ function FaceImpactDashboard({
     { title: 'Side Impact', subtitle: 'Clubface contact', content: 'face' },
     { title: 'Front Impact', subtitle: 'Heel / toe · high / low', content: 'target' },
     { title: 'Top Impact', subtitle: 'Camera-derived geometry', content: 'target' },
-    { title: 'Impact Distribution', subtitle: demoEnabled ? 'Simulated demo session · not measured' : 'Awaiting validated shot history', content: 'distribution' },
+    {
+      title: 'Impact Distribution',
+      subtitle: demoEnabled ? 'Simulated demo session · not measured' : 'Awaiting validated shot history',
+      content: 'distribution',
+    },
     { title: 'Camera Preview', subtitle: 'ELP OV9281', content: 'camera' },
     { title: 'Shot Replay', subtitle: 'Select a captured shot', content: 'replay' },
   ] as const;
@@ -124,19 +128,46 @@ function FaceImpactDashboard({
                   <SyntheticFaceImpactDemo />
                 </div>
               ) : panel.content === 'distribution' ? (
-                <div className="impact-workspace__distribution" aria-label={demoEnabled ? 'Simulated impact distribution' : 'Empty impact distribution'}>
+                <div
+                  className="impact-workspace__distribution"
+                  aria-label={demoEnabled ? 'Simulated impact distribution' : 'Empty impact distribution'}
+                >
                   {demoEnabled ? (
                     <>
-                      <svg viewBox="0 0 300 180" role="img" aria-label={`DEMO ONLY impact map with ${demoShots.length} simulated shots`} style={{ width: '100%', maxWidth: 300 }}>
-                        <rect x="30" y="20" width="240" height="140" rx="28" fill="#243b53" stroke="#8eb3cf" strokeWidth="2" />
+                      <svg
+                        viewBox="0 0 300 180"
+                        role="img"
+                        aria-label={`DEMO ONLY impact map with ${demoShots.length} simulated shots`}
+                        style={{ width: '100%', maxWidth: 300 }}
+                      >
+                        <rect
+                          x="30"
+                          y="20"
+                          width="240"
+                          height="140"
+                          rx="28"
+                          fill="#243b53"
+                          stroke="#8eb3cf"
+                          strokeWidth="2"
+                        />
                         <line x1="150" y1="20" x2="150" y2="160" stroke="#6987a1" strokeDasharray="4 4" />
                         <line x1="30" y1="90" x2="270" y2="90" stroke="#6987a1" strokeDasharray="4 4" />
                         {demoShots.map((shot) => (
-                          <circle key={shot.id} cx={150 + shot.x * 4} cy={90 - shot.y * 4} r="6" fill="#79c5d4" stroke="#ffffff" strokeWidth="1.5">
+                          <circle
+                            key={shot.id}
+                            cx={150 + shot.x * 4}
+                            cy={90 - shot.y * 4}
+                            r="6"
+                            fill="#79c5d4"
+                            stroke="#ffffff"
+                            strokeWidth="1.5"
+                          >
                             <title>{`SIMULATED SHOT ${shot.id}: X ${shot.x} mm, Y ${shot.y} mm`}</title>
                           </circle>
                         ))}
-                        <text x="150" y="14" textAnchor="middle" fontSize="10" fill="#e5f4ff">SIMULATED IMPACT MAP · DEMO ONLY</text>
+                        <text x="150" y="14" textAnchor="middle" fontSize="10" fill="#e5f4ff">
+                          SIMULATED IMPACT MAP · DEMO ONLY
+                        </text>
                       </svg>
                       <span>SIMULATED SHOTS: {demoShots.length} · NOT MEASURED</span>
                       <span>DEMO AVERAGE X: {demoAverage('x')} mm · Y: {demoAverage('y')} mm</span>
@@ -170,7 +201,12 @@ function FaceImpactDashboard({
             </section>
           ))}
         </div>
-        <FaceImpactSessionDemo enabled={demoEnabled} setEnabled={setDemoEnabled} shots={demoShots} setShots={setDemoShots} />
+        <FaceImpactSessionDemo
+          enabled={demoEnabled}
+          setEnabled={setDemoEnabled}
+          shots={demoShots}
+          setShots={setDemoShots}
+        />
         <FaceImpactControls />
         {demoEnabled && (
           <section className="impact-controls" aria-label="Simulated Face Impact metrics">
