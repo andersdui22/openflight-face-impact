@@ -42,4 +42,9 @@ test('Gate 07 setup controls are keyboard accessible and UI-only', async ({ page
   await expect(controls.getByRole('combobox', { name: 'Camera position' })).toHaveValue('top');
   await expect(controls.getByRole('checkbox', { name: /Show alignment overlay/ })).not.toBeChecked();
   await expect(controls.getByText(/Settings are local to this view and are not saved/)).toBeVisible();
+
+  await controls.getByRole('button', { name: 'RESET LOCAL SETTINGS' }).click();
+  await expect(controls.getByRole('combobox', { name: 'Handedness' })).toHaveValue('right');
+  await expect(controls.getByRole('combobox', { name: 'Camera position' })).toHaveValue('face-on');
+  await expect(controls.getByRole('checkbox', { name: /Show alignment overlay/ })).toBeChecked();
 });
