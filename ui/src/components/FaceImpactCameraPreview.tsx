@@ -35,7 +35,9 @@ export function FaceImpactCameraPreview() {
           throw new Error('Camera service unavailable');
         }
         const status = (await response.json()) as UsbStatus;
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         const nextState: CameraState = status.enabled ? status.state : 'disabled';
         setState(nextState);
         setError(nextState === 'error' ? status.last_error ?? 'Camera error' : null);
