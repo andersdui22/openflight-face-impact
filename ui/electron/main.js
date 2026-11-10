@@ -6,7 +6,7 @@
 
 import { app, BrowserWindow, Menu } from 'electron';
 import { fileURLToPath } from 'node:url';
-import { existsSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { resolveTargetUrl } from './resolveTargetUrl.js';
 
 const targetUrl = resolveTargetUrl(process.env, process.argv);
@@ -35,6 +35,47 @@ function createWindow() {
     win.loadFile(fileURLToPath(new URL('../dist/index.html', import.meta.url)));
   } else {
     win.loadURL(targetUrl);
+  }
+
+  // Gate 11 CI-only smoke: exercise the actual packaged renderer and capture evidence.
+  // Disabled for ordinary users. Never activates a camera or measurement.
+  if (process.env.OPENFLIGHT_GATE11_SMOKE === '1') {
+    win.webContents.once('did-finish-load', async () => {
+      try {
+        const result = await win.webContents.executeJavaScript(`
+          (async () => {
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            for (let i = 0; i < 60; i++) {
+              const button = [...document.querySelectorAll('button')]
+                .find((item) => item.textContent?.includes('OPEN FACE IMPACT DASHBOARD'));
+              if (button) {
+                button.click();
+                await sleep(500);
+                const dashboard = document.querySelector('[aria-label="Face Impact dashboard"]');
+                const panels = ['Side Impact', 'Front Impact', 'Top Impact',
+                  'Impact Distribution', 'Camera Preview', 'Shot Replay'];
+                if (dashboard && panels.every((name) => dashboard.querySelector(
+                  '[aria-label="' + name + '"]'))) {
+                  return { ok: true, panels: panels.length };
+                }
+              }
+              await sleep(500);
+            }
+            return { ok: false, error: 'Dashboard or six panels not rendered' };
+          })()
+        `);
+        if (!result.ok) throw new Error(result.error);
+        const shot = await win.webContents.capturePage();
+        writeFileSync(process.env.OPENFLIGHT_GATE11_SCREENSHOT, shot.toPNG());
+        writeFileSync(process.env.OPENFLIGHT_GATE11_RESULT, JSON.stringify(result));
+        app.exit(0);
+      } catch (error) {
+        writeFileSync(process.env.OPENFLIGHT_GATE11_RESULT, JSON.stringify({
+          ok: false, error: String(error),
+        }));
+        app.exit(1);
+      }
+    });
   }
 
   win.on('closed', () => {
