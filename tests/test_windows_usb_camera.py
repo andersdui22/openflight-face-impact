@@ -199,3 +199,38 @@ def test_failed_open_does_not_leave_owned_device_and_allows_retry():
     finally:
         camera.stop()
     assert available.released
+
+
+def test_usb_reconnect_rotates_session_and_preserves_single_reader():
+    """An actual adapter restart must reset capture identity and stale frames."""
+    first = FakeCamera(fail_after=20)
+    second = FakeCamera()
+    devices = iter((first, second))
+    camera = WindowsUsbCamera(
+        UsbCameraSettings(pre_frames=1, post_frames=1),
+        camera_factory=lambda index: next(devices),
+    )
+    camera.start()
+    try:
+        wait_until(lambda: camera.frames_received >= 2)
+        assert camera.trigger()
+        first_capture = camera.ring.wait_for_capture(timeout_s=1)
+        assert first_capture is not None
+        assert first_capture.shot_id and first_capture.session_id
+        wait_until(lambda: camera.last_error is not None)
+    finally:
+        camera.stop()
+    assert first.released
+
+    camera.start()
+    try:
+        wait_until(lambda: camera.ring.buffered_frames >= 1)
+        assert camera.trigger()
+        second_capture = camera.ring.wait_for_capture(timeout_s=1)
+        assert second_capture is not None
+        assert second_capture.session_id != first_capture.session_id
+        assert second_capture.shot_id != first_capture.shot_id
+        assert camera.ring.pop_capture() is None
+    finally:
+        camera.stop()
+    assert second.released
