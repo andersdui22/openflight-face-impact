@@ -21,6 +21,11 @@ test('Gate 07 visual dashboard preserves six panels and exposes honest UI-only c
     await expect(dashboard.getByRole('region', { name: title })).toBeVisible();
   }
 
+  const replayPanel = dashboard.getByRole('region', { name: 'Shot Replay' });
+  const replayBounds = await replayPanel.boundingBox();
+  expect(replayBounds).not.toBeNull();
+  expect(replayBounds!.y + replayBounds!.height).toBeLessThanOrEqual(550);
+
   const controls = dashboard.getByRole('region', { name: 'Face Impact controls' });
   await expect(controls.getByText('No camera measurements are active.')).toBeVisible();
   await expect(controls.getByRole('button', { name: /CONNECT CAMERA/ })).toBeDisabled();
