@@ -4,6 +4,9 @@
 
 
 **Gate08 standalone status update (2026-11-10):** UI now displays `FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW` without exposing unrelated OpenFlight server connectivity (`477365416d2c2acca099895710b99729407a7f5f`). E2E assertion added at `67ad529263fbfa5f643424babac3b2c1235faef4`. This is UI-only: backend architecture and hardware integration are unchanged. Reverify same-SHA CI. Screenshot PR description check remains deferred.
+
+**Gate08 action inventory (2026-11-10):** See `docs/governance/MDP_V1_2_PHASE2_GATE08_PROPOSAL.md`, commit `70b6f2cc424e53789233dc11e8d01fff8ba6f976`. Dashboard navigation, local settings and disabled future actions are catalogued. CAMERA SETTINGS opens legacy OpenFlight Camera view, not Face Impact ELP OV9281 integration. Latest SHA requires same-SHA CI verification.
+
 ## Active project and authority
 - Repo: `andersdui22/openflight-face-impact`. Work only in this repo; ConnectorNext and upstream OpenFlight are read-only references.
 - Project Law V1: `docs/governance/PROJECT_LAW.md`; approved Master Development Plan V1.2: 8 phases / 35 Gates.
