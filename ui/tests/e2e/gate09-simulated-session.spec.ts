@@ -11,6 +11,7 @@ test('Gate 09 demo session is isolated from measured shots and can be reset', as
   const dashboard = page.getByRole('region', { name: 'Face Impact dashboard' });
   const demo = dashboard.getByRole('region', { name: 'Face Impact simulated session' });
   const distribution = dashboard.getByRole('region', { name: 'Impact Distribution' });
+  const demoMetrics = dashboard.getByRole('region', { name: 'Simulated Face Impact metrics' });
 
   await expect(demo.getByText('SIMULATED SESSION — DEMO ONLY')).toBeVisible();
   await expect(demo.getByText(/Not camera measurements or recorded shots/)).toBeVisible();
@@ -31,6 +32,11 @@ test('Gate 09 demo session is isolated from measured shots and can be reset', as
   await expect(distribution.locator('svg circle')).toHaveCount(2);
   await expect(demo.getByRole('status')).toContainText('AVERAGE X: -2.5 mm');
   await expect(demo.getByRole('status')).toContainText('AVERAGE Y: 1.5 mm');
+  await expect(demoMetrics).toContainText('DEMO SHOT COUNT: 2');
+  await expect(demoMetrics).toContainText('DEMO LAST X: 7 mm');
+  await expect(demoMetrics).toContainText('DEMO LAST Y: -5 mm');
+  await expect(demoMetrics).toContainText('DEMO AVERAGE X: -2.5 mm');
+  await expect(demoMetrics).toContainText('DEMO AVERAGE Y: 1.5 mm');
 
   await expect(dashboard.getByRole('region', { name: 'Face Impact metrics' }).getByText('not measured').first()).toBeVisible();
   await reset.click();
@@ -38,7 +44,9 @@ test('Gate 09 demo session is isolated from measured shots and can be reset', as
   await expect(distribution.locator('svg circle')).toHaveCount(0);
   await expect(demo.getByRole('status')).toContainText('SIMULATED SHOTS: 0');
   await expect(reset).toBeDisabled();
+  await expect(demoMetrics).toContainText('DEMO SHOT COUNT: 0');
   await demo.getByRole('button', { name: 'EXIT DEMO MODE' }).click();
+  await expect(demoMetrics).toHaveCount(0);
   await expect(add).toBeDisabled();
   await expect(demo.getByRole('status')).toHaveCount(0);
 });
