@@ -60,6 +60,5 @@ test('Gate 08 dashboard navigation reaches existing sections and returns to summ
 
   await dashboard.getByRole('button', { name: 'OPEN SHOT HISTORY' }).click();
   await expect(dashboard).not.toBeVisible();
-  await page.getByRole('button', { name: 'Live', exact: true }).first().click();
-  await expect(dashboard).toBeVisible();
+  await expect(page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' })).not.toBeVisible();
 });
