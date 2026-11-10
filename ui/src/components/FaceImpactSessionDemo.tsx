@@ -21,7 +21,10 @@ export function FaceImpactSessionDemo({ enabled, setEnabled, shots, setShots }: 
       <strong>SIMULATED SESSION — DEMO ONLY</strong>
       <p>Sample coordinates in mm. Not camera measurements or recorded shots.</p>
       <div className="impact-controls__fields">
-        <button type="button" aria-pressed={enabled} onClick={() => setEnabled(!enabled)}>
+        <button type="button" aria-pressed={enabled} onClick={() => {
+            if (enabled) setShots(() => []);
+            setEnabled(!enabled);
+          }}>
           {enabled ? 'EXIT DEMO MODE' : 'ENTER DEMO MODE'}
         </button>
         <button
