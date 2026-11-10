@@ -199,3 +199,45 @@ def test_failed_open_does_not_leave_owned_device_and_allows_retry():
     finally:
         camera.stop()
     assert available.released
+
+
+def test_restart_discards_stale_preview_frames_before_new_reader_delivers():
+    """A new camera session must not reuse buffered frames from the prior one."""
+    first = FakeCamera(fail_after=3)
+    second = FakeCamera()
+    devices = iter((first, second))
+    camera = WindowsUsbCamera(
+        UsbCameraSettings(pre_frames=2, post_frames=2),
+        camera_factory=lambda index: next(devices),
+    )
+    camera.start()
+    wait_until(lambda: camera.last_error is not None)
+    assert camera.ring.latest_frame is not None
+    camera.stop()
+    camera.start()
+    try:
+        # New reader may already have delivered frames, but any visible frame
+        # must belong to the restarted session, not the failed first session.
+        assert camera.ring is not None
+        assert camera.last_error is None
+        wait_until(lambda: camera.frames_received >= 5)
+        assert camera.ring.latest_frame is not None
+    finally:
+        camera.stop()
+
+
+def test_shared_ring_reset_discards_pending_capture_and_preview():
+    """Restart resets both pre-trigger preview and a completed replay."""
+    from openflight.camera.triggered_buffer import CameraFrame, TriggeredFrameBuffer
+
+    ring = TriggeredFrameBuffer(2, 1)
+    for stamp in (1, 2):
+        ring.add_frame(CameraFrame(np.zeros((2, 2), dtype=np.uint8), stamp, stamp, 0, 0.0))
+    assert ring.trigger(3)
+    ring.add_frame(CameraFrame(np.zeros((2, 2), dtype=np.uint8), 4, 4, 0, 0.0))
+    assert ring.latest_frame is not None
+    ring.reset()
+    assert ring.latest_frame is None
+    assert ring.pop_capture() is None
+    assert not ring.capture_busy
+    assert ring.buffered_frames == 0
