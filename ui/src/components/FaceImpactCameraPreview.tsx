@@ -31,14 +31,18 @@ export function FaceImpactCameraPreview() {
           signal: controller.signal,
           cache: 'no-store',
         });
-        if (!response.ok) throw new Error('Camera service unavailable');
+        if (!response.ok) {
+          throw new Error('Camera service unavailable');
+        }
         const status = (await response.json()) as UsbStatus;
         if (!mounted) return;
         const nextState: CameraState = status.enabled ? status.state : 'disabled';
         setState(nextState);
         setError(nextState === 'error' ? status.last_error ?? 'Camera error' : null);
         setPreviewFailed(false);
-        if (nextState === 'running') setFrameKey((key) => key + 1);
+        if (nextState === 'running') {
+          setFrameKey((key) => key + 1);
+        }
       } catch {
         if (mounted && !controller.signal.aborted) {
           setState('offline');
