@@ -1,16 +1,16 @@
 # OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE
 
 Current plan: Master Development Plan V1.2
-Current gate: Phase 2 / Gate 08 — UI actions, navigation and settings
-Status: Gate 08 OPEN after separate user approval ("Godkendt"), 2026-11-10. Gate 07 closed.
+Current gate: Phase 2 / Gate 09 — simulated demo mode
+Status: Gate 08 CLOSED on approved commit `5c71d6a5c599a7fde17bbfc34bbc834160666e70`; Gate 09 OPEN by explicit user approval on 2026-11-10.
 Project Law: V1
-Approved Gate 08 base: `78e81f99930eb2420955a6b846c02e24085ddbbf` (Gate 07 user-approved closeout)
-Working branch: `mdp-v1.2/phase2-gate08-ui-contract`
+Approved Gate 09 base: `5c71d6a5c599a7fde17bbfc34bbc834160666e70` (Gate 08 user-approved closeout)
+Working branch: `mdp-v1.2/phase2-gate09-demo-mode`
 Gate detail: [MDP_V1_2_PHASE2_GATE08_PROPOSAL.md](MDP_V1_2_PHASE2_GATE08_PROPOSAL.md)
 
-Authorized: visible Face Impact dashboard UI, navigation, fields, buttons, settings controls, clearly disabled future functions, scoped UI tests, and governance documentation.
-Excluded: backend, actual camera acquisition, measurements, calibration algorithms, hardware testing, EXE packaging (Gate 10), changes to other repositories, merges and releases.
-Acceptance: all six original panels preserved; complete planned visual UI and discoverable controls; honest unavailable/synthetic state; keyboard accessibility; UI build, lint, formatting, unit and E2E checks verified.
+Authorized: explicitly simulated demo shots, local sessions, impact points and statistics, scoped UI tests and governance documentation.
+Excluded: real camera acquisition, real measurements, calibration algorithms, hardware testing, EXE packaging (Gate 10), changes to other repositories, merges and releases.
+Acceptance: demonstrable simulated shots, impact points, session history and statistics, clearly separated from actual measurements, preserving the six-panel dashboard; verify CI before closeout.
 Stop: changes outside scope, invented measurements, misleading active controls, unapproved merges/releases/physical tests.
 
 ## Gate history
@@ -21,3 +21,6 @@ No further implementation under Gate 07. Gate 08 permits only its documented UI-
 
 ## Gate 08 authority and bounded implementation
 Original MDP V1.2 Phase 2 Gate 08: implement UI actions, navigation and settings; no dead buttons. Base Gate 07 closeout SHA: `78e81f99930eb2420955a6b846c02e24085ddbbf`. Allowed: existing React UI-only wiring, navigation, local settings and focused tests. Excluded: Gate 09 synthetic demo mode, Gate 10 EXE, camera, real calibration/capture/replay, backend, physical tests, merges, releases. Unavailable actions must be clearly disabled or explained. Closeout requires separate approval.
+
+## Gate 09 implementation
+Gate 08 was explicitly closed and Gate 09 opened by user approval. First demo-session component is local-only and deterministic; further visualization, tests and CI are pending. Screenshot PR requirement remains deferred, not waived. No merges, releases or physical tests.
