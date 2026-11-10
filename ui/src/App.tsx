@@ -104,9 +104,7 @@ function FaceImpactDashboard({
               STATS
             </button>
           </nav>
-          <span className="impact-workspace__connection">
-            ○ FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW
-          </span>
+          <span className="impact-workspace__connection">○ FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW</span>
         </header>
         <div className="impact-workspace__tiles">
           {panels.map((panel) => (
