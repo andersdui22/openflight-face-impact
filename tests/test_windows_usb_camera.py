@@ -156,3 +156,46 @@ def test_delivered_fps_is_observed_and_reset_on_restart():
     finally:
         camera.stop()
     assert camera.delivered_fps is not None
+
+
+def test_repeated_start_reuses_single_reader_and_device():
+    """A second start must not create a second acquisition owner."""
+    opened = []
+    def factory(index):
+        fake = FakeCamera()
+        opened.append((index, fake))
+        return fake
+
+    camera = WindowsUsbCamera(
+        UsbCameraSettings(pre_frames=2, post_frames=2), camera_factory=factory
+    )
+    camera.start()
+    try:
+        wait_until(lambda: camera.frames_received >= 2)
+        camera.start()
+        assert len(opened) == 1
+        assert camera.is_running
+    finally:
+        camera.stop()
+    assert opened[0][1].released
+
+
+def test_failed_open_does_not_leave_owned_device_and_allows_retry():
+    """Failed device acquisition leaves the owner free for a later retry."""
+    unavailable = FakeCamera(opened=False)
+    available = FakeCamera()
+    devices = iter((unavailable, available))
+    camera = WindowsUsbCamera(camera_factory=lambda index: next(devices))
+
+    with pytest.raises(RuntimeError, match="could not be opened"):
+        camera.start()
+    assert unavailable.released
+    assert not camera.is_running
+
+    camera.start()
+    try:
+        wait_until(lambda: camera.frames_received >= 2)
+        assert camera.is_running
+    finally:
+        camera.stop()
+    assert available.released
