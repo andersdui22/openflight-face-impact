@@ -26,6 +26,8 @@ test('Gate 07 setup controls are keyboard accessible and UI-only', async ({ page
 
   const calibration = controls.getByRole('button', { name: 'Calibration' });
   await calibration.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
   await expect(calibration).toBeFocused();
   await expect(calibration).toHaveCSS('outline-style', 'solid');
   await page.keyboard.press('Enter');
