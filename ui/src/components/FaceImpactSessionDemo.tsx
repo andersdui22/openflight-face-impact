@@ -41,6 +41,19 @@ export function FaceImpactSessionDemo() {
       </div>
       {enabled && (
         <div aria-label="Simulated session statistics">
+          <div aria-label="Simulated impact distribution" style={{ maxWidth: 300, margin: '12px 0' }}>
+            <svg viewBox="0 0 300 180" role="img" aria-label={`DEMO ONLY impact map with ${shots.length} simulated shots`} style={{ width: '100%', background: '#15243a', border: '1px solid #607d9a' }}>
+              <rect x="30" y="20" width="240" height="140" rx="28" fill="#243b53" stroke="#8eb3cf" strokeWidth="2" />
+              <line x1="150" y1="20" x2="150" y2="160" stroke="#6987a1" strokeDasharray="4 4" />
+              <line x1="30" y1="90" x2="270" y2="90" stroke="#6987a1" strokeDasharray="4 4" />
+              {shots.map((shot) => (
+                <circle key={shot.id} cx={150 + shot.x * 4} cy={90 - shot.y * 4} r="6" fill="#79c5d4" stroke="#ffffff" strokeWidth="1.5">
+                  <title>{`SIMULATED SHOT ${shot.id}: X ${shot.x} mm, Y ${shot.y} mm`}</title>
+                </circle>
+              ))}
+              <text x="150" y="14" textAnchor="middle" fontSize="10" fill="#e5f4ff">SIMULATED IMPACT MAP · DEMO ONLY</text>
+            </svg>
+          </div>
           <p role="status">
             SIMULATED SHOTS: {shots.length} · AVERAGE X: {average('x')} mm · AVERAGE Y: {average('y')} mm
           </p>
