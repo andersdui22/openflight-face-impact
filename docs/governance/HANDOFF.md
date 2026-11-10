@@ -1,3 +1,18 @@
+# CURRENT STATUS OVERRIDE — PHASE 3 GATE 12 (2026-11-10)
+
+**Read this first.** The older Phase 2 text below is historical and no longer the active authorization. GitHub is authoritative; verify HEAD, PR, exact-SHA checks and Project Law before acting.
+
+- Repository `andersdui22/openflight-face-impact`; Project Law V1; Master Development Plan V1.2 (8 phases, 35 gates).
+- User approved **Phase 3 Gate 12 only**, explicitly on 2026-11-10: single-owner Windows ELP USB camera architecture, Python/React interface inventory, status/lifecycle contract and hardware-free tests. Gate 13–15 implementation NOT approved. No merges, releases or physical tests.
+- Active branch `mdp-v1.2/phase3-gate12-camera-architecture`; base Phase 2 technical-closeout SHA `79549289b7de332a3752f90911850346bcd9fcf0`. Draft PR #38 https://github.com/andersdui22/openflight-face-impact/pull/38 (stacked on Phase 2 draft PR #37). All drafts unmerged.
+- Gate 12 architecture document: `docs/governance/MDP_V1_2_PHASE3_GATE12_ARCHITECTURE.md`. Existing `WindowsUsbCamera` has one reader and `TriggeredFrameBuffer`; server already provides `/api/camera/preview.jpg` and `/api/camera/usb/status`; legacy UI `CameraFeed.tsx` is not integrated into six-panel Face Impact dashboard. Phase 2 Electron portable bundle has no Python backend.
+- Tests added in `tests/test_windows_usb_camera.py` for idempotent start/single camera owner and release/retry after failed open. Exact test commit `5d6862868d28b026e1c69e56c2cc7d8d7155df22`.
+- On exact pre-handoff HEAD `651e54f76f1a5e6ddb78c82a4cb6d4e1bbf49449`, **all technical GitHub CI checks succeeded**, including Windows+Ubuntu USB camera fixtures, Python 3.10–3.12, E2E, UI, lint, format and Windows diagnostics. `PR description completeness` FAILED due to the previously user-deferred screenshot-in-PR-description requirement. Do not waive, bypass or claim it passed.
+- This handoff commit changes HEAD: **recheck CI on the new exact SHA** before Gate 12 closeout. No physical evidence or Golden baseline. Gate 12 remains open pending exact-HEAD check and formal closeout; do not begin Gate 13.
+- The user previously approved Phase 2 technical closeout on `79549289...` with screenshot still deferred; no merge/release. Prior handoff statements that Gate 10/11 are incomplete are outdated.
+
+---
+
 # CURRENT HANDOFF — OpenFlight Face Impact / MDP V1.2
 
 **Updated:** 2026-11-10. **GitHub is authoritative.** Begin each successor chat with read-only verification of branch HEAD, PR, governance and exact-SHA CI. The archived material below is historical only.
