@@ -77,7 +77,7 @@ test('Gate 08 dashboard topbar and sidebar actions open their intended views', a
   await expect(dashboard).not.toBeVisible();
 
   // Return via the existing application footer; no new backend or synthetic data.
-  const footer = page.locator('footer');
+  const footer = page.locator('.panel-footer');
   await footer.getByRole('button', { name: /live/i }).first().click();
   await expect(dashboard).toBeVisible();
   await dashboard.getByRole('button', { name: 'CAMERA SETTINGS' }).click();
