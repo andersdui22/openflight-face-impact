@@ -17,3 +17,12 @@ User authorized completing Gates 09–11 as one development batch on 2026-11-10,
 - Playwright `ui/tests/e2e/gate09-simulated-session.spec.ts` and earlier Gate07/08 E2E cover browser UI behavior. E2E passed on `2bb8e76271ef4bef217edfab9b92f8c110db5e94` before Gate10 changes.
 - **Outstanding evidence:** new exact-HEAD CI, Windows packaging workflow run, Windows EXE GUI smoke test and screenshot review. The PR screenshot-in-description check remains deferred **not waived**.
 - No physical ELP camera tests in Phase 2. No release or merge without separate authorization.
+
+## CI evidence — 2026-11-10
+- Exact verified code SHA: `9c54404e37bec28e8f7b215f26d276a0a2dc69fa`.
+- GitHub Actions Windows portable workflow run `42810519769`: **success**.
+- Windows artifact: `gate10-windows-portable-development-only`, artifact ID `13761873646`, size 161,503,560 bytes. This is a folder-based Electron distribution, **not** a one-file executable or installer.
+- Same-SHA successful checks: `portable-exe`, `e2e`, `format`, `lint`, UI build, UI unit, Python 3.10/3.11/3.12, pylint, Windows diagnostics, PR quality.
+- `PR description completeness` still fails due to the screenshot requirement expressly deferred by the user. Not bypassed or waived.
+- The Windows job validates build and package file structure; **it does not launch the GUI or test the Windows user experience**. This remains an acceptance gap. Real camera capture, measurements, and Python backend packaging are out of scope.
+- Gate11 cannot be declared fully accepted without appropriate runtime/visual evidence. No merge or release.
