@@ -11,6 +11,7 @@ import { useCameraReplayController } from './hooks/useCameraReplayController';
 import { socketService } from './services/socketService';
 import { DebugPanel } from './components/DebugPanel';
 import { SyntheticFaceImpactDemo } from './components/SyntheticFaceImpactDemo';
+import { FaceImpactControls } from './components/FaceImpactControls';
 import { DisplayMode } from './components/DisplayMode';
 import { SimShotBadges } from './components/SimShotBadges';
 import { ShotProcessingArea } from './components/ShotProcessingArea';
@@ -145,6 +146,7 @@ function FaceImpactDashboard({
             </section>
           ))}
         </div>
+        <FaceImpactControls />
         <div className="impact-workspace__metrics" aria-label="Face Impact metrics">
           {[
             'HEEL / TOE',
