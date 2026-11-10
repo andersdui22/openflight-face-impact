@@ -1,3 +1,17 @@
+# CURRENT STATUS OVERRIDE — PHASE 3 GATE 13 TECHNICAL ACCEPTANCE (2026-11-10)
+
+**Read this first.** GitHub is authoritative; verify current branch HEAD, exact-SHA CI, Project Law and PR before continuing. Older handoff sections are archived historical snapshots.
+
+- Repository `andersdui22/openflight-face-impact`; Project Law V1; Master Development Plan V1.2 (8 phases / 35 Gates). No upstream OpenFlight or ConnectorNext modifications.
+- Gate 12 was technically closed by user on `fa142ca893a375f9c45a3ef8d962296f92b460dc`. Its draft PR #38 remains unmerged; screenshot requirement deferred, **not waived**.
+- Gate 13 explicitly approved by user: integrate existing buffered USB JPEG `/api/camera/preview.jpg` into six-panel Camera Preview, report `/api/camera/usb/status`, preserve single camera reader, show offline/error states, add simulated integration tests. Branch `mdp-v1.2/phase3-gate13-camera-preview`, draft stacked PR #39 https://github.com/andersdui22/openflight-face-impact/pull/39 (unmerged).
+- Implementation: `ui/src/components/FaceImpactCameraPreview.tsx` polls backend status every five seconds without overlapping status requests, displays a buffered JPEG still when running, and handles disabled/starting/stopped/error/offline/unavailable JPEG. `ui/src/App.tsx` uses a neutral non-measurement topbar instead of falsely claiming camera offline. No new capture loop.
+- Tests: UI SSR component test, four mocked-camera Playwright scenarios, existing dashboard tests and Python camera contract tests. **All technical CI checks passed on exact code SHA `fd49b99167923f066af49877fa18ea4779dea2e5`**: Python 3.10/3.11/3.12, Windows diagnostics, UI unit, E2E, build, lint, Prettier, Pylint and quality checks. PR description completeness remains **failed** because screenshot evidence was deferred; do not bypass or claim pass.
+- Limitations: periodic JPEG stills, not a validated continuous live stream; physical ELP camera and calibration have not been tested; no measured impact results. Electron portable EXE remains UI-only without bundled Python backend. Real hardware and backend connectivity are not verified.
+- **Gate 13 is technically ready for separate user closeout decision, but remains OPEN.** No Gate 14, merge, release, or physical test authorized. This documentation commit changes HEAD; verify its exact-SHA CI before claiming new HEAD green.
+
+---
+
 # CURRENT STATUS OVERRIDE — PHASE 3 GATE 13 (2026-11-10)
 
 **Read this first.** The Gate 12 and Phase 2 sections below are historical. Verify authoritative GitHub branch HEAD, exact-SHA CI, PR and Project Law before work.
