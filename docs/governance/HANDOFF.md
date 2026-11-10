@@ -8,7 +8,7 @@
 - Current phase/gate: **Phase 2, Gate 08 OPEN** — UI actions, navigation and settings. Gate 07 was separately approved CLOSED.
 - Gate 08 branch: `mdp-v1.2/phase2-gate08-ui-contract`; **draft PR #36**: https://github.com/andersdui22/openflight-face-impact/pull/36 ; base branch `mdp-v1.2/phase2-gate07-complete-ui`.
 - Approved Gate 07 base SHA: `78e81f99930eb2420955a6b846c02e24085ddbbf`. Gate 08 scope: `docs/governance/MDP_V1_2_PHASE2_GATE08_PROPOSAL.md`; active gate: `docs/governance/ACTIVE_CHANGE_GATE.md`.
-- Latest test commit before this handoff update: `7b8415fbd9535a3bf68913666957c69a0547fb37` (additional dashboard stats/camera navigation E2E). **Reverify branch HEAD and CI after this handoff commit**.
+- Latest test commit before this handoff update: `468cafeb9fdad4823fab508915f3ad8cbfa733e8` (dashboard stats/camera navigation E2E using locale-independent footer selector). **Reverify branch HEAD and CI after this handoff commit**.
 
 ## Implemented
 - Gate 07 six-panel dark dashboard: Side Impact, Front Impact, Top Impact, Impact Distribution, Camera Preview, Shot Replay.
@@ -18,7 +18,7 @@
 
 ## CI evidence and pending checks
 - PR #36 at SHA `d17891da7c65242f094faa664dafc2607ccade4c`: build, lint, format, UI unit, E2E, Python 3.10/3.11/3.12, pylint, Windows diagnostics **passed**. PR description completeness **failed** due to screenshot embedded-description requirement.
-- At `d072acc31d177b4d83042ee895819b5195551a33`, all technical checks including E2E were **successful**; screenshot PR description completeness failed. Subsequent navigation E2E changes (`68f43482...`, `7b8415fb...`) require new same-SHA CI verification.
+- At `d072acc31d177b4d83042ee895819b5195551a33`, all technical checks including E2E were **successful**; screenshot PR description completeness failed. Subsequent navigation E2E changes (`68f43482...`, `7b8415fb...`, `468cafeb...`) require new same-SHA CI verification.
 - User explicitly deferred inserting the dashboard image; do not ask repeatedly, waive, or bypass screenshot requirement. Playwright screenshot artifact exists from Gate 07. PR #35 remains draft/unmerged; its description check also fails.
 - No merges, releases or physical tests have been authorized.
 
