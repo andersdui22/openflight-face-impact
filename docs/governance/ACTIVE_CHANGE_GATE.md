@@ -1,3 +1,15 @@
+# CURRENT AUTHORIZATION — PHASE 3 GATE 13 (2026-11-10)
+
+Master Development Plan V1.2 / Project Law V1. User explicitly approved Gate 13 camera-preview integration and simulated tests. Branch `mdp-v1.2/phase3-gate13-camera-preview`, draft unmerged PR #39, stacked on technically closed Gate 12 / draft PR #38.
+
+**Technical acceptance evidence:** all technical checks succeeded at exact code SHA `fd49b99167923f066af49877fa18ea4779dea2e5` (Python 3.10–3.12, Windows diagnostics, Playwright E2E, UI unit, build, lint, formatting, Pylint). PR description completeness failed solely because screenshot requirement is deferred, **not waived**. New documentation HEAD needs its own CI check.
+
+Implemented: existing status endpoint and buffered JPEG preview, offline/disabled/error states, single camera reader preserved, truthful non-measurement header, simulated E2E tests. Preview is periodically refreshed JPEG, not proven live video. Electron EXE is UI-only; no Python backend bundled; no physical ELP test or calibrated impact measurements.
+
+**Gate 13 remains OPEN pending explicit user technical closeout.** Do not merge, release, run physical hardware tests, or implement Gate 14 without separate approval. The older sections below are historical.
+
+---
+
 # OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE
 
 Plan: Master Development Plan V1.2; Project Law V1.
