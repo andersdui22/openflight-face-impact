@@ -26,3 +26,13 @@ User authorized completing Gates 09–11 as one development batch on 2026-11-10,
 - `PR description completeness` still fails due to the screenshot requirement expressly deferred by the user. Not bypassed or waived.
 - The Windows job validates build and package file structure; **it does not launch the GUI or test the Windows user experience**. This remains an acceptance gap. Real camera capture, measurements, and Python backend packaging are out of scope.
 - Gate11 cannot be declared fully accepted without appropriate runtime/visual evidence. No merge or release.
+
+## Gate 11 verified packaged Windows renderer smoke (2026-11-10)
+- Exact code SHA: `1dbf9d41d553790db4a15c61a1f85ab1aaef6110`.
+- Workflow: https://github.com/andersdui22/openflight-face-impact/actions/runs/42838234719 — **success**.
+- `Gate 11 packaged EXE renderer smoke` step: **success**. The packaged `OpenFlight Face Impact.exe` was started on a GitHub-hosted Windows runner; the renderer reported all six dashboard panels. This is automated runtime evidence, **not** a user-observed physical-device test.
+- Screenshot evidence artifact: `gate11-windows-dashboard-screenshot`, ID `13774303142`, 12,885 bytes. The artifact was uploaded successfully; visual content has not been independently reviewed in this audit.
+- Portable development-only EXE artifact: `gate10-windows-portable-development-only`, ID `13774068585`, 161,504,268 bytes.
+- All same-SHA technical checks passed: `portable-exe`, `e2e`, `format`, `lint`, UI build/unit, Python 3.10/3.11/3.12, pylint and Windows diagnostics.
+- `PR description completeness` remains **failure** solely with the previously deferred screenshot-in-description requirement; do not waive or claim it passed.
+- Remaining limits: no real ELP camera validation, no Python backend bundled in portable EXE, no physical Windows machine acceptance, no merge/release. Gate11 acceptance still requires final governance closeout decision; this documentation commit requires fresh exact-HEAD CI verification.
