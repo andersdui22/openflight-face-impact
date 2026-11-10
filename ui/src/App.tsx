@@ -58,9 +58,7 @@ function FaceImpactDashboard({
   const [demoEnabled, setDemoEnabled] = useState(false);
   const [demoShots, setDemoShots] = useState<DemoShot[]>([]);
   const demoAverage = (axis: 'x' | 'y') =>
-    demoShots.length
-      ? (demoShots.reduce((sum, shot) => sum + shot[axis], 0) / demoShots.length).toFixed(1)
-      : '—';
+    demoShots.length ? (demoShots.reduce((sum, shot) => sum + shot[axis], 0) / demoShots.length).toFixed(1) : '—';
   const latestDemoShot = demoShots[demoShots.length - 1];
   const panels = [
     { title: 'Side Impact', subtitle: 'Clubface contact', content: 'face' },
@@ -170,7 +168,9 @@ function FaceImpactDashboard({
                         </text>
                       </svg>
                       <span>SIMULATED SHOTS: {demoShots.length} · NOT MEASURED</span>
-                      <span>DEMO AVERAGE X: {demoAverage('x')} mm · Y: {demoAverage('y')} mm</span>
+                      <span>
+                        DEMO AVERAGE X: {demoAverage('x')} mm · Y: {demoAverage('y')} mm
+                      </span>
                     </>
                   ) : (
                     <>
