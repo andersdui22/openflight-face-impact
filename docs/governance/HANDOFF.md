@@ -1,3 +1,14 @@
+# GATE 13 USER-APPROVED TECHNICAL CLOSEOUT — 2026-11-10
+
+The user explicitly approved technical closeout of Phase 3 Gate 13 after all technical CI checks passed on exact SHA `b4843c71b326a0c6adb02127d974756bdfec70b7`. This approval **closes Gate 13 technically**, not physically. The previously deferred screenshot-in-PR-description requirement remains **deferred, not waived**, and the PR description completeness check remains failed. Physical ELP camera testing, calibrated measurement validation and end-to-end Electron/Python backend integration remain unverified.
+
+- Branch: `mdp-v1.2/phase3-gate13-camera-preview`; draft PR #39, open/unmerged, stacked on draft PR #38.
+- Technical scope delivered: existing USB status and buffered JPEG endpoints integrated into six-panel Camera Preview; honest camera/offline/error and non-measurement states; single camera owner preserved; mocked Playwright coverage.
+- All technical checks succeeded on exact pre-closeout SHA `b4843c71b326a0c6adb02127d974756bdfec70b7`: Python 3.10–3.12, Playwright E2E, UI unit, build, lint, formatting, Pylint, Windows diagnostics and quality checks. This governance update creates a new HEAD; recheck exact-SHA CI.
+- **No Gate 14 implementation is authorized.** Next permitted work: read-only audit and prepare Gate 14 scope/approval proposal under Project Law V1. No merge, release or physical testing.
+
+---
+
 # CURRENT STATUS OVERRIDE — PHASE 3 GATE 13 TECHNICAL ACCEPTANCE (2026-11-10)
 
 **Read this first.** GitHub is authoritative; verify current branch HEAD, exact-SHA CI, Project Law and PR before continuing. Older handoff sections are archived historical snapshots.
