@@ -181,3 +181,25 @@ def test_gate15_waiting_consumer_is_cancelled_on_reset():
     worker.join(timeout=1)
     assert not worker.is_alive()
     assert results == [None]
+
+
+def test_gate15_current_session_identity_tracks_reset():
+    ring = TriggeredFrameBuffer(pre_trigger_frames=1, post_trigger_frames=1)
+    first_session = ring.session_id
+    assert first_session
+    ring.add_frame(frame(1))
+    assert ring.trigger(host_timestamp_ns=2)
+    ring.add_frame(frame(3))
+    first = ring.pop_capture()
+    assert first is not None
+    assert first.session_id == first_session
+
+    ring.reset()
+    assert ring.session_id
+    assert ring.session_id != first_session
+    ring.add_frame(frame(4))
+    assert ring.trigger(host_timestamp_ns=5)
+    ring.add_frame(frame(6))
+    second = ring.pop_capture()
+    assert second is not None
+    assert second.session_id == ring.session_id
