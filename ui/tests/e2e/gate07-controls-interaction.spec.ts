@@ -24,7 +24,7 @@ test('Gate 07 setup controls are keyboard accessible and UI-only', async ({ page
   await overlay.uncheck();
   await expect(overlay).not.toBeChecked();
 
-  const calibration = controls.getByRole('button', { name: 'Calibration' });
+  const calibration = controls.getByRole('button', { name: 'Calibration', exact: true });
   await calibration.focus();
   await page.keyboard.press('Tab');
   await page.keyboard.press('Shift+Tab');
