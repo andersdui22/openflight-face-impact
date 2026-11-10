@@ -707,7 +707,7 @@ test('opens reference-inspired Face Impact dashboard without inventing camera re
   await expect(dashboard.locator('.impact-workspace__tile')).toHaveCount(6);
   await expect(dashboard.locator('.impact-workspace__metric')).toHaveCount(8);
   await expect(dashboard.getByText('No measured impacts yet')).toBeVisible();
-  await expect(dashboard.getByText('not measured')).toHaveCount(7);
+  await expect(dashboard.getByText('not measured')).toHaveCount(8);
   await expect(dashboard.getByLabel('Synthetic Face Impact test case')).toBeVisible();
   // Produce a real browser-rendered screenshot for visual review in the CI artifacts.
   await page.screenshot({ path: 'test-results/gate32-dashboard.png', fullPage: true });
@@ -727,7 +727,7 @@ test('keeps Face Impact dashboard accessible at tablet and narrow widths', async
     await expect(dashboard.locator('.impact-workspace__tile')).toHaveCount(6);
     await expect(dashboard.locator('.impact-workspace__metric')).toHaveCount(8);
     await expect(dashboard.getByText('No measured impacts yet')).toBeVisible();
-    await expect(dashboard.getByText('not measured')).toHaveCount(7);
+    await expect(dashboard.getByText('not measured')).toHaveCount(8);
     await expect(dashboard.getByLabel('Synthetic Face Impact test case')).toBeVisible();
     await page.screenshot({ path: `test-results/gate32-dashboard-${width}px.png`, fullPage: true });
     // A narrow viewport hides the sidebar, so top navigation must remain usable.
