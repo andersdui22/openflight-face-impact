@@ -1,3 +1,18 @@
+# CURRENT STATUS OVERRIDE — PHASE 3 GATE 13 (2026-11-10)
+
+**Read this first.** The Gate 12 and Phase 2 sections below are historical. Verify authoritative GitHub branch HEAD, exact-SHA CI, PR and Project Law before work.
+
+- Repository `andersdui22/openflight-face-impact`; Project Law V1; Master Development Plan V1.2 (8 phases, 35 Gates). Do not change upstream OpenFlight or ConnectorNext.
+- **Gate 12 technically closed by user** on `fa142ca893a375f9c45a3ef8d962296f92b460dc`, screenshot evidence deferred, not waived. Draft PR #38 unmerged.
+- **User explicitly approved Gate 13** (2026-11-10): wire six-panel Camera Preview to existing `/api/camera/preview.jpg` and `/api/camera/usb/status`, preserve existing single camera owner/buffer, show offline state, add hardware-free integration tests. No Gate 14, physical testing, merges or releases authorized.
+- Active branch `mdp-v1.2/phase3-gate13-camera-preview`, stacked on Gate 12; draft PR #39 https://github.com/andersdui22/openflight-face-impact/pull/39 (open/unmerged).
+- Implementation: `ui/src/components/FaceImpactCameraPreview.tsx` periodically polls backend status (5 seconds) and requests existing buffered JPEG endpoint when backend reports running; handles disabled, starting, stopped, error, offline and JPEG failure; labels preview as non-measurement. `ui/src/App.tsx` mounts it in Camera Preview. Electron portable UI remains UI-only; Python backend is not bundled. Preview is periodic JPEG stills, not verified live video.
+- Tests: `ui/src/components/FaceImpactCameraPreview.test.tsx` contains SSR checking-state test (not part of current UI CI). `ui/tests/e2e/gate13-camera-preview.spec.ts` covers offline backend, stopped camera, backend error and missing JPEG using mocked HTTP responses.
+- **Exact verified SHA `db67c925e3a6cd1ded4dfffb70c53b6ca26ce872`: all technical CI succeeded** (UI build, lint, format, Playwright E2E, Python 3.10–3.12, Pylint, quality checks). `PR description completeness` fails due to previously deferred screenshot requirement; do not bypass or claim success. Earlier Prettier failure was corrected and mandatory workflow restored.
+- **Known limitations / next Gate 13 tasks:** topbar in `ui/src/App.tsx` still hardcodes “FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW” even if camera is running; reconcile this without duplicating capture. Check overlapping status polling and recovery behavior. No real ELP hardware test or Golden baseline. Update evidence after changes; each documentation commit changes HEAD and requires rechecking exact-SHA CI. Gate 13 remains open until separate user closeout approval.
+
+---
+
 # CURRENT STATUS OVERRIDE — PHASE 3 GATE 12 (2026-11-10)
 
 **Read this first.** The older Phase 2 text below is historical and no longer the active authorization. GitHub is authoritative; verify HEAD, PR, exact-SHA checks and Project Law before acting.
