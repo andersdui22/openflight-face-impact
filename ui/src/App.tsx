@@ -68,7 +68,9 @@ function FaceImpactDashboard({
     { title: 'Top Impact', subtitle: 'Camera-derived geometry', content: 'target' },
     {
       title: 'Impact Distribution',
-      subtitle: demoEnabled ? 'Simulated demo session · not measured' : 'Awaiting validated shot history',
+      subtitle: demoEnabled
+        ? 'Simulated demo session · not measured'
+        : 'Awaiting validated shot history',
       content: 'distribution',
     },
     { title: 'Camera Preview', subtitle: 'ELP OV9281', content: 'camera' },
