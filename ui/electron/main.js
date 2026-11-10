@@ -5,6 +5,7 @@
 // chromium / google-chrome / firefox) with one pinned Chromium version.
 
 import { app, BrowserWindow, Menu } from 'electron';
+import { fileURLToPath } from 'node:url';
 import { resolveTargetUrl } from './resolveTargetUrl.js';
 
 const targetUrl = resolveTargetUrl(process.env, process.argv);
@@ -27,7 +28,13 @@ function createWindow() {
   // The kiosk shell only ever shows the OpenFlight UI itself; deny any
   // attempt (e.g. target="_blank" links) to pop a second window.
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-  win.loadURL(targetUrl);
+  if (app.isPackaged || process.env.OPENFLIGHT_PORTABLE === '1') {
+    // The portable Windows bundle starts its bundled UI without a terminal or server.
+    // Hardware/backend features remain unavailable until a supported service is connected.
+    win.loadFile(fileURLToPath(new URL('../dist/index.html', import.meta.url)));
+  } else {
+    win.loadURL(targetUrl);
+  }
 
   win.on('closed', () => {
     app.quit();
