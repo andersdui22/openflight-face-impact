@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  base: './',
   plugins: [react()],
   server: {
     // Relative fetch('/api/shutdown') from the UI hits Vite; proxy to the mock/backend.

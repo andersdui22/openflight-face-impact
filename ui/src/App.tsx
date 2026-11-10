@@ -11,6 +11,7 @@ import { useCameraReplayController } from './hooks/useCameraReplayController';
 import { socketService } from './services/socketService';
 import { DebugPanel } from './components/DebugPanel';
 import { SyntheticFaceImpactDemo } from './components/SyntheticFaceImpactDemo';
+import { FaceImpactSessionDemo, type DemoShot } from './components/FaceImpactSessionDemo';
 import { FaceImpactControls } from './components/FaceImpactControls';
 import { DisplayMode } from './components/DisplayMode';
 import { SimShotBadges } from './components/SimShotBadges';
@@ -54,11 +55,20 @@ function FaceImpactDashboard({
   onNavigate: (view: PanelView) => void;
   shotCount: number;
 }) {
+  const [demoEnabled, setDemoEnabled] = useState(false);
+  const [demoShots, setDemoShots] = useState<DemoShot[]>([]);
+  const demoAverage = (axis: 'x' | 'y') =>
+    demoShots.length ? (demoShots.reduce((sum, shot) => sum + shot[axis], 0) / demoShots.length).toFixed(1) : '—';
+  const latestDemoShot = demoShots[demoShots.length - 1];
   const panels = [
     { title: 'Side Impact', subtitle: 'Clubface contact', content: 'face' },
     { title: 'Front Impact', subtitle: 'Heel / toe · high / low', content: 'target' },
     { title: 'Top Impact', subtitle: 'Camera-derived geometry', content: 'target' },
-    { title: 'Impact Distribution', subtitle: 'Awaiting validated shot history', content: 'distribution' },
+    {
+      title: 'Impact Distribution',
+      subtitle: demoEnabled ? 'Simulated demo session · not measured' : 'Awaiting validated shot history',
+      content: 'distribution',
+    },
     { title: 'Camera Preview', subtitle: 'ELP OV9281', content: 'camera' },
     { title: 'Shot Replay', subtitle: 'Select a captured shot', content: 'replay' },
   ] as const;
@@ -116,9 +126,58 @@ function FaceImpactDashboard({
                   <SyntheticFaceImpactDemo />
                 </div>
               ) : panel.content === 'distribution' ? (
-                <div className="impact-workspace__distribution" aria-label="Empty impact distribution">
-                  <div className="impact-workspace__rings" />
-                  <span>No measured impacts yet</span>
+                <div
+                  className="impact-workspace__distribution"
+                  aria-label={demoEnabled ? 'Simulated impact distribution' : 'Empty impact distribution'}
+                >
+                  {demoEnabled ? (
+                    <>
+                      <svg
+                        viewBox="0 0 300 180"
+                        role="img"
+                        aria-label={`DEMO ONLY impact map with ${demoShots.length} simulated shots`}
+                        style={{ width: '100%', maxWidth: 300 }}
+                      >
+                        <rect
+                          x="30"
+                          y="20"
+                          width="240"
+                          height="140"
+                          rx="28"
+                          fill="#243b53"
+                          stroke="#8eb3cf"
+                          strokeWidth="2"
+                        />
+                        <line x1="150" y1="20" x2="150" y2="160" stroke="#6987a1" strokeDasharray="4 4" />
+                        <line x1="30" y1="90" x2="270" y2="90" stroke="#6987a1" strokeDasharray="4 4" />
+                        {demoShots.map((shot) => (
+                          <circle
+                            key={shot.id}
+                            cx={150 + shot.x * 4}
+                            cy={90 - shot.y * 4}
+                            r="6"
+                            fill="#79c5d4"
+                            stroke="#ffffff"
+                            strokeWidth="1.5"
+                          >
+                            <title>{`SIMULATED SHOT ${shot.id}: X ${shot.x} mm, Y ${shot.y} mm`}</title>
+                          </circle>
+                        ))}
+                        <text x="150" y="14" textAnchor="middle" fontSize="10" fill="#e5f4ff">
+                          SIMULATED IMPACT MAP · DEMO ONLY
+                        </text>
+                      </svg>
+                      <span>SIMULATED SHOTS: {demoShots.length} · NOT MEASURED</span>
+                      <span>
+                        DEMO AVERAGE X: {demoAverage('x')} mm · Y: {demoAverage('y')} mm
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="impact-workspace__rings" />
+                      <span>No measured impacts yet</span>
+                    </>
+                  )}
                 </div>
               ) : panel.content === 'camera' ? (
                 <div className="impact-workspace__empty">
@@ -142,8 +201,26 @@ function FaceImpactDashboard({
             </section>
           ))}
         </div>
+        <FaceImpactSessionDemo
+          enabled={demoEnabled}
+          setEnabled={setDemoEnabled}
+          shots={demoShots}
+          setShots={setDemoShots}
+        />
         <FaceImpactControls />
-        <div className="impact-workspace__metrics" aria-label="Face Impact metrics">
+        {demoEnabled && (
+          <section className="impact-controls" aria-label="Simulated Face Impact metrics">
+            <strong>DEMO METRICS — SIMULATED, NOT MEASURED</strong>
+            <div className="impact-controls__fields">
+              <span>DEMO SHOT COUNT: {demoShots.length}</span>
+              <span>DEMO LAST X: {latestDemoShot?.x ?? '—'} mm</span>
+              <span>DEMO LAST Y: {latestDemoShot?.y ?? '—'} mm</span>
+              <span>DEMO AVERAGE X: {demoAverage('x')} mm</span>
+              <span>DEMO AVERAGE Y: {demoAverage('y')} mm</span>
+            </div>
+          </section>
+        )}
+        <div className="impact-workspace__metrics" role="region" aria-label="Face Impact metrics">
           {[
             'HEEL / TOE',
             'HIGH / LOW',

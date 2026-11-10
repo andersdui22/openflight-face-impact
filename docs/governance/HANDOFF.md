@@ -1,43 +1,47 @@
 # CURRENT HANDOFF — OpenFlight Face Impact / MDP V1.2
 
-**Updated:** 2026-11-10. **GitHub is authoritative.** A successor chat must begin with a **read-only startup audit** of branch, HEAD, PR, gate law and CI. This file is maintained on every meaningful change so a new chat can resume without relying on chat history.
+**Updated:** 2026-11-10. **GitHub is authoritative.** Begin each successor chat with read-only verification of branch HEAD, PR, governance and exact-SHA CI. The archived material below is historical only.
 
+## Active project and governance
+- Repository: `andersdui22/openflight-face-impact`. Never modify upstream OpenFlight or ConnectorNext.
+- Project Law V1: `docs/governance/PROJECT_LAW.md`. Approved Master Development Plan V1.2: 8 phases, 35 Gates.
+- **Current authorization: Phase 2 Gates 09–11 bundled development approved**. User approved completing remaining Phase 2 gates consecutively on 2026-11-10.
+- Active branch: `mdp-v1.2/phase2-gate09-demo-mode`, stacked on Gate08 branch `mdp-v1.2/phase2-gate08-ui-contract`. Draft PR **#37**: https://github.com/andersdui22/openflight-face-impact/pull/37. PRs #35 (Gate07) and #36 (Gate08) remain draft/unmerged.
+- **Latest known branch commit before this handoff update:** `43842063c4668d0dc7c8b0f3fbee03215cb30531`. Fetch latest HEAD and reverify; handoff update itself changes HEAD.
+- `Fortsæt` permits autonomous work within Phase 2 Gates 09–11. No merge, release, physical tests or later phases without separate user approval. Keep PR draft.
 
-**Gate08 standalone status update (2026-11-10):** UI now displays `FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW` without exposing unrelated OpenFlight server connectivity (`477365416d2c2acca099895710b99729407a7f5f`). E2E assertion added at `67ad529263fbfa5f643424babac3b2c1235faef4`. This is UI-only: backend architecture and hardware integration are unchanged. Reverify same-SHA CI. Screenshot PR description check remains deferred.
+## Gate11 packaged EXE smoke verified — 2026-11-10
+Exact code SHA `1dbf9d41d553790db4a15c61a1f85ab1aaef6110`: **all technical CI success**, including packaged Windows EXE launch and renderer check of six Face Impact panels. Windows workflow run `42838234719` succeeded. Screenshot artifact `gate11-windows-dashboard-screenshot` ID `13774303142`; portable bundle artifact ID `13774068585`. Screenshot was uploaded but not independently visually reviewed or inserted into PR description. PR description completeness still fails by user-deferred requirement. No physical tests, real ELP measurements, bundled Python backend, merge or release. Gate09–11 closeout evidence now exists; seek explicit Phase 2 closeout approval after rechecking latest HEAD. Latest documentation commit before this handoff update: `696c518c854dd5a74fa36bc6e0d3b441baa9a853`.
 
-**Gate08 action inventory (2026-11-10):** See `docs/governance/MDP_V1_2_PHASE2_GATE08_PROPOSAL.md`, commit `70b6f2cc424e53789233dc11e8d01fff8ba6f976`. Dashboard navigation, local settings and disabled future actions are catalogued. CAMERA SETTINGS opens legacy OpenFlight Camera view, not Face Impact ELP OV9281 integration. Latest SHA requires same-SHA CI verification.
+## Latest Gate10/11 CI evidence (2026-11-10)
+Exact code SHA `9c54404e37bec28e8f7b215f26d276a0a2dc69fa`: **all technical CI passed**, including Windows `portable-exe` job (run `42810519769`), E2E, Prettier, lint, UI build/unit, Python matrix, pylint, Windows diagnostics. Downloadable development-only artifact ID `13761873646` named `gate10-windows-portable-development-only` (161,503,560 bytes) was produced. **Only** PR description completeness fails due to user-deferred screenshot. No GUI startup test, no hardware, no Python backend in portable EXE, no merge/release. Gate11 runtime/visual acceptance remains open. Acceptance evidence recorded in `docs/governance/MDP_V1_2_PHASE2_GATES10_11_ACCEPTANCE.md`. This handoff documentation update changes HEAD; check latest HEAD before declaring same-SHA status.
 
-## Active project and authority
-- Repo: `andersdui22/openflight-face-impact`. Work only in this repo; ConnectorNext and upstream OpenFlight are read-only references.
-- Project Law V1: `docs/governance/PROJECT_LAW.md`; approved Master Development Plan V1.2: 8 phases / 35 Gates.
-- Current phase/gate: **Phase 2, Gate 08 OPEN** — UI actions, navigation and settings. Gate 07 was separately approved CLOSED.
-- Gate 08 branch: `mdp-v1.2/phase2-gate08-ui-contract`; **draft PR #36**: https://github.com/andersdui22/openflight-face-impact/pull/36 ; base branch `mdp-v1.2/phase2-gate07-complete-ui`.
-- Approved Gate 07 base SHA: `78e81f99930eb2420955a6b846c02e24085ddbbf`. Gate 08 scope: `docs/governance/MDP_V1_2_PHASE2_GATE08_PROPOSAL.md`; active gate: `docs/governance/ACTIVE_CHANGE_GATE.md`.
-- Latest test commit before this handoff update: `619712db615b8c805877834f91f194d99aaad424` (Face Impact camera explicitly OFFLINE even if server is connected; E2E assertion). **Reverify branch HEAD and CI after this handoff commit**.
+## Phase 2 bundled authorization — Gates 09–11 (2026-11-10)
+User explicitly approved continuing all remaining Phase 2 Gates 09–11 and fixing GitHub CI errors afterward, without per-Gate pauses. This authorization does **not** include merges, releases or physical testing. Governance recorded in `docs/governance/ACTIVE_CHANGE_GATE.md`.
+- Gate09 demo CI passed all technical checks on `2bb8e76271ef4bef217edfab9b92f8c110db5e94`. Screenshot-in-PR-description check remains deferred, not waived.
+- Gate10 implementation now includes `scripts/build-face-impact-windows.ps1`, relative Vite asset paths, Electron local-file startup for portable mode, and manual-only `.github/workflows/gate10-windows-portable.yml` with bundle artifact validation. This produces a **folder-based EXE**, not a single-file installer, and excludes the Python backend. Windows runtime has **not** been verified.
+- Gate11 acceptance checklist in `docs/governance/MDP_V1_2_PHASE2_GATES10_11_ACCEPTANCE.md`; pending new exact-HEAD CI and Windows EXE runtime/visual acceptance.
+- Last known commit before this handoff update: `4f121a52b61d32b82d0931212bdd8aa11d7e7673`; fetch authoritative HEAD. PR #37 remains draft and unmerged. Avoid implying packaging is tested or Gate11 is accepted.
 
-## Implemented
-- Gate 07 six-panel dark dashboard: Side Impact, Front Impact, Top Impact, Impact Distribution, Camera Preview, Shot Replay.
-- Gate 07 four control tabs: Camera setup, Calibration, Capture, Replay. Handedness, camera position, overlay are local-only; future physical actions are explicitly disabled.
-- Gate 08: `RESET LOCAL SETTINGS` restores right-handed / face-on / overlay enabled. Playwright tests verify reset, tab navigation, and that capture/replay remain disabled.
-- Modified Gate 08 files: `ui/src/components/FaceImpactControls.tsx`, `ui/tests/e2e/gate07-controls-interaction.spec.ts`, Gate 08 governance docs, active gate and this handoff.
+## Implemented in active Gate09
+- `ui/src/components/FaceImpactSessionDemo.tsx`: deterministic, local React-only simulated shots with mm X/Y sample coordinates; enter/exit, add, reset, shot history, count and averages. Exiting demo clears synthetic session.
+- `ui/src/App.tsx`: shared demo state renders points inside existing **Impact Distribution** SVG and a separate clearly labeled **DEMO METRICS — SIMULATED, NOT MEASURED** panel. Actual measurement metrics and legacy OpenFlight shot counts are not overwritten.
+- `ui/tests/e2e/gate09-simulated-session.spec.ts`: Playwright lifecycle, plot, averages, reset, exit and clean re-entry.
+- Existing six-panel Gate07 dashboard remains; Gate08 UI navigation/reset remain. CAMERA SETTINGS opens legacy OpenFlight Camera view, **not** a working ELP OV9281 Face Impact integration. Real camera and capture controls remain inactive.
+- No real measurements, physical testing, hardware camera acquisition, release or merge.
 
-## CI evidence and pending checks
-- PR #36 at SHA `d17891da7c65242f094faa664dafc2607ccade4c`: build, lint, format, UI unit, E2E, Python 3.10/3.11/3.12, pylint, Windows diagnostics **passed**. PR description completeness **failed** due to screenshot embedded-description requirement.
-- At `d072acc31d177b4d83042ee895819b5195551a33`, all technical checks including E2E were **successful**; screenshot PR description completeness failed. At `5a3fd45e8d9d7db00c3e51bc799a38e268633adf`, E2E failed because `CAMERA SETTINGS` matched two dashboard buttons (strict-mode violation); other technical checks passed. Fixed with sidebar-scoped selector at `43441d14...`; All technical CI checks passed on handoff SHA `f90cca82caae4c414a30ac18acbd4539d1130819`; screenshot PR description completeness remains failed by agreed deferral. New camera-status change and test at `619712db...` require same-SHA CI verification.
-- User explicitly deferred inserting the dashboard image; do not ask repeatedly, waive, or bypass screenshot requirement. Playwright screenshot artifact exists from Gate 07. PR #35 remains draft/unmerged; its description check also fails.
-- No merges, releases or physical tests have been authorized.
+## Verified CI and outstanding work
+- On `c15bb140d5ea4e513e05f1e9d3b4e1f8da6d1f82`: E2E, UI build, lint, UI unit, Python tests 3.10/3.11/3.12, pylint and Windows diagnostics passed; Prettier failed on `ui/src/App.tsx`.
+- GitHub Actions UI workflow run `42807074528` generated artifact `gate09-prettier-app` (artifact ID `13758513819`) containing exact Prettier-formatted `App.tsx`. On `c102635326f4d614d4b4ccb2aa68fb1323e803f6`, the resulting two formatting differences were applied to `App.tsx`; format and all other technical checks later passed on exact SHA `2bb8e76271ef4bef217edfab9b92f8c110db5e94`.
+- Temporary diagnostic steps were **removed** from `.github/workflows/ui-build.yml` in `33e42f7c2003184b4344612c0b2c21e740cf96dd`. The original `npm run format:check` and all other CI checks remain active.
+- PR description completeness **fails** due to the previously deferred screenshot-in-description requirement. User explicitly deferred screenshot; never claim waived, bypassed or passed, and do not repeatedly request it.
+- **Gate09 closeout proposal:** `docs/governance/MDP_V1_2_PHASE2_GATE09_CLOSEOUT.md` added in `43842063c4668d0dc7c8b0f3fbee03215cb30531`. **Next:** verify exact new HEAD CI including Prettier, E2E, all Python versions, UI unit, build, lint and Windows diagnostics. Ask explicit user approval before closing Gate09 or opening Gate10.
+- Minimize unnecessary GitHub Actions runs by batching meaningful changes. Do not disable CI checks without approval.
 
-## Next autonomous actions within Gate 08
-1. Read-only GitHub audit of current branch SHA, PR #36 checks, changed files, and Project Law V1.
-2. If CI fails for code/test reasons, repair only Gate 08 UI/test scope and rerun CI.
-3. Audit all enabled Face Impact UI controls for meaningful behavior; add narrow UI-only wiring and tests, keeping unavailable physical features disabled and provenance honest.
-4. Keep this handoff current after each meaningful commit; record exact latest HEAD and test evidence. Do not declare Gate 08 closed without explicit user approval.
-
-## Future gates (NOT authorized)
-- Gate 09: simulated shots/demo, impact points, sessions and statistics.
-- Gate 10: double-click Windows EXE.
-- Gate 11: visual/functional acceptance.
-- No camera acquisition, calibration measurement algorithms, real impact claims, merges, releases or physical testing in Gate 08.
+## Future Gates (NOT authorized)
+- Gate10: Windows double-click EXE packaging.
+- Gate11: visual and functional acceptance.
+- Later phases: real ELP camera acquisition, calibration, geometry, tracking, mathematical impact model, integration and validation.
 
 ---
 
