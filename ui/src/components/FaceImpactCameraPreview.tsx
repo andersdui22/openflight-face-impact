@@ -40,7 +40,7 @@ export function FaceImpactCameraPreview() {
         }
         const nextState: CameraState = status.enabled ? status.state : 'disabled';
         setState(nextState);
-        setError(nextState === 'error' ? status.last_error ?? 'Camera error' : null);
+        setError(nextState === 'error' ? (status.last_error ?? 'Camera error') : null);
         setPreviewFailed(false);
         if (nextState === 'running') {
           setFrameKey((key) => key + 1);
