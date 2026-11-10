@@ -10,6 +10,7 @@ test('Gate 07 visual dashboard preserves six panels and exposes honest UI-only c
 
   await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
   const dashboard = page.getByRole('region', { name: 'Face Impact dashboard' });
+  await expect(dashboard.getByText(/FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW/)).toBeVisible();
   for (const title of [
     'Side Impact',
     'Front Impact',
