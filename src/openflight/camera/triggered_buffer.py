@@ -80,6 +80,12 @@ class TriggeredFrameBuffer:
             self._condition.notify_all()
 
     @property
+    def session_id(self) -> str:
+        """Current acquisition session; changes after reset/reconnect."""
+        with self._condition:
+            return self._session_id
+
+    @property
     def buffered_frames(self) -> int:
         """Current number of frames available before a trigger."""
         with self._condition:
