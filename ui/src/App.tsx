@@ -107,7 +107,7 @@ function FaceImpactDashboard({
             </button>
           </nav>
           <span className="impact-workspace__connection">
-            {connected ? '● CONNECTED' : '○ OFFLINE'} · SYNTHETIC PREVIEW
+            {connected ? '● SERVER CONNECTED' : '○ SERVER OFFLINE'} · FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW
           </span>
         </header>
         <div className="impact-workspace__tiles">
