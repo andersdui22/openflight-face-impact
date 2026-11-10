@@ -243,3 +243,30 @@ def test_shared_ring_reset_discards_pending_capture_and_preview():
     assert ring.pop_capture() is None
     assert not ring.capture_busy
     assert ring.buffered_frames == 0
+
+
+def test_reset_cancels_waiting_capture_consumer_without_timeout():
+    """A consumer waiting for a capture must unblock when acquisition resets."""
+    import threading
+    from openflight.camera.triggered_buffer import CameraFrame, TriggeredFrameBuffer
+
+    ring = TriggeredFrameBuffer(1, 2)
+    ring.add_frame(CameraFrame(np.zeros((2, 2), dtype=np.uint8), 1, 1, 0, 0.0))
+    assert ring.trigger(2)
+    waiting = threading.Event()
+    results = []
+
+    def consumer():
+        waiting.set()
+        results.append(ring.wait_for_capture(timeout_s=5))
+
+    thread = threading.Thread(target=consumer)
+    thread.start()
+    assert waiting.wait(timeout=1)
+    # The event announces thread entry; allow the waiter to acquire the
+    # condition lock before resetting the acquisition session.
+    time.sleep(0.02)
+    ring.reset()
+    thread.join(timeout=1)
+    assert not thread.is_alive(), "capture consumer remained blocked after reset"
+    assert results == [None]
