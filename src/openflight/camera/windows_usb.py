@@ -96,6 +96,8 @@ class WindowsUsbCamera:
         except Exception:
             camera.release()
             raise
+        # A restarted acquisition must never expose a previous session's frames.
+        self.ring.reset()
         self._camera = camera
         self._last_error = None
         with self._arrival_lock:

@@ -1,3 +1,27 @@
+# USER-APPROVED TECHNICAL CLOSEOUT — PHASE 3 GATES 14 AND 15 (2026-11-11)
+
+The user explicitly approved technical closeout of **both Gate 14 and Gate 15** in the current conversation after the assistant presented same-SHA CI results. This approval is for technical software acceptance only and is **not** permission to merge, release, perform physical camera tests, integrate the sibling branches, or start Gate 16.
+
+- Gate 14: branch `mdp-v1.2/phase3-gate14-stable-frame-buffer`, PR #40, accepted code SHA `091e48d9f52af843d1f239ab1cfcf7fe0fa1ce38`.
+- Gate 15: branch `mdp-v1.2/phase3-gate15-trigger-replay`, PR #41, accepted code SHA `de81bc7e89ba73563f9bbf796ab7e48ba2dbe92e`.
+- At those exact SHAs, all reported technical CI workflows succeeded: Windows USB camera, foundation, Pylint, Tests, UI, Documentation.
+- `PR Checks` failed because the screenshot-in-PR-description requirement remains **deferred, not waived**. Do not bypass or mark it passed.
+- The two PRs are separate siblings based on Gate 13; their combined code has **not** been integrated or jointly verified. Physical ELP OV9281 acquisition, timing/accuracy, impact localization, and backend-in-EXE packaging remain unverified.
+- This documentation-only commit changes the branch HEAD. The CI evidence above belongs to the explicitly named accepted **code SHAs**, not automatically to the new documentation HEAD. Verify any newly triggered CI independently.
+- Next permitted actions: read-only integration planning, evidence and handoff preparation; **no Gate 16 implementation without explicit user approval**.
+
+---
+
+# CURRENT APPROVAL — PHASE 3 GATES 14 AND 15 (2026-11-10)
+
+User explicitly approved implementation of **both Gate 14 and Gate 15 in parallel**, with separate branches, automated hardware-free tests, no physical ELP test, no merge and no release. Gate 13 was user-technically-closed on `b4843c71b326a0c6adb02127d974756bdfec70b7`; latest Gate 13 governance HEAD `246d167a1552ac94013aa46fcd1f13de5c9289f8` passed all technical checks. Screenshot-in-PR-description remains deferred, not waived; check fails.
+
+**This branch is Gate 14**, `mdp-v1.2/phase3-gate14-stable-frame-buffer`, draft PR #40, stacked on Gate 13 draft PR #39. Latest code SHA before governance update: `21cf113d8240eefb2219711b082e5f627257dfda`; exact-HEAD CI must be checked again after documentation changes. The other Gate is developed on its separate branch. Do not merge these branches automatically or claim they are integrated.
+
+Gate 14: preserve one camera reader and shared ring; prevent stale frames on restart and preview blocking; hardware-free lifecycle tests. Gate 15: reuse ring to establish trigger, pre/post frame capture and replay contract; no invented automatic impact detector or real measurement. No Gate 16 authorization.
+
+---
+
 # GATE 13 TECHNICALLY CLOSED BY USER — 2026-11-10
 
 Under Project Law V1 and Master Development Plan V1.2, the user explicitly approved **technical closeout of Phase 3 Gate 13** after all technical CI checks passed on exact SHA `b4843c71b326a0c6adb02127d974756bdfec70b7`.

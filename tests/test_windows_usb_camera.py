@@ -8,8 +8,9 @@ from openflight.camera.windows_usb import UsbCameraSettings, WindowsUsbCamera
 
 
 class FakeCamera:
-    def __init__(self, *, fail_after=None, opened=True):
+    def __init__(self, *, fail_after=None, opened=True, pixel_value=80):
         self.opened = opened
+        self.pixel_value = pixel_value
         self.fail_after = fail_after
         self.reads = 0
         self.released = False
@@ -30,7 +31,7 @@ class FakeCamera:
         time.sleep(0.002)
         if self.fail_after is not None and self.reads > self.fail_after:
             return False, None
-        return True, np.full((8, 12, 3), 80, dtype=np.uint8)
+        return True, np.full((8, 12, 3), self.pixel_value, dtype=np.uint8)
 
     def release(self):
         self.released = True
@@ -199,3 +200,78 @@ def test_failed_open_does_not_leave_owned_device_and_allows_retry():
     finally:
         camera.stop()
     assert available.released
+
+
+def test_restart_discards_stale_preview_frames_before_new_reader_delivers():
+    """A new camera session must not reuse buffered frames from the prior one."""
+    first = FakeCamera(fail_after=3, pixel_value=17)
+    second = FakeCamera(pixel_value=211)
+    devices = iter((first, second))
+    camera = WindowsUsbCamera(
+        UsbCameraSettings(pre_frames=2, post_frames=2),
+        camera_factory=lambda index: next(devices),
+    )
+    camera.start()
+    wait_until(lambda: camera.last_error is not None)
+    assert camera.ring.latest_frame is not None
+    camera.stop()
+    camera.start()
+    try:
+        # New reader may already have delivered frames, but any visible frame
+        # must belong to the restarted session, not the failed first session.
+        assert camera.ring is not None
+        assert camera.last_error is None
+        wait_until(lambda: camera.frames_received >= 5)
+        assert camera.ring.latest_frame is not None
+        assert np.all(camera.ring.latest_frame.image == 211), 'stale frame from previous acquisition'
+    finally:
+        camera.stop()
+
+
+def test_shared_ring_reset_discards_pending_capture_and_preview():
+    """Restart resets both pre-trigger preview and a completed replay."""
+    from openflight.camera.triggered_buffer import CameraFrame, TriggeredFrameBuffer
+
+    ring = TriggeredFrameBuffer(2, 1)
+    for stamp in (1, 2):
+        ring.add_frame(CameraFrame(np.zeros((2, 2), dtype=np.uint8), stamp, stamp, 0, 0.0))
+    assert ring.trigger(3)
+    ring.add_frame(CameraFrame(np.zeros((2, 2), dtype=np.uint8), 4, 4, 0, 0.0))
+    assert ring.latest_frame is not None
+    ring.reset()
+    assert ring.latest_frame is None
+    assert ring.pop_capture() is None
+    assert not ring.capture_busy
+    assert ring.buffered_frames == 0
+
+
+def test_reset_cancels_waiting_capture_consumer_without_timeout():
+    """A consumer waiting for a capture must unblock when acquisition resets."""
+    import threading
+    from openflight.camera.triggered_buffer import CameraFrame, TriggeredFrameBuffer
+
+    ring = TriggeredFrameBuffer(1, 2)
+    ring.add_frame(CameraFrame(np.zeros((2, 2), dtype=np.uint8), 1, 1, 0, 0.0))
+    assert ring.trigger(2)
+    wait_entered = threading.Event()
+    results = []
+    original_wait_for = ring._condition.wait_for
+
+    def tracked_wait_for(predicate, timeout=None):
+        # Called while the condition lock is held. reset() cannot acquire
+        # the lock until the actual wait releases it.
+        wait_entered.set()
+        return original_wait_for(predicate, timeout)
+
+    ring._condition.wait_for = tracked_wait_for
+
+    def consumer():
+        results.append(ring.wait_for_capture(timeout_s=5))
+
+    thread = threading.Thread(target=consumer)
+    thread.start()
+    assert wait_entered.wait(timeout=1)
+    ring.reset()
+    thread.join(timeout=1)
+    assert not thread.is_alive(), "capture consumer remained blocked after reset"
+    assert results == [None]
