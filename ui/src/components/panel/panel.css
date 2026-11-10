@@ -1930,7 +1930,24 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .impact-workspace__sidebar {
-    display: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    border-right: 0;
+    border-bottom: 1px solid #47546b;
+    padding: 8px;
+  }
+  .impact-workspace__brand {
+    flex-basis: 100%;
+    padding: 0 2px 4px;
+  }
+  .impact-workspace__sidebar-title {
+    margin-top: 0;
+  }
+  .impact-workspace__session,
+  .impact-workspace__sidebar button {
+    min-width: 0;
   }
   .impact-workspace__tiles {
     grid-template-columns: minmax(0, 1fr);
