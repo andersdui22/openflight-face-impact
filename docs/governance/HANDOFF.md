@@ -1,3 +1,44 @@
+# CURRENT HANDOFF — OpenFlight Face Impact / MDP V1.2
+
+**Updated:** 2026-11-10. **GitHub is authoritative.** A successor chat must begin with a **read-only startup audit** of branch, HEAD, PR, gate law and CI. This file is maintained on every meaningful change so a new chat can resume without relying on chat history.
+
+## Active project and authority
+- Repo: `andersdui22/openflight-face-impact`. Work only in this repo; ConnectorNext and upstream OpenFlight are read-only references.
+- Project Law V1: `docs/governance/PROJECT_LAW.md`; approved Master Development Plan V1.2: 8 phases / 35 Gates.
+- Current phase/gate: **Phase 2, Gate 08 OPEN** — UI actions, navigation and settings. Gate 07 was separately approved CLOSED.
+- Gate 08 branch: `mdp-v1.2/phase2-gate08-ui-contract`; **draft PR #36**: https://github.com/andersdui22/openflight-face-impact/pull/36 ; base branch `mdp-v1.2/phase2-gate07-complete-ui`.
+- Approved Gate 07 base SHA: `78e81f99930eb2420955a6b846c02e24085ddbbf`. Gate 08 scope: `docs/governance/MDP_V1_2_PHASE2_GATE08_PROPOSAL.md`; active gate: `docs/governance/ACTIVE_CHANGE_GATE.md`.
+- Latest functional/test commit: `13b0db88a685b078d071197bb6b08f0a849c5f15` (navigation/disabled-action E2E extension). Latest governance commit before this handoff: `95581e2b8bf28fa0242a87cd7e87056fd720b07b`. **Reverify branch HEAD and CI after this handoff commit**.
+
+## Implemented
+- Gate 07 six-panel dark dashboard: Side Impact, Front Impact, Top Impact, Impact Distribution, Camera Preview, Shot Replay.
+- Gate 07 four control tabs: Camera setup, Calibration, Capture, Replay. Handedness, camera position, overlay are local-only; future physical actions are explicitly disabled.
+- Gate 08: `RESET LOCAL SETTINGS` restores right-handed / face-on / overlay enabled. Playwright tests verify reset, tab navigation, and that capture/replay remain disabled.
+- Modified Gate 08 files: `ui/src/components/FaceImpactControls.tsx`, `ui/tests/e2e/gate07-controls-interaction.spec.ts`, Gate 08 governance docs, active gate and this handoff.
+
+## CI evidence and pending checks
+- PR #36 at SHA `d17891da7c65242f094faa664dafc2607ccade4c`: build, lint, format, UI unit, E2E, Python 3.10/3.11/3.12, pylint, Windows diagnostics **passed**. PR description completeness **failed** due to screenshot embedded-description requirement.
+- Latest E2E extension at `13b0db88...` and subsequent governance commits are **not yet recorded as same-SHA green**. Verify current SHA check-runs before claiming success.
+- User explicitly deferred inserting the dashboard image; do not ask repeatedly, waive, or bypass screenshot requirement. Playwright screenshot artifact exists from Gate 07. PR #35 remains draft/unmerged; its description check also fails.
+- No merges, releases or physical tests have been authorized.
+
+## Next autonomous actions within Gate 08
+1. Read-only GitHub audit of current branch SHA, PR #36 checks, changed files, and Project Law V1.
+2. If CI fails for code/test reasons, repair only Gate 08 UI/test scope and rerun CI.
+3. Audit all enabled Face Impact UI controls for meaningful behavior; add narrow UI-only wiring and tests, keeping unavailable physical features disabled and provenance honest.
+4. Keep this handoff current after each meaningful commit; record exact latest HEAD and test evidence. Do not declare Gate 08 closed without explicit user approval.
+
+## Future gates (NOT authorized)
+- Gate 09: simulated shots/demo, impact points, sessions and statistics.
+- Gate 10: double-click Windows EXE.
+- Gate 11: visual/functional acceptance.
+- No camera acquisition, calibration measurement algorithms, real impact claims, merges, releases or physical testing in Gate 08.
+
+---
+
+## Archived handoff from previous gate sequence
+The material below predates MDP V1.2 and refers to historical Gate 25–31 work. It is retained as archive, **not** the active gate or authorization.
+
 # Active handoff
 
 Current snapshot: 2026-11-09. GitHub is authoritative. Start each session with a read-only audit.
