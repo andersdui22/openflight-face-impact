@@ -19,12 +19,7 @@ export function FaceImpactControls() {
     <section className="impact-controls" aria-label="Face Impact controls">
       <div className="impact-controls__tabs" role="group" aria-label="Configuration sections">
         {tabs.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            aria-pressed={tab === item.id}
-            onClick={() => setTab(item.id)}
-          >
+          <button key={item.id} type="button" aria-pressed={tab === item.id} onClick={() => setTab(item.id)}>
             {item.title}
           </button>
         ))}
