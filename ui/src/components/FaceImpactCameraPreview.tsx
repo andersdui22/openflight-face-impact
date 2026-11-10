@@ -25,7 +25,12 @@ export function FaceImpactCameraPreview() {
   useEffect(() => {
     const controller = new AbortController();
     let mounted = true;
+    let requestInFlight = false;
     const check = async () => {
+      if (requestInFlight) {
+        return;
+      }
+      requestInFlight = true;
       try {
         const response = await fetch(`${backendOrigin()}/api/camera/usb/status`, {
           signal: controller.signal,
@@ -50,6 +55,8 @@ export function FaceImpactCameraPreview() {
           setState('offline');
           setError(null);
         }
+      } finally {
+        requestInFlight = false;
       }
     };
     void check();
