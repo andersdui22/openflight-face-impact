@@ -150,8 +150,22 @@ function FaceImpactDashboard({
                           stroke="#8eb3cf"
                           strokeWidth="2"
                         />
-                        <line x1="150" y1="20" x2="150" y2="160" stroke="#6987a1" strokeDasharray="4 4" />
-                        <line x1="30" y1="90" x2="270" y2="90" stroke="#6987a1" strokeDasharray="4 4" />
+                        <line
+                          x1="150"
+                          y1="20"
+                          x2="150"
+                          y2="160"
+                          stroke="#6987a1"
+                          strokeDasharray="4 4"
+                        />
+                        <line
+                          x1="30"
+                          y1="90"
+                          x2="270"
+                          y2="90"
+                          stroke="#6987a1"
+                          strokeDasharray="4 4"
+                        />
                         {demoShots.map((shot) => (
                           <circle
                             key={shot.id}
