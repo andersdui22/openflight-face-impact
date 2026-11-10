@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import threading
 import time
+import uuid
 from collections import deque
 from dataclasses import dataclass
 from typing import Deque, Optional, Sequence
@@ -29,6 +30,8 @@ class TriggeredCapture:
     frames: tuple[CameraFrame, ...]
     pre_trigger_count: int
     trigger_host_timestamp_ns: int
+    shot_id: str = ""  # unique capture identity, not a physical impact claim
+    session_id: str = ""  # acquisition-buffer session identity
 
     @property
     def post_trigger_count(self) -> int:
@@ -53,6 +56,8 @@ class TriggeredFrameBuffer:
         self._trigger_ns = 0
         self._ready: Optional[TriggeredCapture] = None
         self._capturing = False
+        self._session_id = uuid.uuid4().hex
+        self._pending_shot_id: str | None = None
         self._condition = threading.Condition()
 
     @property
@@ -97,8 +102,11 @@ class TriggeredFrameBuffer:
                 frames=frames,
                 pre_trigger_count=len(self._frozen_pre),
                 trigger_host_timestamp_ns=self._trigger_ns,
+                shot_id=self._pending_shot_id or "",
+                session_id=self._session_id,
             )
             self._capturing = False
+            self._pending_shot_id = None
             self._pre.clear()
             self._post = []
             self._frozen_pre = ()
@@ -116,7 +124,8 @@ class TriggeredFrameBuffer:
             self._frozen_pre = tuple(self._pre)
             self._pre.clear()
             self._post = []
-            self._trigger_ns = host_timestamp_ns or time.monotonic_ns()
+            self._trigger_ns = host_timestamp_ns if host_timestamp_ns is not None else time.monotonic_ns()
+            self._pending_shot_id = uuid.uuid4().hex
             self._capturing = True
             return True
 
