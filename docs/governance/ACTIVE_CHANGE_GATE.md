@@ -1,3 +1,13 @@
+# CURRENT APPROVAL — PHASE 3 GATES 14 AND 15 (2026-11-10)
+
+User explicitly approved implementation of **both Gate 14 and Gate 15 in parallel**, with separate branches, automated hardware-free tests, no physical ELP test, no merge and no release. Gate 13 was user-technically-closed on `b4843c71b326a0c6adb02127d974756bdfec70b7`; latest Gate 13 governance HEAD `246d167a1552ac94013aa46fcd1f13de5c9289f8` passed all technical checks. Screenshot-in-PR-description remains deferred, not waived; check fails.
+
+**This branch is Gate 15**, `mdp-v1.2/phase3-gate15-trigger-replay`, draft PR #41, stacked on Gate 13 draft PR #39. Latest code SHA before governance update: `0731ec108df911672b0d5be825857bf25c21887a`; exact-HEAD CI must be checked again after documentation changes. The other Gate is developed on its separate branch. Do not merge these branches automatically or claim they are integrated.
+
+Gate 14: preserve one camera reader and shared ring; prevent stale frames on restart and preview blocking; hardware-free lifecycle tests. Gate 15: reuse ring to establish trigger, pre/post frame capture and replay contract; no invented automatic impact detector or real measurement. No Gate 16 authorization.
+
+---
+
 # GATE 13 TECHNICALLY CLOSED BY USER — 2026-11-10
 
 Under Project Law V1 and Master Development Plan V1.2, the user explicitly approved **technical closeout of Phase 3 Gate 13** after all technical CI checks passed on exact SHA `b4843c71b326a0c6adb02127d974756bdfec70b7`.
