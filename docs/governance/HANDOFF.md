@@ -8,7 +8,7 @@
 - Current phase/gate: **Phase 2, Gate 08 OPEN** — UI actions, navigation and settings. Gate 07 was separately approved CLOSED.
 - Gate 08 branch: `mdp-v1.2/phase2-gate08-ui-contract`; **draft PR #36**: https://github.com/andersdui22/openflight-face-impact/pull/36 ; base branch `mdp-v1.2/phase2-gate07-complete-ui`.
 - Approved Gate 07 base SHA: `78e81f99930eb2420955a6b846c02e24085ddbbf`. Gate 08 scope: `docs/governance/MDP_V1_2_PHASE2_GATE08_PROPOSAL.md`; active gate: `docs/governance/ACTIVE_CHANGE_GATE.md`.
-- Latest test commit before this handoff update: `43441d14f9f8b3425111da7f04e14299275e9d34` (Playwright selector disambiguates sidebar CAMERA SETTINGS). **Reverify branch HEAD and CI after this handoff commit**.
+- Latest test commit before this handoff update: `619712db615b8c805877834f91f194d99aaad424` (Face Impact camera explicitly OFFLINE even if server is connected; E2E assertion). **Reverify branch HEAD and CI after this handoff commit**.
 
 ## Implemented
 - Gate 07 six-panel dark dashboard: Side Impact, Front Impact, Top Impact, Impact Distribution, Camera Preview, Shot Replay.
@@ -18,7 +18,7 @@
 
 ## CI evidence and pending checks
 - PR #36 at SHA `d17891da7c65242f094faa664dafc2607ccade4c`: build, lint, format, UI unit, E2E, Python 3.10/3.11/3.12, pylint, Windows diagnostics **passed**. PR description completeness **failed** due to screenshot embedded-description requirement.
-- At `d072acc31d177b4d83042ee895819b5195551a33`, all technical checks including E2E were **successful**; screenshot PR description completeness failed. At `5a3fd45e8d9d7db00c3e51bc799a38e268633adf`, E2E failed because `CAMERA SETTINGS` matched two dashboard buttons (strict-mode violation); other technical checks passed. Fixed with sidebar-scoped selector at `43441d14...`; same-SHA CI verification is pending.
+- At `d072acc31d177b4d83042ee895819b5195551a33`, all technical checks including E2E were **successful**; screenshot PR description completeness failed. At `5a3fd45e8d9d7db00c3e51bc799a38e268633adf`, E2E failed because `CAMERA SETTINGS` matched two dashboard buttons (strict-mode violation); other technical checks passed. Fixed with sidebar-scoped selector at `43441d14...`; All technical CI checks passed on handoff SHA `f90cca82caae4c414a30ac18acbd4539d1130819`; screenshot PR description completeness remains failed by agreed deferral. New camera-status change and test at `619712db...` require same-SHA CI verification.
 - User explicitly deferred inserting the dashboard image; do not ask repeatedly, waive, or bypass screenshot requirement. Playwright screenshot artifact exists from Gate 07. PR #35 remains draft/unmerged; its description check also fails.
 - No merges, releases or physical tests have been authorized.
 
