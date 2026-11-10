@@ -1,0 +1,34 @@
+name: Gate 10 Windows portable EXE (manual validation)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  portable-exe:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.node-version'
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - name: Build portable EXE
+        shell: pwsh
+        run: ./scripts/build-face-impact-windows.ps1
+      - name: Validate bundle structure
+        shell: pwsh
+        run: |
+          $bundle = 'out/OpenFlight-Face-Impact-Windows'
+          if (!(Test-Path "$bundle/OpenFlight Face Impact.exe")) { throw 'Missing EXE' }
+          if (!(Test-Path "$bundle/resources/app/dist/index.html")) { throw 'Missing UI' }
+          if (!(Test-Path "$bundle/resources/app/electron/main.js")) { throw 'Missing Electron main' }
+          Write-Host 'Bundle file structure verified (not a GUI runtime or hardware test).'
+      - name: Upload development-only portable bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: gate10-windows-portable-development-only
+          path: out/OpenFlight-Face-Impact-Windows
+          if-no-files-found: error
