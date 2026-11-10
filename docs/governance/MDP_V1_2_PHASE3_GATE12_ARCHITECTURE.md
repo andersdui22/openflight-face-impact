@@ -31,3 +31,14 @@ Connect the existing Windows ELP OV9281 USB acquisition architecture to the exis
 - Verify targeted tests and required exact-HEAD CI, with any screenshot-in-PR-description requirement still deferred but **not waived**.
 - Do not proceed to Gate 13, physical tests, merge or release without separate approval.
 - If an actual API/ownership mismatch requires a public behavior change, document and stop for scope review.
+
+## Gate 12 targeted evidence — after test commit
+- Test commit `5d6862868d28b026e1c69e56c2cc7d8d7155df22`: all technical GitHub checks passed, including USB camera fixtures on Windows and Ubuntu, Python 3.10–3.12, UI build/E2E/unit, lint/format and Windows diagnostics. `PR description completeness` failed due to the user-deferred screenshot requirement; **not waived**.
+- Added hardware-free `tests/test_windows_usb_camera.py` assertions that repeated `start()` does not open a second device, and failed opening releases the device before a successful retry. This is not physical validation.
+- `tests/test_windows_usb_server.py` already verifies existing Flask endpoints: `GET /api/camera/preview.jpg` uses the existing USB runtime and returns JPEG/503/404 appropriately; `GET /api/camera/usb/status` reports running/starting/error/disabled and distinguishes reported FPS from observed host-arrival FPS. Do not duplicate these endpoints or tests in Gate 13.
+- `docs/governance/GATE03_WINDOWS_USB_RUNBOOK.md` documents opt-in `--windows-usb-camera` startup and explicitly notes that the Windows bootstrap still starts mock mode by default. Camera device indices are not stable identities; auto reconnect, sustained FPS, and real USB UI compatibility remain physically unverified.
+- Architecture gap: the Phase 2 portable Electron bundle has no Python backend, and the Face Impact dashboard has no proven direct subscription to the USB preview. This is **future Gate 13+ implementation**, not Gate 12 permission.
+- Existing legacy `CameraFrame.sensor_timestamp_ns` field carries a host-clock alias on USB. Do not infer sensor exposure timing from the field name; any public contract change requires separate review.
+
+## Gate 12 disposition
+Architecture and reuse inventory recorded; two narrow contract tests added and technically passed on their exact code SHA. This documentation update changes HEAD and must have its own exact-SHA CI checked before any final closeout. Gate 12 remains **open** until final verification and an explicit closeout decision under Project Law. No Gate 13 implementation authorized.
