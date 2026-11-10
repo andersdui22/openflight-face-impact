@@ -8,8 +8,9 @@ from openflight.camera.windows_usb import UsbCameraSettings, WindowsUsbCamera
 
 
 class FakeCamera:
-    def __init__(self, *, fail_after=None, opened=True):
+    def __init__(self, *, fail_after=None, opened=True, pixel_value=80):
         self.opened = opened
+        self.pixel_value = pixel_value
         self.fail_after = fail_after
         self.reads = 0
         self.released = False
@@ -30,7 +31,7 @@ class FakeCamera:
         time.sleep(0.002)
         if self.fail_after is not None and self.reads > self.fail_after:
             return False, None
-        return True, np.full((8, 12, 3), 80, dtype=np.uint8)
+        return True, np.full((8, 12, 3), self.pixel_value, dtype=np.uint8)
 
     def release(self):
         self.released = True
@@ -203,8 +204,8 @@ def test_failed_open_does_not_leave_owned_device_and_allows_retry():
 
 def test_restart_discards_stale_preview_frames_before_new_reader_delivers():
     """A new camera session must not reuse buffered frames from the prior one."""
-    first = FakeCamera(fail_after=3)
-    second = FakeCamera()
+    first = FakeCamera(fail_after=3, pixel_value=17)
+    second = FakeCamera(pixel_value=211)
     devices = iter((first, second))
     camera = WindowsUsbCamera(
         UsbCameraSettings(pre_frames=2, post_frames=2),
@@ -222,6 +223,7 @@ def test_restart_discards_stale_preview_frames_before_new_reader_delivers():
         assert camera.last_error is None
         wait_until(lambda: camera.frames_received >= 5)
         assert camera.ring.latest_frame is not None
+        assert np.all(camera.ring.latest_frame.image == 211), 'stale frame from previous acquisition'
     finally:
         camera.stop()
 
