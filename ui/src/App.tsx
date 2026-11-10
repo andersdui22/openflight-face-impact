@@ -115,7 +115,9 @@ function FaceImpactDashboard({
               STATS
             </button>
           </nav>
-          <span className="impact-workspace__connection">FACE IMPACT · CAMERA STATUS IN PREVIEW · IMPACT DATA NOT MEASURED</span>
+          <span className="impact-workspace__connection">
+            FACE IMPACT · CAMERA STATUS IN PREVIEW · IMPACT DATA NOT MEASURED
+          </span>
         </header>
         <div className="impact-workspace__tiles">
           {panels.map((panel) => (
