@@ -152,3 +152,32 @@ def test_gate15_reset_drops_inflight_shot_identity():
     assert new is not None
     assert tuple(f.host_timestamp_ns for f in new.frames) == (4, 6, 7)
     assert new.shot_id and new.session_id
+
+
+def test_gate15_waiting_consumer_is_cancelled_on_reset():
+    """Reset must wake a consumer instead of waiting for its timeout."""
+    import threading
+
+    ring = TriggeredFrameBuffer(pre_trigger_frames=1, post_trigger_frames=2)
+    ring.add_frame(frame(1))
+    assert ring.trigger(host_timestamp_ns=2)
+    entered_wait = threading.Event()
+    results = []
+    original_wait_for = ring._condition.wait_for
+
+    def tracked_wait_for(predicate, timeout=None):
+        entered_wait.set()
+        return original_wait_for(predicate, timeout)
+
+    ring._condition.wait_for = tracked_wait_for
+
+    def consumer():
+        results.append(ring.wait_for_capture(timeout_s=5))
+
+    worker = threading.Thread(target=consumer)
+    worker.start()
+    assert entered_wait.wait(timeout=1)
+    ring.reset()
+    worker.join(timeout=1)
+    assert not worker.is_alive()
+    assert results == [None]
