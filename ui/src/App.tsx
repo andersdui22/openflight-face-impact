@@ -49,12 +49,10 @@ function FaceImpactDashboard({
   onLegacy,
   onNavigate,
   shotCount,
-  connected,
 }: {
   onLegacy: () => void;
   onNavigate: (view: PanelView) => void;
   shotCount: number;
-  connected: boolean;
 }) {
   const panels = [
     { title: 'Side Impact', subtitle: 'Clubface contact', content: 'face' },
@@ -107,7 +105,7 @@ function FaceImpactDashboard({
             </button>
           </nav>
           <span className="impact-workspace__connection">
-            {connected ? '● SERVER CONNECTED' : '○ SERVER OFFLINE'} · FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW
+            ○ FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW
           </span>
         </header>
         <div className="impact-workspace__tiles">
@@ -445,7 +443,6 @@ function AppContent() {
             onLegacy={() => setDashboardOpen(false)}
             onNavigate={setCurrentView}
             shotCount={profileShots.length}
-            connected={connected}
           />
         )}
         {currentView === 'live' && !dashboardOpen && (
