@@ -54,6 +54,7 @@ class TriggeredFrameBuffer:
         self._ready: Optional[TriggeredCapture] = None
         self._capturing = False
         self._condition = threading.Condition()
+        self._reset_generation = 0
 
     def reset(self) -> None:
         """Discard frames and incomplete captures when an acquisition session restarts.
@@ -62,6 +63,7 @@ class TriggeredFrameBuffer:
         the same single acquisition source. Wake any waiting capture consumers.
         """
         with self._condition:
+            self._reset_generation += 1
             self._pre.clear()
             self._post.clear()
             self._frozen_pre = ()
@@ -138,8 +140,12 @@ class TriggeredFrameBuffer:
     def wait_for_capture(self, timeout_s: Optional[float] = None) -> Optional[TriggeredCapture]:
         """Wait for and consume the next completed capture."""
         with self._condition:
-            ready = self._condition.wait_for(lambda: self._ready is not None, timeout_s)
-            if not ready:
+            generation = self._reset_generation
+            ready = self._condition.wait_for(
+                lambda: self._ready is not None or self._reset_generation != generation,
+                timeout_s,
+            )
+            if not ready or self._reset_generation != generation:
                 return None
             capture = self._ready
             self._ready = None
