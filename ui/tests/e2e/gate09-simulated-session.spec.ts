@@ -51,6 +51,6 @@ test('Gate 09 demo session is isolated from measured shots and can be reset', as
   await demo.getByRole('button', { name: 'ENTER DEMO MODE' }).click();
   await expect(demo.getByRole('status')).toContainText('SIMULATED SHOTS: 0');
   await expect(distribution.locator('svg circle')).toHaveCount(0);
-  await expect(add).toBeDisabled();
-  await expect(demo.getByRole('status')).toHaveCount(0);
+  await expect(add).toBeEnabled();
+  await expect(demo.getByRole('status')).toContainText('SIMULATED SHOTS: 0');
 });
