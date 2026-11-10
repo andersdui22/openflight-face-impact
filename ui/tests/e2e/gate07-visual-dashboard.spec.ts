@@ -42,3 +42,24 @@ test('Gate 07 visual dashboard preserves six panels and exposes honest UI-only c
     contentType: 'image/png',
   });
 });
+
+
+test('Gate 08 dashboard navigation reaches existing sections and returns to summary', async ({ page }) => {
+  await gotoApp(page);
+  const picker = page.getByRole('dialog', { name: 'Select club' });
+  if (await picker.isVisible()) {
+    await page.getByRole('button', { name: 'Close Select club' }).click();
+  }
+  await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
+  const dashboard = page.getByRole('region', { name: 'Face Impact dashboard' });
+
+  await dashboard.getByRole('button', { name: 'OPEN CLASSIC LIVE VIEW' }).click();
+  await expect(dashboard).not.toBeVisible();
+  await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
+  await expect(dashboard).toBeVisible();
+
+  await dashboard.getByRole('button', { name: 'OPEN SHOT HISTORY' }).click();
+  await expect(dashboard).not.toBeVisible();
+  await page.getByRole('button', { name: 'Live', exact: true }).first().click();
+  await expect(dashboard).toBeVisible();
+});
