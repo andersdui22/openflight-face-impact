@@ -110,3 +110,45 @@ def test_gate15_rejected_trigger_does_not_allocate_another_shot():
     assert second is not None
     assert first.shot_id != second.shot_id
     assert first.session_id == second.session_id
+
+
+def test_gate15_reset_rotates_session_and_discards_pending_capture():
+    ring = TriggeredFrameBuffer(pre_trigger_frames=1, post_trigger_frames=1)
+    ring.add_frame(frame(1))
+    assert ring.trigger(host_timestamp_ns=2)
+    ring.add_frame(frame(3))
+    old = ring.pop_capture()
+    assert old is not None
+    ring.add_frame(frame(4))
+    assert ring.trigger(host_timestamp_ns=5)
+    ring.add_frame(frame(6))
+    ring.reset()
+    assert ring.pop_capture() is None
+    assert ring.latest_frame is None
+    assert not ring.capture_busy
+    ring.add_frame(frame(7))
+    assert ring.trigger(host_timestamp_ns=8)
+    ring.add_frame(frame(9))
+    new = ring.pop_capture()
+    assert new is not None
+    assert new.session_id != old.session_id
+    assert new.shot_id != old.shot_id
+    assert tuple(f.host_timestamp_ns for f in new.frames) == (7, 9)
+
+
+def test_gate15_reset_drops_inflight_shot_identity():
+    ring = TriggeredFrameBuffer(pre_trigger_frames=1, post_trigger_frames=2)
+    ring.add_frame(frame(1))
+    assert ring.trigger(host_timestamp_ns=2)
+    ring.add_frame(frame(3))
+    ring.reset()
+    assert ring.pop_capture() is None
+    assert not ring.capture_busy
+    ring.add_frame(frame(4))
+    assert ring.trigger(host_timestamp_ns=5)
+    ring.add_frame(frame(6))
+    ring.add_frame(frame(7))
+    new = ring.pop_capture()
+    assert new is not None
+    assert tuple(f.host_timestamp_ns for f in new.frames) == (4, 6, 7)
+    assert new.shot_id and new.session_id
