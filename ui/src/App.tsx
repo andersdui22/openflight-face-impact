@@ -201,12 +201,7 @@ function FaceImpactDashboard({
             </section>
           ))}
         </div>
-        <FaceImpactSessionDemo
-          enabled={demoEnabled}
-          setEnabled={setDemoEnabled}
-          shots={demoShots}
-          setShots={setDemoShots}
-        />
+        <FaceImpactSessionDemo enabled={demoEnabled} setEnabled={setDemoEnabled} shots={demoShots} setShots={setDemoShots} />
         <FaceImpactControls />
         {demoEnabled && (
           <section className="impact-controls" aria-label="Simulated Face Impact metrics">
