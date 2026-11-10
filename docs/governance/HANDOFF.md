@@ -2,6 +2,8 @@
 
 **Updated:** 2026-11-10. **GitHub is authoritative.** A successor chat must begin with a **read-only startup audit** of branch, HEAD, PR, gate law and CI. This file is maintained on every meaningful change so a new chat can resume without relying on chat history.
 
+
+**Gate08 standalone status update (2026-11-10):** UI now displays `FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW` without exposing unrelated OpenFlight server connectivity (`477365416d2c2acca099895710b99729407a7f5f`). E2E assertion added at `67ad529263fbfa5f643424babac3b2c1235faef4`. This is UI-only: backend architecture and hardware integration are unchanged. Reverify same-SHA CI. Screenshot PR description check remains deferred.
 ## Active project and authority
 - Repo: `andersdui22/openflight-face-impact`. Work only in this repo; ConnectorNext and upstream OpenFlight are read-only references.
 - Project Law V1: `docs/governance/PROJECT_LAW.md`; approved Master Development Plan V1.2: 8 phases / 35 Gates.
