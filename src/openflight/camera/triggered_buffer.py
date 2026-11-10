@@ -59,6 +59,25 @@ class TriggeredFrameBuffer:
         self._session_id = uuid.uuid4().hex
         self._pending_shot_id: str | None = None
         self._condition = threading.Condition()
+        self._reset_generation = 0
+
+    def reset(self) -> None:
+        """Start a new acquisition session and discard stale capture state.
+
+        Preserve the buffer object and single camera reader. Any consumer
+        waiting for a capture from the previous session is cancelled.
+        """
+        with self._condition:
+            self._reset_generation += 1
+            self._session_id = uuid.uuid4().hex
+            self._pending_shot_id = None
+            self._pre.clear()
+            self._post.clear()
+            self._frozen_pre = ()
+            self._trigger_ns = 0
+            self._ready = None
+            self._capturing = False
+            self._condition.notify_all()
 
     @property
     def buffered_frames(self) -> int:
@@ -132,8 +151,12 @@ class TriggeredFrameBuffer:
     def wait_for_capture(self, timeout_s: Optional[float] = None) -> Optional[TriggeredCapture]:
         """Wait for and consume the next completed capture."""
         with self._condition:
-            ready = self._condition.wait_for(lambda: self._ready is not None, timeout_s)
-            if not ready:
+            generation = self._reset_generation
+            ready = self._condition.wait_for(
+                lambda: self._ready is not None or self._reset_generation != generation,
+                timeout_s,
+            )
+            if not ready or self._reset_generation != generation:
                 return None
             capture = self._ready
             self._ready = None
