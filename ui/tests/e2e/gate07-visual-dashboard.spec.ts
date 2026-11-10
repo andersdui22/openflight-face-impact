@@ -80,6 +80,6 @@ test('Gate 08 dashboard topbar and sidebar actions open their intended views', a
   const footer = page.locator('.panel-footer');
   await footer.locator('.panel-footer__tabs .nav__button').first().click();
   await expect(dashboard).toBeVisible();
-  await dashboard.getByRole('button', { name: 'CAMERA SETTINGS' }).click();
+  await dashboard.getByRole('complementary', { name: 'Session and club sidebar' }).getByRole('button', { name: 'CAMERA SETTINGS' }).click();
   await expect(dashboard).not.toBeVisible();
 });
