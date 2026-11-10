@@ -10,6 +10,7 @@ test('Gate 09 demo session is isolated from measured shots and can be reset', as
   await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
   const dashboard = page.getByRole('region', { name: 'Face Impact dashboard' });
   const demo = dashboard.getByRole('region', { name: 'Face Impact simulated session' });
+  const distribution = dashboard.getByRole('region', { name: 'Impact Distribution' });
 
   await expect(demo.getByText('SIMULATED SESSION — DEMO ONLY')).toBeVisible();
   await expect(demo.getByText(/Not camera measurements or recorded shots/)).toBeVisible();
@@ -20,21 +21,21 @@ test('Gate 09 demo session is isolated from measured shots and can be reset', as
 
   await demo.getByRole('button', { name: 'ENTER DEMO MODE' }).click();
   await expect(demo.getByRole('status')).toContainText('SIMULATED SHOTS: 0');
-  await expect(demo.getByRole('img', { name: 'DEMO ONLY impact map with 0 simulated shots' })).toBeVisible();
+  await expect(distribution.getByRole('img', { name: 'DEMO ONLY impact map with 0 simulated shots' })).toBeVisible();
   await add.click();
   await expect(demo.getByRole('listitem')).toContainText(['SIMULATED SHOT 1: X -12 mm, Y 8 mm']);
   await expect(demo.getByRole('status')).toContainText('AVERAGE X: -12.0 mm');
   await add.click();
   await expect(demo.getByRole('listitem')).toHaveCount(2);
-  await expect(demo.getByRole('img', { name: 'DEMO ONLY impact map with 2 simulated shots' })).toBeVisible();
-  await expect(demo.locator('svg circle')).toHaveCount(2);
+  await expect(distribution.getByRole('img', { name: 'DEMO ONLY impact map with 2 simulated shots' })).toBeVisible();
+  await expect(distribution.locator('svg circle')).toHaveCount(2);
   await expect(demo.getByRole('status')).toContainText('AVERAGE X: -2.5 mm');
   await expect(demo.getByRole('status')).toContainText('AVERAGE Y: 1.5 mm');
 
   await expect(dashboard.getByRole('region', { name: 'Face Impact metrics' }).getByText('not measured').first()).toBeVisible();
   await reset.click();
   await expect(demo.getByRole('listitem')).toHaveCount(0);
-  await expect(demo.locator('svg circle')).toHaveCount(0);
+  await expect(distribution.locator('svg circle')).toHaveCount(0);
   await expect(demo.getByRole('status')).toContainText('SIMULATED SHOTS: 0');
   await expect(reset).toBeDisabled();
   await demo.getByRole('button', { name: 'EXIT DEMO MODE' }).click();
