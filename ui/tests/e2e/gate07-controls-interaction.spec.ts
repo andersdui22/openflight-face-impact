@@ -42,4 +42,23 @@ test('Gate 07 setup controls are keyboard accessible and UI-only', async ({ page
   await expect(controls.getByRole('combobox', { name: 'Camera position' })).toHaveValue('top');
   await expect(controls.getByRole('checkbox', { name: /Show alignment overlay/ })).not.toBeChecked();
   await expect(controls.getByText(/Settings are local to this view and are not saved/)).toBeVisible();
+
+  await controls.getByRole('button', { name: 'RESET LOCAL SETTINGS' }).click();
+  await expect(controls.getByRole('combobox', { name: 'Handedness' })).toHaveValue('right');
+  await expect(controls.getByRole('combobox', { name: 'Camera position' })).toHaveValue('face-on');
+  await expect(controls.getByRole('checkbox', { name: /Show alignment overlay/ })).toBeChecked();
+
+  await controls.getByRole('button', { name: 'Replay', exact: true }).click();
+  await expect(controls.getByRole('button', { name: /PLAY — NOT AVAILABLE/ })).toBeDisabled();
+  await expect(controls.getByRole('button', { name: /FRAME STEP — NOT AVAILABLE/ })).toBeDisabled();
+  await expect(controls.getByRole('button', { name: /EXPORT — NOT AVAILABLE/ })).toBeDisabled();
+
+  await controls.getByRole('button', { name: 'Capture', exact: true }).click();
+  await expect(controls.getByRole('button', { name: /START CAPTURE — NOT AVAILABLE/ })).toBeDisabled();
+  await expect(controls.getByRole('button', { name: /STOP CAPTURE — NOT AVAILABLE/ })).toBeDisabled();
+
+  await controls.getByRole('button', { name: 'Camera setup' }).click();
+  await expect(controls.getByRole('combobox', { name: 'Handedness' })).toHaveValue('right');
+  await expect(controls.getByRole('combobox', { name: 'Camera position' })).toHaveValue('face-on');
+  await expect(controls.getByRole('checkbox', { name: /Show alignment overlay/ })).toBeChecked();
 });

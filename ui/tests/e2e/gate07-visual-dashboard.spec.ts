@@ -10,6 +10,8 @@ test('Gate 07 visual dashboard preserves six panels and exposes honest UI-only c
 
   await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
   const dashboard = page.getByRole('region', { name: 'Face Impact dashboard' });
+  await expect(dashboard.getByText('○ FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW')).toBeVisible();
+  await expect(dashboard.getByText(/SERVER CONNECTED|SERVER OFFLINE/)).toHaveCount(0);
   for (const title of [
     'Side Impact',
     'Front Impact',
@@ -41,4 +43,45 @@ test('Gate 07 visual dashboard preserves six panels and exposes honest UI-only c
     body: await page.screenshot({ fullPage: true }),
     contentType: 'image/png',
   });
+});
+
+
+test('Gate 08 dashboard navigation reaches existing sections and returns to summary', async ({ page }) => {
+  await gotoApp(page);
+  const picker = page.getByRole('dialog', { name: 'Select club' });
+  if (await picker.isVisible()) {
+    await page.getByRole('button', { name: 'Close Select club' }).click();
+  }
+  await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
+  const dashboard = page.getByRole('region', { name: 'Face Impact dashboard' });
+
+  await dashboard.getByRole('button', { name: 'OPEN CLASSIC LIVE VIEW' }).click();
+  await expect(dashboard).not.toBeVisible();
+  await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
+  await expect(dashboard).toBeVisible();
+
+  await dashboard.getByRole('button', { name: 'OPEN SHOT HISTORY' }).click();
+  await expect(dashboard).not.toBeVisible();
+  await expect(page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' })).not.toBeVisible();
+});
+
+
+test('Gate 08 dashboard topbar and sidebar actions open their intended views', async ({ page }) => {
+  await gotoApp(page);
+  const picker = page.getByRole('dialog', { name: 'Select club' });
+  if (await picker.isVisible()) {
+    await page.getByRole('button', { name: 'Close Select club' }).click();
+  }
+  await page.getByRole('button', { name: 'OPEN FACE IMPACT DASHBOARD' }).click();
+  const dashboard = page.getByRole('region', { name: 'Face Impact dashboard' });
+  const nav = dashboard.getByRole('navigation', { name: 'Dashboard sections' });
+  await nav.getByRole('button', { name: 'STATS' }).click();
+  await expect(dashboard).not.toBeVisible();
+
+  // Return via the existing application footer; no new backend or synthetic data.
+  const footer = page.locator('.panel-footer');
+  await footer.locator('.panel-footer__tabs .nav__button').first().click();
+  await expect(dashboard).toBeVisible();
+  await dashboard.getByRole('complementary', { name: 'Session and club sidebar' }).getByRole('button', { name: 'CAMERA SETTINGS' }).click();
+  await expect(dashboard).not.toBeVisible();
 });

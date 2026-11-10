@@ -15,6 +15,12 @@ export function FaceImpactControls() {
   const [cameraPosition, setCameraPosition] = useState('face-on');
   const [overlay, setOverlay] = useState(true);
 
+  const resetLocalSettings = () => {
+    setHandedness('right');
+    setCameraPosition('face-on');
+    setOverlay(true);
+  };
+
   return (
     <section className="impact-controls" aria-label="Face Impact controls">
       <div className="impact-controls__tabs" role="group" aria-label="Configuration sections">
@@ -50,7 +56,10 @@ export function FaceImpactControls() {
               <input type="checkbox" checked={overlay} onChange={(event) => setOverlay(event.target.checked)} />
               Show alignment overlay (preview only)
             </label>
-            <button type="button" disabled title="Camera integration is not available in Gate 07">
+            <button type="button" onClick={resetLocalSettings}>
+              RESET LOCAL SETTINGS
+            </button>
+            <button type="button" disabled title="Camera integration is not available in this gate">
               CONNECT CAMERA — NOT AVAILABLE
             </button>
           </>
