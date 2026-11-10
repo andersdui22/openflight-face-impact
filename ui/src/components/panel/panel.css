@@ -1943,3 +1943,63 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.impact-controls {
+  border-top: 1px solid #506685;
+  background: #1d2d43;
+  padding: 8px 12px;
+  color: #eaf4ff;
+}
+.impact-controls__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.impact-controls__tabs button,
+.impact-controls__fields button {
+  border: 1px solid #6c88ac;
+  border-radius: 3px;
+  background: #344d6c;
+  color: #eaf4ff;
+  padding: 6px 9px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.impact-controls__tabs button[aria-pressed='true'] {
+  border-color: #79c5d4;
+  background: #456b88;
+}
+.impact-controls__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+}
+.impact-controls__fields label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.impact-controls__fields select,
+.impact-controls__fields input:not([type='checkbox']) {
+  max-width: 160px;
+  border: 1px solid #6982a5;
+  border-radius: 3px;
+  background: #26374e;
+  color: #fff;
+  padding: 5px;
+}
+.impact-controls__fields button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.impact-controls__checkbox {
+  white-space: nowrap;
+}
+.impact-controls__disclaimer {
+  margin: 8px 0 0;
+  color: #aab9ca;
+  font-size: 10px;
+}
