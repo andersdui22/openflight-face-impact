@@ -44,7 +44,12 @@ import { useLaunchDaddy, LaunchDaddyOverlay, LaunchDaddyBrand } from './componen
 import { useI18n } from './i18n/useI18n';
 import './components/panel/panel.css';
 
-function FaceImpactDashboard({ onLegacy, onNavigate, shotCount, connected }: {
+function FaceImpactDashboard({
+  onLegacy,
+  onNavigate,
+  shotCount,
+  connected,
+}: {
   onLegacy: () => void;
   onNavigate: (view: PanelView) => void;
   shotCount: number;
@@ -62,27 +67,47 @@ function FaceImpactDashboard({ onLegacy, onNavigate, shotCount, connected }: {
   return (
     <section className="impact-workspace" aria-label="Face Impact dashboard">
       <aside className="impact-workspace__sidebar" aria-label="Session and club sidebar">
-        <div className="impact-workspace__brand">OPENFLIGHT <span>FACE IMPACT</span></div>
-        <div className="impact-workspace__sidebar-title">SESSIONS <span>{shotCount}</span></div>
+        <div className="impact-workspace__brand">
+          OPENFLIGHT <span>FACE IMPACT</span>
+        </div>
+        <div className="impact-workspace__sidebar-title">
+          SESSIONS <span>{shotCount}</span>
+        </div>
         <button type="button" className="impact-workspace__session" onClick={() => onNavigate('shots')}>
           CURRENT SESSION <span>›</span>
         </button>
         <div className="impact-workspace__sidebar-title">CLUB SELECTION</div>
         <div className="impact-workspace__sidebar-note">Select a club in the existing OpenFlight interface.</div>
-        <button type="button" className="impact-workspace__sidebar-link" onClick={onLegacy}>OPEN CLASSIC LIVE VIEW</button>
-        <button type="button" className="impact-workspace__sidebar-link" onClick={() => onNavigate('camera')}>CAMERA SETTINGS</button>
-        <button type="button" className="impact-workspace__sidebar-link" onClick={() => onNavigate('shots')}>SHOT HISTORY</button>
+        <button type="button" className="impact-workspace__sidebar-link" onClick={onLegacy}>
+          OPEN CLASSIC LIVE VIEW
+        </button>
+        <button type="button" className="impact-workspace__sidebar-link" onClick={() => onNavigate('camera')}>
+          CAMERA SETTINGS
+        </button>
+        <button type="button" className="impact-workspace__sidebar-link" onClick={() => onNavigate('shots')}>
+          SHOT HISTORY
+        </button>
       </aside>
       <div className="impact-workspace__content">
         <header className="impact-workspace__topbar">
           <nav aria-label="Dashboard sections">
             <span className="impact-workspace__active">SUMMARY</span>
-            <button type="button" onClick={onLegacy}>SWING</button>
-            <button type="button" onClick={() => onNavigate('camera')}>VIDEO</button>
-            <button type="button" onClick={() => onNavigate('shots')}>HISTORY</button>
-            <button type="button" onClick={() => onNavigate('stats')}>STATS</button>
+            <button type="button" onClick={onLegacy}>
+              SWING
+            </button>
+            <button type="button" onClick={() => onNavigate('camera')}>
+              VIDEO
+            </button>
+            <button type="button" onClick={() => onNavigate('shots')}>
+              HISTORY
+            </button>
+            <button type="button" onClick={() => onNavigate('stats')}>
+              STATS
+            </button>
           </nav>
-          <span className="impact-workspace__connection">{connected ? '● CONNECTED' : '○ OFFLINE'} · SYNTHETIC PREVIEW</span>
+          <span className="impact-workspace__connection">
+            {connected ? '● CONNECTED' : '○ OFFLINE'} · SYNTHETIC PREVIEW
+          </span>
         </header>
         <div className="impact-workspace__tiles">
           {panels.map((panel) => (
@@ -90,25 +115,52 @@ function FaceImpactDashboard({ onLegacy, onNavigate, shotCount, connected }: {
               <div className="impact-workspace__tile-heading">{panel.title}</div>
               <div className="impact-workspace__tile-subtitle">{panel.subtitle}</div>
               {panel.content === 'face' ? (
-                <div className="impact-workspace__face"><SyntheticFaceImpactDemo /></div>
+                <div className="impact-workspace__face">
+                  <SyntheticFaceImpactDemo />
+                </div>
               ) : panel.content === 'distribution' ? (
                 <div className="impact-workspace__distribution" aria-label="Empty impact distribution">
                   <div className="impact-workspace__rings" />
                   <span>No measured impacts yet</span>
                 </div>
               ) : panel.content === 'camera' ? (
-                <div className="impact-workspace__empty"><span className="impact-workspace__crosshair">＋</span>Live camera not active<button type="button" onClick={() => onNavigate('camera')}>OPEN CAMERA SETTINGS</button></div>
+                <div className="impact-workspace__empty">
+                  <span className="impact-workspace__crosshair">＋</span>Live camera not active
+                  <button type="button" onClick={() => onNavigate('camera')}>
+                    OPEN CAMERA SETTINGS
+                  </button>
+                </div>
               ) : panel.content === 'replay' ? (
-                <div className="impact-workspace__empty"><span className="impact-workspace__play">▷</span>No shot replay selected<button type="button" onClick={() => onNavigate('shots')}>OPEN SHOT HISTORY</button></div>
+                <div className="impact-workspace__empty">
+                  <span className="impact-workspace__play">▷</span>No shot replay selected
+                  <button type="button" onClick={() => onNavigate('shots')}>
+                    OPEN SHOT HISTORY
+                  </button>
+                </div>
               ) : (
-                <div className="impact-workspace__empty"><span className="impact-workspace__crosshair">＋</span>Awaiting calibrated observations</div>
+                <div className="impact-workspace__empty">
+                  <span className="impact-workspace__crosshair">＋</span>Awaiting calibrated observations
+                </div>
               )}
             </section>
           ))}
         </div>
         <div className="impact-workspace__metrics" aria-label="Face Impact metrics">
-          {['HEEL / TOE', 'HIGH / LOW', 'IMPACT X', 'IMPACT Y', 'FACE CONTACT', 'CAMERA FPS', 'CALIBRATION', 'SHOT COUNT'].map((name) => (
-            <div className="impact-workspace__metric" key={name}><span>{name}</span><strong>{name === 'SHOT COUNT' ? shotCount : '—'}</strong><small>{name === 'SHOT COUNT' ? 'session shots' : 'not measured'}</small></div>
+          {[
+            'HEEL / TOE',
+            'HIGH / LOW',
+            'IMPACT X',
+            'IMPACT Y',
+            'FACE CONTACT',
+            'CAMERA FPS',
+            'CALIBRATION',
+            'SHOT COUNT',
+          ].map((name) => (
+            <div className="impact-workspace__metric" key={name}>
+              <span>{name}</span>
+              <strong>{name === 'SHOT COUNT' ? shotCount : '—'}</strong>
+              <small>{name === 'SHOT COUNT' ? 'session shots' : 'not measured'}</small>
+            </div>
           ))}
         </div>
       </div>
@@ -387,11 +439,18 @@ function AppContent() {
 
       <main className="panel-app__main">
         {currentView === 'live' && dashboardOpen && (
-          <FaceImpactDashboard onLegacy={() => setDashboardOpen(false)} onNavigate={setCurrentView} shotCount={profileShots.length} connected={connected} />
+          <FaceImpactDashboard
+            onLegacy={() => setDashboardOpen(false)}
+            onNavigate={setCurrentView}
+            shotCount={profileShots.length}
+            connected={connected}
+          />
         )}
         {currentView === 'live' && !dashboardOpen && (
           <>
-            <button type="button" className="impact-workspace__return" onClick={() => setDashboardOpen(true)}>OPEN FACE IMPACT DASHBOARD</button>
+            <button type="button" className="impact-workspace__return" onClick={() => setDashboardOpen(true)}>
+              OPEN FACE IMPACT DASHBOARD
+            </button>
             <ShotProcessingArea phase={shotProcessingPhase}>
               <LivePanel
                 key={shotVersion}
