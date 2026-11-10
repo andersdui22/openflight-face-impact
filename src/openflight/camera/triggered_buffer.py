@@ -55,6 +55,21 @@ class TriggeredFrameBuffer:
         self._capturing = False
         self._condition = threading.Condition()
 
+    def reset(self) -> None:
+        """Discard frames and incomplete captures when an acquisition session restarts.
+
+        Preserve the buffer object so existing preview/trigger consumers retain
+        the same single acquisition source. Wake any waiting capture consumers.
+        """
+        with self._condition:
+            self._pre.clear()
+            self._post.clear()
+            self._frozen_pre = ()
+            self._trigger_ns = 0
+            self._ready = None
+            self._capturing = False
+            self._condition.notify_all()
+
     @property
     def buffered_frames(self) -> int:
         """Current number of frames available before a trigger."""
