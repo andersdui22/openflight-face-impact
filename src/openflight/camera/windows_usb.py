@@ -96,6 +96,9 @@ class WindowsUsbCamera:
         except Exception:
             camera.release()
             raise
+        # The previous reader is fully stopped before a new session starts.
+        # Reuse the same ring while discarding stale frames and shot identity.
+        self.ring.reset()
         self._camera = camera
         self._last_error = None
         with self._arrival_lock:
