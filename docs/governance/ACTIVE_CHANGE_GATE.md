@@ -1,3 +1,41 @@
+# GATE 13 TECHNICALLY CLOSED BY USER — 2026-11-10
+
+Under Project Law V1 and Master Development Plan V1.2, the user explicitly approved **technical closeout of Phase 3 Gate 13** after all technical CI checks passed on exact SHA `b4843c71b326a0c6adb02127d974756bdfec70b7`.
+
+This is a **technical-only** closeout. The screenshot-in-PR-description requirement is **deferred, not waived or passed**; the corresponding check remains failed. No physical ELP camera test, calibration, real impact measurements or end-to-end Electron/Python integration has been verified. Draft PR #39 remains open and unmerged. No merge or release authorized.
+
+**No active authorization to implement Gate 14.** Next action: read-only Gate 14 planning and request separate explicit Gate approval. Reverify exact-SHA CI on the governance-update HEAD.
+
+---
+
+# CURRENT AUTHORIZATION — PHASE 3 GATE 13 (2026-11-10)
+
+Master Development Plan V1.2 / Project Law V1. User explicitly approved Gate 13 camera-preview integration and simulated tests. Branch `mdp-v1.2/phase3-gate13-camera-preview`, draft unmerged PR #39, stacked on technically closed Gate 12 / draft PR #38.
+
+**Technical acceptance evidence:** all technical checks succeeded at exact code SHA `fd49b99167923f066af49877fa18ea4779dea2e5` (Python 3.10–3.12, Windows diagnostics, Playwright E2E, UI unit, build, lint, formatting, Pylint). PR description completeness failed solely because screenshot requirement is deferred, **not waived**. New documentation HEAD needs its own CI check.
+
+Implemented: existing status endpoint and buffered JPEG preview, offline/disabled/error states, single camera reader preserved, truthful non-measurement header, simulated E2E tests. Preview is periodically refreshed JPEG, not proven live video. Electron EXE is UI-only; no Python backend bundled; no physical ELP test or calibrated impact measurements.
+
+**Gate 13 remains OPEN pending explicit user technical closeout.** Do not merge, release, run physical hardware tests, or implement Gate 14 without separate approval. The older sections below are historical.
+
+---
+
+# OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE
+
+Plan: Master Development Plan V1.2; Project Law V1.
+
+## CURRENT ACTIVE AUTHORIZATION — PHASE 3 GATE 13 (2026-11-10)
+
+User explicitly approved Gate 13: connect the six-panel Camera Preview to existing `/api/camera/preview.jpg`, report actual backend camera state from `/api/camera/usb/status`, preserve the existing single-owner reader and buffered JPEG, show offline backend honestly, and add simulated camera integration tests.
+
+Branch: `mdp-v1.2/phase3-gate13-camera-preview`. Draft stacked PR #39, based on user-technically-closed Gate 12 SHA `fa142ca893a375f9c45a3ef8d962296f92b460dc`; PR #38 remains unmerged.
+
+On exact code SHA `db67c925e3a6cd1ded4dfffb70c53b6ca26ce872`, UI build, lint, format, Playwright E2E, Python 3.10–3.12, Pylint and other technical checks passed. The PR screenshot-description requirement remains user-deferred, **not waived or passed**. Later documentation commits require new exact-HEAD CI verification.
+
+Scope boundaries: no new camera capture loop, physical ELP test, merge, release or Gate 14 implementation without separate approval. Python backend is not bundled in portable Electron EXE. No calibrated impact measurements or real camera verification. Gate 13 is **open** pending remaining work and explicit closeout.
+
+---
+
 # OPENFLIGHT FACE IMPACT — ACTIVE CHANGE GATE
 
 Plan: Master Development Plan V1.2; Project Law V1.

@@ -13,6 +13,7 @@ import { DebugPanel } from './components/DebugPanel';
 import { SyntheticFaceImpactDemo } from './components/SyntheticFaceImpactDemo';
 import { FaceImpactSessionDemo, type DemoShot } from './components/FaceImpactSessionDemo';
 import { FaceImpactControls } from './components/FaceImpactControls';
+import { FaceImpactCameraPreview } from './components/FaceImpactCameraPreview';
 import { DisplayMode } from './components/DisplayMode';
 import { SimShotBadges } from './components/SimShotBadges';
 import { ShotProcessingArea } from './components/ShotProcessingArea';
@@ -114,7 +115,9 @@ function FaceImpactDashboard({
               STATS
             </button>
           </nav>
-          <span className="impact-workspace__connection">○ FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW</span>
+          <span className="impact-workspace__connection">
+            FACE IMPACT · CAMERA STATUS IN PREVIEW · IMPACT DATA NOT MEASURED
+          </span>
         </header>
         <div className="impact-workspace__tiles">
           {panels.map((panel) => (
@@ -180,12 +183,7 @@ function FaceImpactDashboard({
                   )}
                 </div>
               ) : panel.content === 'camera' ? (
-                <div className="impact-workspace__empty">
-                  <span className="impact-workspace__crosshair">＋</span>Live camera not active
-                  <button type="button" onClick={() => onNavigate('camera')}>
-                    OPEN CAMERA SETTINGS
-                  </button>
-                </div>
+                <FaceImpactCameraPreview />
               ) : panel.content === 'replay' ? (
                 <div className="impact-workspace__empty">
                   <span className="impact-workspace__play">▷</span>No shot replay selected

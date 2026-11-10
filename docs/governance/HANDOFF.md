@@ -1,3 +1,43 @@
+# GATE 13 USER-APPROVED TECHNICAL CLOSEOUT — 2026-11-10
+
+The user explicitly approved technical closeout of Phase 3 Gate 13 after all technical CI checks passed on exact SHA `b4843c71b326a0c6adb02127d974756bdfec70b7`. This approval **closes Gate 13 technically**, not physically. The previously deferred screenshot-in-PR-description requirement remains **deferred, not waived**, and the PR description completeness check remains failed. Physical ELP camera testing, calibrated measurement validation and end-to-end Electron/Python backend integration remain unverified.
+
+- Branch: `mdp-v1.2/phase3-gate13-camera-preview`; draft PR #39, open/unmerged, stacked on draft PR #38.
+- Technical scope delivered: existing USB status and buffered JPEG endpoints integrated into six-panel Camera Preview; honest camera/offline/error and non-measurement states; single camera owner preserved; mocked Playwright coverage.
+- All technical checks succeeded on exact pre-closeout SHA `b4843c71b326a0c6adb02127d974756bdfec70b7`: Python 3.10–3.12, Playwright E2E, UI unit, build, lint, formatting, Pylint, Windows diagnostics and quality checks. This governance update creates a new HEAD; recheck exact-SHA CI.
+- **No Gate 14 implementation is authorized.** Next permitted work: read-only audit and prepare Gate 14 scope/approval proposal under Project Law V1. No merge, release or physical testing.
+
+---
+
+# CURRENT STATUS OVERRIDE — PHASE 3 GATE 13 TECHNICAL ACCEPTANCE (2026-11-10)
+
+**Read this first.** GitHub is authoritative; verify current branch HEAD, exact-SHA CI, Project Law and PR before continuing. Older handoff sections are archived historical snapshots.
+
+- Repository `andersdui22/openflight-face-impact`; Project Law V1; Master Development Plan V1.2 (8 phases / 35 Gates). No upstream OpenFlight or ConnectorNext modifications.
+- Gate 12 was technically closed by user on `fa142ca893a375f9c45a3ef8d962296f92b460dc`. Its draft PR #38 remains unmerged; screenshot requirement deferred, **not waived**.
+- Gate 13 explicitly approved by user: integrate existing buffered USB JPEG `/api/camera/preview.jpg` into six-panel Camera Preview, report `/api/camera/usb/status`, preserve single camera reader, show offline/error states, add simulated integration tests. Branch `mdp-v1.2/phase3-gate13-camera-preview`, draft stacked PR #39 https://github.com/andersdui22/openflight-face-impact/pull/39 (unmerged).
+- Implementation: `ui/src/components/FaceImpactCameraPreview.tsx` polls backend status every five seconds without overlapping status requests, displays a buffered JPEG still when running, and handles disabled/starting/stopped/error/offline/unavailable JPEG. `ui/src/App.tsx` uses a neutral non-measurement topbar instead of falsely claiming camera offline. No new capture loop.
+- Tests: UI SSR component test, four mocked-camera Playwright scenarios, existing dashboard tests and Python camera contract tests. **All technical CI checks passed on exact code SHA `fd49b99167923f066af49877fa18ea4779dea2e5`**: Python 3.10/3.11/3.12, Windows diagnostics, UI unit, E2E, build, lint, Prettier, Pylint and quality checks. PR description completeness remains **failed** because screenshot evidence was deferred; do not bypass or claim pass.
+- Limitations: periodic JPEG stills, not a validated continuous live stream; physical ELP camera and calibration have not been tested; no measured impact results. Electron portable EXE remains UI-only without bundled Python backend. Real hardware and backend connectivity are not verified.
+- **Gate 13 is technically ready for separate user closeout decision, but remains OPEN.** No Gate 14, merge, release, or physical test authorized. This documentation commit changes HEAD; verify its exact-SHA CI before claiming new HEAD green.
+
+---
+
+# CURRENT STATUS OVERRIDE — PHASE 3 GATE 13 (2026-11-10)
+
+**Read this first.** The Gate 12 and Phase 2 sections below are historical. Verify authoritative GitHub branch HEAD, exact-SHA CI, PR and Project Law before work.
+
+- Repository `andersdui22/openflight-face-impact`; Project Law V1; Master Development Plan V1.2 (8 phases, 35 Gates). Do not change upstream OpenFlight or ConnectorNext.
+- **Gate 12 technically closed by user** on `fa142ca893a375f9c45a3ef8d962296f92b460dc`, screenshot evidence deferred, not waived. Draft PR #38 unmerged.
+- **User explicitly approved Gate 13** (2026-11-10): wire six-panel Camera Preview to existing `/api/camera/preview.jpg` and `/api/camera/usb/status`, preserve existing single camera owner/buffer, show offline state, add hardware-free integration tests. No Gate 14, physical testing, merges or releases authorized.
+- Active branch `mdp-v1.2/phase3-gate13-camera-preview`, stacked on Gate 12; draft PR #39 https://github.com/andersdui22/openflight-face-impact/pull/39 (open/unmerged).
+- Implementation: `ui/src/components/FaceImpactCameraPreview.tsx` periodically polls backend status (5 seconds) and requests existing buffered JPEG endpoint when backend reports running; handles disabled, starting, stopped, error, offline and JPEG failure; labels preview as non-measurement. `ui/src/App.tsx` mounts it in Camera Preview. Electron portable UI remains UI-only; Python backend is not bundled. Preview is periodic JPEG stills, not verified live video.
+- Tests: `ui/src/components/FaceImpactCameraPreview.test.tsx` contains SSR checking-state test (not part of current UI CI). `ui/tests/e2e/gate13-camera-preview.spec.ts` covers offline backend, stopped camera, backend error and missing JPEG using mocked HTTP responses.
+- **Exact verified SHA `db67c925e3a6cd1ded4dfffb70c53b6ca26ce872`: all technical CI succeeded** (UI build, lint, format, Playwright E2E, Python 3.10–3.12, Pylint, quality checks). `PR description completeness` fails due to previously deferred screenshot requirement; do not bypass or claim success. Earlier Prettier failure was corrected and mandatory workflow restored.
+- **Known limitations / next Gate 13 tasks:** topbar in `ui/src/App.tsx` still hardcodes “FACE IMPACT CAMERA OFFLINE · SYNTHETIC PREVIEW” even if camera is running; reconcile this without duplicating capture. Check overlapping status polling and recovery behavior. No real ELP hardware test or Golden baseline. Update evidence after changes; each documentation commit changes HEAD and requires rechecking exact-SHA CI. Gate 13 remains open until separate user closeout approval.
+
+---
+
 # CURRENT STATUS OVERRIDE — PHASE 3 GATE 12 (2026-11-10)
 
 **Read this first.** The older Phase 2 text below is historical and no longer the active authorization. GitHub is authoritative; verify HEAD, PR, exact-SHA checks and Project Law before acting.

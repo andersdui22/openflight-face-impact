@@ -25,6 +25,6 @@ def test_all_six_dashboard_panels_are_retained():
 def test_face_impact_demo_is_explicitly_synthetic():
     app = APP.read_text(encoding="utf-8")
     demo = DEMO.read_text(encoding="utf-8")
-    assert "SYNTHETIC PREVIEW" in app
+    assert "IMPACT DATA NOT MEASURED" in app
     assert "SyntheticFaceImpactDemo" in app
     assert "Not a camera measurement" in demo
