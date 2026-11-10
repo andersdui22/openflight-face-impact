@@ -10,6 +10,9 @@
 - **Latest known branch commit before this handoff update:** `43842063c4668d0dc7c8b0f3fbee03215cb30531`. Fetch latest HEAD and reverify; handoff update itself changes HEAD.
 - `Fortsæt` permits autonomous work within Phase 2 Gates 09–11. No merge, release, physical tests or later phases without separate user approval. Keep PR draft.
 
+## Latest Gate10/11 CI evidence (2026-11-10)
+Exact code SHA `9c54404e37bec28e8f7b215f26d276a0a2dc69fa`: **all technical CI passed**, including Windows `portable-exe` job (run `42810519769`), E2E, Prettier, lint, UI build/unit, Python matrix, pylint, Windows diagnostics. Downloadable development-only artifact ID `13761873646` named `gate10-windows-portable-development-only` (161,503,560 bytes) was produced. **Only** PR description completeness fails due to user-deferred screenshot. No GUI startup test, no hardware, no Python backend in portable EXE, no merge/release. Gate11 runtime/visual acceptance remains open. Acceptance evidence recorded in `docs/governance/MDP_V1_2_PHASE2_GATES10_11_ACCEPTANCE.md`. This handoff documentation update changes HEAD; check latest HEAD before declaring same-SHA status.
+
 ## Phase 2 bundled authorization — Gates 09–11 (2026-11-10)
 User explicitly approved continuing all remaining Phase 2 Gates 09–11 and fixing GitHub CI errors afterward, without per-Gate pauses. This authorization does **not** include merges, releases or physical testing. Governance recorded in `docs/governance/ACTIVE_CHANGE_GATE.md`.
 - Gate09 demo CI passed all technical checks on `2bb8e76271ef4bef217edfab9b92f8c110db5e94`. Screenshot-in-PR-description check remains deferred, not waived.
