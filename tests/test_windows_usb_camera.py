@@ -253,19 +253,24 @@ def test_reset_cancels_waiting_capture_consumer_without_timeout():
     ring = TriggeredFrameBuffer(1, 2)
     ring.add_frame(CameraFrame(np.zeros((2, 2), dtype=np.uint8), 1, 1, 0, 0.0))
     assert ring.trigger(2)
-    waiting = threading.Event()
+    wait_entered = threading.Event()
     results = []
+    original_wait_for = ring._condition.wait_for
+
+    def tracked_wait_for(predicate, timeout=None):
+        # Called while the condition lock is held. reset() cannot acquire
+        # the lock until the actual wait releases it.
+        wait_entered.set()
+        return original_wait_for(predicate, timeout)
+
+    ring._condition.wait_for = tracked_wait_for
 
     def consumer():
-        waiting.set()
         results.append(ring.wait_for_capture(timeout_s=5))
 
     thread = threading.Thread(target=consumer)
     thread.start()
-    assert waiting.wait(timeout=1)
-    # The event announces thread entry; allow the waiter to acquire the
-    # condition lock before resetting the acquisition session.
-    time.sleep(0.02)
+    assert wait_entered.wait(timeout=1)
     ring.reset()
     thread.join(timeout=1)
     assert not thread.is_alive(), "capture consumer remained blocked after reset"
