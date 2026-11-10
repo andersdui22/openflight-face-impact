@@ -1987,6 +1987,15 @@
   border-color: #79c5d4;
   background: #456b88;
 }
+.impact-controls__tabs button:focus-visible,
+.impact-controls__fields button:focus-visible,
+.impact-controls__fields select:focus-visible,
+.impact-controls__fields input:focus-visible,
+.impact-workspace__sidebar button:focus-visible,
+.impact-workspace__topbar button:focus-visible {
+  outline: 2px solid #b5eaff;
+  outline-offset: 2px;
+}
 .impact-controls__fields {
   display: flex;
   flex-wrap: wrap;
