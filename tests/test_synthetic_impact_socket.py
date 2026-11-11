@@ -35,3 +35,23 @@ def test_unknown_case_never_fabricates_measurements(case_id):
     assert payload["ok"] is False
     assert "result" not in payload
     assert "polygon_face_mm" not in payload
+
+
+@pytest.mark.parametrize("case_id", ["toe-high", "heel-low", "outside-face", "no-tangency"])
+def test_synthetic_socket_never_claims_physical_calibration(case_id):
+    """Gate 19 boundary: a demo result is not verified ELP evidence."""
+    payload = synthetic_face_impact_response(case_id)
+    assert payload["source"] == "synthetic_python_pipeline"
+    assert "physical_validation" not in payload
+    assert "camera_mode_compatible" not in payload
+    assert "calibration_revision" not in payload
+    assert "club_geometry_compatible" not in payload
+    assert "physical_validation" not in payload["result"]
+
+
+@pytest.mark.parametrize("case_id", ["outside-face", "no-tangency"])
+def test_rejected_synthetic_results_never_publish_regions_or_coordinates(case_id):
+    """A rejected demo contact must not look like a measured impact."""
+    result = synthetic_face_impact_response(case_id)["result"]
+    for key in ("x_mm", "y_mm", "horizontal_region", "vertical_region"):
+        assert key not in result
