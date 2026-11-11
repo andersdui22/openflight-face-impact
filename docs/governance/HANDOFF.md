@@ -1,3 +1,12 @@
+# PHASE 5 GATE 21 ROBUSTNESS: HOLES AND MALFORMED THRESHOLDS (2026-11-11)
+
+- Verified `48c0c3b5` exact-SHA CI: all six workflows SUCCESS, including the unmocked synthetic image-to-pose regression.
+- Hardened optional synthetic perspective quadrilateral extraction against filled-contour **interior holes** and malformed/non-numeric/boolean acceptance thresholds. A bright outline with dark interior must not be accepted as a filled face candidate.
+- Added negative regression tests for interior holes, malformed area/fill thresholds and wrong calibration dimensions. Existing rectangle mode, camera ownership, and real pose solver remain unchanged.
+- No claim of real clubface detection or physical impact; Gates 20–24 remain OPEN; physical tests deferred; no merge/release. Verify CI on new SHA.
+
+---
+
 # PHASE 5 GATE 21 UNMOCKED SYNTHETIC PERSPECTIVE POSE REGRESSION (2026-11-11)
 
 - Verified exact-SHA `3dd6f5ca`: all six GitHub Actions workflows SUCCESS.

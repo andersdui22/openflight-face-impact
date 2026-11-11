@@ -70,3 +70,32 @@ def test_invalid_threshold_rejected(threshold):
     with pytest.raises(ValueError, match="threshold"):
         observe(polygon_image([[50, 40], [150, 40], [150, 100], [50, 100]]),
                 threshold=threshold)
+
+
+def test_interior_hole_is_rejected():
+    image = polygon_image([[50, 35], [170, 40], [165, 120], [45, 115]])
+    cv.circle(image, (110, 75), 12, 0, -1)
+    with pytest.raises(ValueError, match="interior hole"):
+        observe(image)
+
+
+@pytest.mark.parametrize("bad_area", [True, None, "100", float("nan"), float("inf"), 0])
+def test_invalid_area_threshold_fails_closed(bad_area):
+    image = polygon_image([[50, 40], [150, 40], [150, 100], [50, 100]])
+    with pytest.raises(ValueError, match="acceptance thresholds"):
+        observe(image, min_area_px=bad_area)
+
+
+@pytest.mark.parametrize("bad_ratio", [True, None, "0.85", float("nan"), 0, 1.1])
+def test_invalid_fill_ratio_fails_closed(bad_ratio):
+    image = polygon_image([[50, 40], [150, 40], [150, 100], [50, 100]])
+    with pytest.raises(ValueError, match="acceptance thresholds"):
+        observe(image, min_fill_ratio=bad_ratio)
+
+
+def test_wrong_calibration_dimensions_fail_closed():
+    image = polygon_image([[50, 40], [150, 40], [150, 100], [50, 100]])
+    with pytest.raises(ValueError, match="dimensions"):
+        extract_synthetic_quadrilateral_corners(
+            capture(image), 1, image_size=(160, 240),
+        )

@@ -32,7 +32,11 @@ def extract_synthetic_quadrilateral_corners(
     """
     if type(threshold) is not int or not 1 <= threshold <= 255:
         raise ValueError("threshold must be an integer from 1 to 255")
-    if (not np.isfinite(min_area_px) or min_area_px <= 0
+    if (not isinstance(min_area_px, (int, float, np.integer, np.floating))
+            or isinstance(min_area_px, (bool, np.bool_))
+            or not np.isfinite(min_area_px) or min_area_px <= 0
+            or not isinstance(min_fill_ratio, (int, float, np.integer, np.floating))
+            or isinstance(min_fill_ratio, (bool, np.bool_))
             or not np.isfinite(min_fill_ratio) or not 0 < min_fill_ratio <= 1):
         raise ValueError("invalid quadrilateral acceptance thresholds")
     if type(border_margin_px) is not int or border_margin_px < 0:
@@ -57,6 +61,12 @@ def extract_synthetic_quadrilateral_corners(
             or np.any(corners[:, 1] < border_margin_px)
             or np.any(corners[:, 1] >= height - border_margin_px)):
         raise ValueError("synthetic quadrilateral touches excluded image border")
+    # A contour's bounding box may hide interior holes: require a solid mask.
+    component_mask = np.zeros_like(mask)
+    cv.drawContours(component_mask, [contour], -1, 255, thickness=cv.FILLED)
+    missing_pixels = cv.countNonZero(cv.bitwise_and(component_mask, cv.bitwise_not(mask)))
+    if missing_pixels:
+        raise ValueError("synthetic quadrilateral contains an interior hole")
     polygon_area = abs(float(cv.contourArea(approx)))
     if polygon_area <= 0 or area / polygon_area < min_fill_ratio:
         raise ValueError("synthetic quadrilateral has insufficient fill")
