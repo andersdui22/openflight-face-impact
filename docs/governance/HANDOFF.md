@@ -1,3 +1,12 @@
+# BATCH A — EXPERIMENTAL IMAGE-DERIVED FIDUCIAL OBSERVATIONS (2026-11-12)
+
+- Added `experimental_face_markers.py`: controlled grayscale image -> thresholded, area/circularity/border-validated bright-marker centres, with exact count enforcement and immutable unlabelled pixel observations. Raster regression tests cover four observed points, missing/extra markers and unsupported images.
+- This is a **preparatory image-observation primitive only**. The points have no established correspondence to face coordinates and are not fed into pose/impact estimation. No claim of automatic unmarked clubface detection or physical validity.
+- PR Checks failure investigated: genuine screenshot absent from PR description. Do not fabricate screenshot. Exact SHA CI pending.
+- Gates 20–24 OPEN; physical ELP tests deferred.
+
+---
+
 # BATCH A — OFFLINE EVIDENCE BOUNDARY HARDENING (2026-11-12)
 
 - Strengthened the Python Socket.IO transport boundary: reject missing/whitespace/oversized shot and session identifiers, missing/oversized reasons, nonboolean acceptance, and noncallable emitter before any event publication. Added parameterized negative contract tests.
