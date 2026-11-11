@@ -79,7 +79,13 @@ def estimate_synthetic_face_pose(  # pylint: disable=too-many-arguments
     # pylint: disable=no-member
     import cv2 as cv  # pylint: disable=import-outside-toplevel
 
-    if not all(math.isfinite(limit) and limit > 0 for limit in (max_rms_px, min_margin_px)):
+    if not all(
+        isinstance(limit, (int, float, np.integer, np.floating))
+        and not isinstance(limit, (bool, np.bool_))
+        and math.isfinite(limit)
+        and limit > 0
+        for limit in (max_rms_px, min_margin_px)
+    ):
         raise ValueError("pose score thresholds must be positive and finite")
 
     objects = _plane_points(landmarks_face_mm)
