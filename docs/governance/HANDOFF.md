@@ -1,3 +1,12 @@
+# PHASE 5 GATES 20–24 BATCH DEVELOPMENT: MULTI-FRAME OFFLINE ASSESSMENT (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `2f66f312ac08b50a94093b5e2991aa51f0e2e38e`: all five technical workflows SUCCESS (Tests, UI, Pylint, Foundation, Documentation); PR Checks FAILURE (PR metadata).
+- New bounded pure `assess_synthetic_frame_candidates` evaluates multiple **explicit** frame candidates in one call. Each candidate retains its frame index and independently supplied face pixels, and receives an individual synthetic result plus quality report. No best-frame selection or physical contact timestamp inference.
+- Strict input validation: bounded nonempty tuple, unique nonnegative integer indices, finite Nx2 face pixels copied to read-only arrays, positive integer maximum. Offline tests cover multiple different rejection stages, invalid frame, pixel aliasing, duplicate indices, malformed batches, invalid pixels and limits.
+- Caller face metadata identity is internally tied to the corresponding frame index; this is not proof of actual face pixel origin. Successful full image-derived impact and physical accuracy remain unverified. Gates 20–24 OPEN; no hardware tests, merges, releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATE 24 FACE-FRAME IDENTITY QUALITY PROPAGATION (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `99a7fc0b4ddeb4d3940274af1e48de42068c44b0`: Documentation SUCCESS; Foundation, Tests, Pylint, UI IN PROGRESS; PR Checks FAILURE.
