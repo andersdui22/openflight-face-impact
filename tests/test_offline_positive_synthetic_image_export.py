@@ -10,6 +10,7 @@ import pytest
 
 from openflight.camera.checkerboard_calibration import CheckerboardCalibration
 from openflight.camera.offline_capture_batch import assess_offline_capture_batch
+from openflight.camera.offline_impact_runner import analyze_and_publish_offline_capture
 from openflight.camera.offline_impact_handoff import prepare_offline_impact_handoff
 from openflight.camera.synthetic_face_polygon import SyntheticFacePolygon
 from openflight.camera.synthetic_frame_candidates import SyntheticFrameCandidate
@@ -105,3 +106,40 @@ def test_rasterized_synthetic_contact_reaches_offline_export_without_mocks():
     assert result.vertical_region == "high"
     assert result.physically_validated is False
     assert result.position_uncertainty_mm is None
+
+
+    # Full real runner, not a mocked assessment or manually forged evidence.
+    events = []
+    payload = analyze_and_publish_offline_capture(
+        calibration, capture,
+        (SyntheticFrameCandidate(0, face_pixels),
+         SyntheticFrameCandidate(1, face_pixels)),
+        landmarks, polygon,
+        ball_radius_mm=radius,
+        max_ball_residual_rad=0.03,
+        max_face_rms_px=0.5,
+        min_face_margin_px=0.1,
+        contact_tolerance_mm=5.,
+        threshold=100,
+        min_area_px=300.,
+        ball_border_margin_px=2.,
+        min_circularity=0.8,
+        max_sensor_gap_ns=100,
+        max_host_gap_ns=1000,
+        emit=lambda event, body, **kw: events.append((event, body, kw)),
+        recipient="synthetic-test-client",
+    )
+    assert payload["accepted"] is True
+    assert payload["source"] == "offline_synthetic_analysis"
+    assert payload["shot_id"] == "synthetic-shot"
+    assert payload["session_id"] == "synthetic-session"
+    assert payload["frame_index"] == 1
+    assert payload["x_mm"] == pytest.approx(12., abs=5.)
+    assert payload["y_mm"] == pytest.approx(5., abs=5.)
+    assert payload["horizontal_region"] == "toe"
+    assert payload["vertical_region"] == "high"
+    assert payload["physically_validated"] is False
+    assert payload["position_uncertainty_mm"] is None
+    assert events == [
+        ("offline_impact_evidence", payload, {"to": "synthetic-test-client"})
+    ]

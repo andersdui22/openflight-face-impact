@@ -1,3 +1,12 @@
+# BATCH B — POSITIVE UNMOCKED RASTER TO SOCKET EMISSION REGRESSION (2026-11-12)
+
+- Extended previously proven positive synthetic raster geometry fixture to invoke `analyze_and_publish_offline_capture` directly, repeating real image extraction, batch assessment, temporal selection, safe export and recipient-targeted event publication.
+- Assert accepted x/y, face region, shot/session/frame identity, physically unvalidated metadata, and exactly one `offline_impact_evidence` emission. No mocked geometry calculations. This tests the Python-to-Socket.IO emission contract, **not an actual running browser/socket connection**.
+- Physical ELP camera tests, automatic server capture callback, actual face landmark detection and browser transport integration remain deferred/open.
+- Exact SHA `e59f99de`: Foundation, Pylint, Documentation and Windows USB camera passed; Tests and UI still running at review; PR Checks failed. New commit CI must be checked before acceptance.
+
+---
+
 # BATCH B — ACTUAL OFFLINE ANALYSIS TO EVENT ORCHESTRATION (2026-11-12)
 
 - Added `analyze_and_publish_offline_capture` trusted Python entry point: unmocked captured-frame assessment, fingerprint-bound audit, temporal handoff, and targeted Socket.IO event publishing. It validates recipient/emitter before expensive analysis and aborts on errors without a fabricated impact.
