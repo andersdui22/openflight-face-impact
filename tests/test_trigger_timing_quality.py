@@ -65,3 +65,28 @@ def test_trigger_host_time_not_compared_to_sensor_clock(capture):
         frame(900_000, 1000), frame(900_100, 2000), frame(900_200, 3000),
     ))
     assert assess_trigger_timing(shifted).valid
+
+
+def test_gate22_validates_actual_ring_buffer_capture():
+    from openflight.camera.triggered_buffer import TriggeredFrameBuffer
+
+    ring = TriggeredFrameBuffer(pre_trigger_frames=2, post_trigger_frames=1)
+    ring.add_frame(frame(100, 1000))
+    ring.add_frame(frame(200, 2000))
+    assert ring.trigger(host_timestamp_ns=2500)
+    ring.add_frame(frame(300, 3000))
+    completed = ring.pop_capture()
+    assert completed is not None
+    assert completed.shot_id
+    assert completed.session_id
+    quality = assess_trigger_timing(completed)
+    assert quality.valid
+    assert quality.trigger_between_host_frames
+
+
+def test_gate22_rejects_trigger_before_pre_frame_host_clock(capture):
+    quality = assess_trigger_timing(
+        replace(capture, trigger_host_timestamp_ns=1500)
+    )
+    assert not quality.valid
+    assert "not bracketed" in quality.reason
