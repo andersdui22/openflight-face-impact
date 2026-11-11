@@ -81,20 +81,20 @@ def test_publication_rejects_untyped_or_unaddressed_evidence():
     ("shot", None), ("x" * 257, "session"), ("shot", "x" * 257),
 ])
 def test_offline_transport_rejects_invalid_capture_identity(shot_id, session_id):
-    evidence = OfflineImpactEvidence(
-        shot_id, session_id, 2, True, 12., 5., "toe", "high",
-        "synthetic geometry only",
-    )
-    with pytest.raises(ValueError, match="shot/session identity"):
+    with pytest.raises(ValueError, match="capture identity|shot/session identity"):
+        evidence = OfflineImpactEvidence(
+            shot_id, session_id, 2, True, 12., 5., "toe", "high",
+            "synthetic geometry only",
+        )
         serialize_offline_impact_evidence(evidence)
 
 
 @pytest.mark.parametrize("reason", ["", " ", None, "x" * 2049])
 def test_offline_transport_rejects_invalid_reason(reason):
-    evidence = OfflineImpactEvidence(
-        "shot", "session", None, False, None, None, None, None, reason,
-    )
-    with pytest.raises(ValueError, match="nonempty reason"):
+    with pytest.raises(ValueError, match="explanation|nonempty reason"):
+        evidence = OfflineImpactEvidence(
+            "shot", "session", None, False, None, None, None, None, reason,
+        )
         serialize_offline_impact_evidence(evidence)
 
 

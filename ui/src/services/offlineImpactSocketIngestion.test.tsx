@@ -40,9 +40,16 @@ describe('offline socket event -> Zustand -> review contract', () => {
   });
 
   it('shows rejection reason and no marker', () => {
-    const { frame_index: _frame, x_mm: _x, y_mm: _y,
-      horizontal_region: _horizontal, vertical_region: _vertical, ...rejected } = pythonPayload;
-    ingestOfflineImpactSocketEvent({ ...rejected, accepted: false, reason: 'ambiguous frame' });
+    ingestOfflineImpactSocketEvent({
+      schema_version: 1,
+      source: 'offline_synthetic_analysis',
+      shot_id: 'synthetic-shot',
+      session_id: 'synthetic-session',
+      accepted: false,
+      reason: 'ambiguous frame',
+      physically_validated: false,
+      position_uncertainty_mm: null,
+    });
     const html = renderToStaticMarkup(
       <OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />
     );

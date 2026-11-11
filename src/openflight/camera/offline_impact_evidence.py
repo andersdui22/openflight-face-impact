@@ -31,7 +31,8 @@ class OfflineImpactEvidence:
     position_uncertainty_mm: float | None = None
 
     def __post_init__(self) -> None:
-        if not self.shot_id.strip() or not self.session_id.strip():
+        if (not isinstance(self.shot_id, str) or not self.shot_id.strip()
+                or not isinstance(self.session_id, str) or not self.session_id.strip()):
             raise ValueError("impact evidence requires capture identity")
         if self.physically_validated is not False or self.position_uncertainty_mm is not None:
             raise ValueError("offline evidence cannot assert physical accuracy")

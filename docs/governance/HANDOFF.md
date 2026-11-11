@@ -1,3 +1,10 @@
+# CI BLOCKER REPAIR — 2026-11-12
+
+- Inspected completed CI on `4291f823`: Python tests 7 failures due to invalid fixture construction outside expected exception context; UI test parser failed because JSX was in a `.ts` file; UI lint and format failed for same parse error. Fixed fixture assertions to cover constructor and serialization, added explicit type guards to capture identity validation, and moved JSX test to `.tsx`. Removed unused destructured variables in rejection test.
+- Remaining PR Checks failure requires authentic screenshot in PR description; do not bypass without real evidence. CI on this exact SHA still to be verified. Gates 20–24 OPEN.
+
+---
+
 # BATCH A — LABELLED REFERENCE MARKER ASSOCIATION (2026-11-12)
 
 - Added fail-closed association from image-extracted **unlabelled** bright marker centres to separately trusted **labelled reference pixels**, with global one-to-one assignment, maximum per-point displacement and best-versus-runner-up ambiguity margin. Limited exhaustive matching to <=8 points; no guessed left-to-right label ordering.
