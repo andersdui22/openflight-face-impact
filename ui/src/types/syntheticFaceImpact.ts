@@ -82,7 +82,7 @@ export function isSyntheticFaceImpactResponse(value: unknown): value is Syntheti
       }
       if ((yi > y) !== (yj > y) && x < xi + ((y - yi) * (xj - xi)) / (yj - yi)) inside = !inside;
     }
-    return inside && (
+    return inside && result.rejection_reason === undefined && (
       typeof result.x_mm === 'number' &&
       Number.isFinite(result.x_mm) &&
       typeof result.y_mm === 'number' &&
@@ -95,6 +95,8 @@ export function isSyntheticFaceImpactResponse(value: unknown): value is Syntheti
     ['outside_face', 'no_tangency', 'invalid_geometry'].includes(String(result.status)) &&
     typeof result.rejection_reason === 'string' &&
     result.x_mm === undefined &&
-    result.y_mm === undefined
+    result.y_mm === undefined &&
+    result.horizontal_region === undefined &&
+    result.vertical_region === undefined
   );
 }

@@ -1,3 +1,12 @@
+# PHASE 5 REJECTED-RESULT FIELD ISOLATION (2026-11-11)
+
+- Reconciled React Socket.IO result validation with Python `SyntheticImpactResult` invariants: accepted synthetic impacts cannot also contain a rejection reason; rejected impacts cannot expose horizontal/vertical regions, in addition to coordinates. Added regressions for both contradictory payload classes.
+- This prevents misleading display state at the transport boundary, but does not resolve the P0 positive unmocked image-to-export integration test or physical validation.
+- CI for exact SHA `e9598c50` was queued/in progress at review. Do not infer passing results. PR Checks screenshot requirement remains outstanding.
+- Gates 20–24 OPEN. No physical tests, merges or releases.
+
+---
+
 # PHASE 5 HANDOFF REGRESSION COVERAGE AND ACCEPTANCE RECONCILIATION (2026-11-11)
 
 - Extended the unmocked synthetic-image capture handoff tests to reject over-budget frame batches and reordered frame captures even when frame count and identities otherwise match. This verifies both bounded processing and capture fingerprint provenance.
