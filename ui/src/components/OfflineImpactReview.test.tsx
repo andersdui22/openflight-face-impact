@@ -41,6 +41,23 @@ describe('offline synthetic impact review', () => {
     expect(html).not.toContain('synthetic-impact-marker');
   });
 
+  it('does not show the earlier accepted marker when the latest shot is rejected', () => {
+    useOfflineImpactStore.getState().ingest(accepted);
+    useOfflineImpactStore.getState().ingest({
+      schema_version: 1, source: 'offline_synthetic_analysis',
+      shot_id: 'shot-rejected', session_id: 'session-a', accepted: false,
+      reason: 'no unique temporal contact', physically_validated: false,
+      position_uncertainty_mm: null,
+    });
+    const html = renderToStaticMarkup(
+      <OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />
+    );
+    expect(html).toContain('shot-a');
+    expect(html).toContain('shot-rejected');
+    expect(html).toContain('no unique temporal contact');
+    expect(html).not.toContain('data-testid="synthetic-impact-marker"');
+  });
+
   it('does not draw outside the illustrative reference outline', () => {
     useOfflineImpactStore.getState().ingest({ ...accepted, x_mm: 200 });
     const html = renderToStaticMarkup(<OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />);

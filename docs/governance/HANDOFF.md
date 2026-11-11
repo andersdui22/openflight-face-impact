@@ -1,3 +1,11 @@
+# BATCH B — FRONTEND REGRESSION HARDENING (2026-11-12)
+
+- Removed brittle exact React SSR whitespace-comment assertion from offline socket-to-review contract test. Added mixed accepted/rejected history test: latest rejected shot must not inherit an earlier accepted impact marker.
+- Exact SHA `336bedd9` CI was still running at inspection; PR Checks failed. This change is not evidence of a completed browser/network end-to-end run.
+- Next: verify exact SHA CI and add a controlled, server-owned synthetic replay path for true browser integration. Gates 20–24 OPEN; physical tests deferred.
+
+---
+
 # BATCH B — SOCKET EVENT TO REACT VIEW CONTRACT (2026-11-12)
 
 - Extracted the actual `offline_impact_evidence` Socket.IO listener ingestion to a shared typed handler, used by production listener and new contract tests.

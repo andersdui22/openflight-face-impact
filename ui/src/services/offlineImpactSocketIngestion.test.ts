@@ -29,7 +29,7 @@ describe('offline socket event -> Zustand -> review contract', () => {
     expect(entries).toHaveLength(1);
     const html = renderToStaticMarkup(<OfflineImpactReview evidence={entries} />);
     expect(html).toContain('synthetic-shot');
-    expect(html).toContain('X: <!-- -->12.0');
+    expect(html).toContain('12.0');
     expect(html).toContain('synthetic-impact-marker');
     expect(html).toContain('NOT CAMERA MEASUREMENTS');
   });
