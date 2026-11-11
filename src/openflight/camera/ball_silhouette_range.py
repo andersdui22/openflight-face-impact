@@ -31,6 +31,19 @@ class BallSilhouettePosition:
             or not np.all(np.isfinite(center))
         ):
             raise ValueError("ball centre must be a finite XYZ camera position")
+        if any(
+            not isinstance(value, (int, float, np.integer, np.floating))
+            or isinstance(value, (bool, np.bool_))
+            or not math.isfinite(value)
+            for value in (self.range_mm, self.angular_radius_rad, self.max_residual_rad)
+        ):
+            raise ValueError("ball range diagnostics must be finite numeric scalars")
+        if (
+            self.range_mm <= 0
+            or not 0 < self.angular_radius_rad < math.pi / 2
+            or not 0 <= self.max_residual_rad < self.angular_radius_rad
+        ):
+            raise ValueError("ball range diagnostics are inconsistent")
         immutable = np.array(center, dtype=np.float64, copy=True)
         immutable.setflags(write=False)
         object.__setattr__(self, "center_camera_mm", immutable)

@@ -1,3 +1,11 @@
+# PHASE 5 GATE 20 RESULT-CONTRACT HARDENING (2026-11-11)
+
+- Read-only startup audit of draft PR #45 at `bbb8a5f7a14da70ea975e1fd9f60a931fbe76b40`: all five technical workflows SUCCESS; PR Checks FAILURE due title and required PR-description sections. Source and tests inspected before editing.
+- Gate 20: reject invalid/nonfinite/boolean or inconsistent range, angular radius and residual in immutable BallSilhouettePosition results. Tests cover malformed scalar diagnostics and valid contract; no physical accuracy claim.
+- Atomic batch changes source, tests and handoff in one commit. CI for this new HEAD pending; do not infer results from preceding SHA. Gate 20–24 OPEN. No hardware tests, merges, releases, or PR check bypass.
+
+---
+
 # PHASE 5 GATE 22 CI CONTRACT FIX (2026-11-11)
 
 - Read-only audit at `2d1fab4cd3502319790c3c7c3c40f2db17e86869`: Documentation, Pylint, Face Impact foundation and UI passed; Tests failed 3 assertions on changed error wording. PR Checks still fail title/description. CI logs show all 3 failures expect substring `missing capture identity` while the new stricter identity validator returned `missing or invalid capture identity`.

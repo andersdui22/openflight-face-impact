@@ -141,3 +141,36 @@ def test_gate20_position_copies_external_centre_array():
     result = BallSilhouettePosition(centre, 500., 0.1, 0.001)
     centre[0] = 999.
     assert result.center_camera_mm[0] == 1.
+
+
+@pytest.mark.parametrize(("range_mm", "angular_radius_rad", "residual_rad"), [
+    (0., 0.1, 0.001),
+    (-1., 0.1, 0.001),
+    (float("nan"), 0.1, 0.001),
+    (True, 0.1, 0.001),
+    (500., 0., 0.001),
+    (500., float("inf"), 0.001),
+    (500., 0.1, -0.001),
+    (500., 0.1, 0.1),
+    (500., 0.1, "0.001"),
+])
+def test_gate20_rejects_invalid_ball_range_diagnostics(
+    range_mm, angular_radius_rad, residual_rad,
+):
+    from openflight.camera.ball_silhouette_range import BallSilhouettePosition
+
+    with pytest.raises(ValueError, match="ball range diagnostics"):
+        BallSilhouettePosition(
+            np.array([0., 0., 500.]), range_mm, angular_radius_rad, residual_rad,
+        )
+
+
+def test_gate20_valid_ball_range_diagnostics_preserved():
+    from openflight.camera.ball_silhouette_range import BallSilhouettePosition
+
+    result = BallSilhouettePosition(
+        np.array([0., 0., 500.]), 500., 0.1, 0.001,
+    )
+    assert result.range_mm == 500.
+    assert result.angular_radius_rad == 0.1
+    assert result.max_residual_rad == 0.001
