@@ -1,3 +1,11 @@
+# PHASE 5 GATE 24 ACCEPTED-RESULT COMPOSITION REGRESSION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `756aa4cc56876e238d1be53e8aada3e02ef5cd61`: Documentation SUCCESS; Tests, Pylint, Foundation, UI IN PROGRESS; PR Checks FAILURE.
+- Added isolated acceptance-path regression for `assess_capture_ball_synthetic_impact`: injected successful synthetic geometry is carried unchanged to the quality report, with physical validation False and uncertainty None. Existing real selected-frame negative integration test remains.
+- This test **mocks the underlying geometry calculation**; it does not establish a successful camera-frame-to-contact end-to-end case. Such a case and face-observation provenance remain open. Gates 20–24 OPEN; no hardware tests, merges, releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATE 24 END-TO-END SYNTHETIC QUALITY COMPOSITION (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `ea34c998371f5d3bbfaa09defbd493ee497af62c`: Foundation, Pylint, Documentation SUCCESS; Tests and UI IN PROGRESS; PR Checks FAILURE.

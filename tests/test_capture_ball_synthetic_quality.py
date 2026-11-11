@@ -38,3 +38,28 @@ def test_missing_ball_in_selected_frame_has_consistent_rejection_quality():
     assert result.quality.reason == result.impact.rejection_reason
     assert result.quality.physically_validated is False
     assert result.quality.position_uncertainty_mm is None
+
+
+def test_accepted_synthetic_impact_is_reported_without_physical_confidence(monkeypatch):
+    from openflight.camera import capture_ball_synthetic_quality as module
+    from openflight.camera.synthetic_impact_pipeline import SyntheticImpactResult
+
+    expected = SyntheticImpactResult(
+        SyntheticImpactStatus.OK, 12., -4., "toe", "low",
+    )
+    def fake_capture_impact(*_args, **_kwargs):
+        return expected
+
+    monkeypatch.setattr(module, "calculate_capture_ball_synthetic_impact", fake_capture_impact)
+    result = module.assess_capture_ball_synthetic_impact(
+        None, None, 2, None, None, None,
+        ball_radius_mm=21.35, max_ball_residual_rad=0.02,
+        max_face_rms_px=0.5, min_face_margin_px=0.1,
+        contact_tolerance_mm=0.01, threshold=100,
+        min_area_px=100., ball_border_margin_px=2.,
+    )
+    assert result.impact is expected
+    assert result.quality.accepted_synthetic_geometry is True
+    assert result.quality.physically_validated is False
+    assert result.quality.position_uncertainty_mm is None
+    assert "unverified" in result.quality.reason
