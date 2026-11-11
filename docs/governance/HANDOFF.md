@@ -1,3 +1,12 @@
+# BATCH B — OFFLINE IMPACT VISUAL REVIEW (2026-11-12)
+
+- Replaced text-only offline synthetic history with `OfflineImpactReview`, using `FaceImpactView` for accepted evidence, selectable shot history, and clear rejection messages. New component tests cover accepted marker, rejected no-marker, and accepted point outside illustrative outline.
+- **Important:** face outline is explicitly illustrative and uncalibrated. The marker is a display of an accepted *synthetic offline result*, not a measured camera contact; no physical accuracy claim. The existing main Face Impact demo remains separate.
+- Python still does not emit the new `offline_impact_evidence` event from actual offline captures. The UI subscription and review can consume such events once the backend is wired.
+- Exact SHA `8aa9fd4b` CI pending at review; PR Checks failed. Gates 20–24 OPEN; physical tests deferred; no merge/release.
+
+---
+
 # BATCH B — FRONTEND OFFLINE EVIDENCE EVENT INGESTION (2026-11-12)
 
 - Added bounded Zustand store `useOfflineImpactStore` and tests for validated event ingestion, immutable shot deduplication, session rollover and rejected evidence. Source must be versioned `offline_synthetic_analysis` and explicitly physically unvalidated.
