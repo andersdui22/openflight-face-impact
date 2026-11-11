@@ -1,3 +1,12 @@
+# PHASE 5 GATE 22 CANDIDATE FRAME CHECKPOINT (2026-11-11)
+
+- PR #45 remains draft/unmerged. Last read-only audit of `6c741f579fba1bd8d2359687cb9b886368635be8`: Pylint and Documentation passed; foundation in progress; Tests, UI and PR Checks queued. A much older SHA `70093cfae191068f4eb7056f5b43e4c65e575e9b` had all technical workflows green, with PR Checks red (deferred screenshots). **No same-SHA green claim for latest changes.**
+- Gate 22 commit `b912d31a3e1bf237bb5cf2890c6f7aebfad576c7`: `validate_candidate_frame_index(capture, candidate_index)` now requires valid capture timing/identity and an explicitly supplied bounded frame index. It does NOT infer the physical impact instant from trigger or timestamps. Test commit `e051dc75e39eebe2f2a0e72097cbd385fb1496c8` checks accepted indices, invalid indices and rejected provenance.
+- This is an offline contract helper only, **not yet wired into impact calculation or live publication**. The selected candidate remains a hypothesis, not verified physical contact.
+- Next: verify CI on new HEAD, check Pylint and tests, then continue Gate 20 contour quality and Gate 21/23/24 integration. No physical tests until all 35 Gates, no merge/release without authorization. Handoff commit advances HEAD.
+
+---
+
 # PHASE 5 GATE 22 RING INTEGRATION TEST CHECKPOINT (2026-11-11)
 
 - PR #45 read-only audit: HEAD `85e87a96545adbb117f966907ea17a216405085b`, draft, unmerged. All six PR workflows were **queued** when checked, including Tests, Pylint, UI, Documentation, foundation and PR Checks. **No same-SHA pass has been verified.**
