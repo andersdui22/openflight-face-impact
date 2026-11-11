@@ -1,3 +1,11 @@
+# PHASE 5 GATE 20 OFFLINE CONTOUR-TO-SPHERE COMPOSITION (2026-11-11)
+
+- Exact-SHA startup audit of PR #45 `c68deb447d25d1d893ffef9f42474322cfcee6b3`: Tests, Pylint, Foundation, UI and Documentation SUCCESS; PR Checks FAILURE on metadata.
+- New pure `estimate_bright_ball_position` composes existing single-bright-component extraction, calibrated pixel rays and existing ball silhouette range solver; validates calibrated image dimensions before processing. No duplicate ray or sphere solver, no camera reader.
+- Added offline disk/invalid-dimensions/ambiguous-component/invalid-radius tests. Brightness is not proof of golf-ball identity, and synthetic results are not physical accuracy evidence. No live impact publication. Gates 20–24 OPEN; no hardware tests, merges, releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATE 20 SYNTHETIC BRIGHT CONTOUR EXTRACTION (2026-11-11)
 
 - Read-only startup audit of PR #45 exact HEAD `3be171b1aa2b870f6631f9ae97f0bd6c178d7b87`: Tests, Pylint, Foundation, UI, Documentation SUCCESS; PR Checks FAILURE on PR metadata.
