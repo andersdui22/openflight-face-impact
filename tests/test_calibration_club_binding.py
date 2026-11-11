@@ -13,6 +13,7 @@ from openflight.camera.calibration_profile import CameraCalibrationProfile
 from openflight.camera.calibration_revision import calibration_revision
 from openflight.camera.checkerboard_calibration import CheckerboardCalibration
 from openflight.camera.club_face_model import ClubFaceModel, ClubFamily, FaceSurface
+from openflight.camera.club_geometry_revision import club_geometry_revision
 
 
 def profile():
@@ -36,7 +37,7 @@ def club():
 def test_matching_offline_binding_is_accepted():
     p = profile()
     require_calibration_club_binding(
-        CalibrationClubBinding(calibration_revision(p), club().model_id),
+        CalibrationClubBinding(calibration_revision(p), club().model_id, club_geometry_revision(club())),
         profile=p, club_model=club(),
     )
 
@@ -45,7 +46,7 @@ def test_stale_calibration_rejected():
     p = profile()
     with pytest.raises(ValueError, match="stale"):
         require_calibration_club_binding(
-            CalibrationClubBinding(calibration_revision(p), club().model_id),
+            CalibrationClubBinding(calibration_revision(p), club().model_id, club_geometry_revision(club())),
             profile=replace(p, camera_mode_id="different-crop"), club_model=club(),
         )
 
@@ -54,7 +55,7 @@ def test_substituted_club_identity_rejected():
     p = profile()
     with pytest.raises(ValueError, match="identity incompatible"):
         require_calibration_club_binding(
-            CalibrationClubBinding(calibration_revision(p), club().model_id),
+            CalibrationClubBinding(calibration_revision(p), club().model_id, club_geometry_revision(club())),
             profile=p, club_model=replace(club(), model_id="synthetic-9iron"),
         )
 
@@ -63,7 +64,7 @@ def test_unknown_club_geometry_rejected():
     p = profile()
     with pytest.raises(ValueError, match="evidenced"):
         require_calibration_club_binding(
-            CalibrationClubBinding(calibration_revision(p), "unknown"),
+            CalibrationClubBinding(calibration_revision(p), "unknown", club_geometry_revision(club())),
             profile=p, club_model=ClubFaceModel(ClubFamily.IRON, "unknown"),
         )
 
@@ -73,3 +74,32 @@ def test_malformed_binding_rejected():
         CalibrationClubBinding("", "synthetic-7iron")
     with pytest.raises(ValueError, match="identity"):
         CalibrationClubBinding("placeholder", " ")
+
+
+def test_same_club_identity_but_changed_dimensions_rejected():
+    p = profile()
+    original = club()
+    binding = CalibrationClubBinding(
+        calibration_revision(p), original.model_id, club_geometry_revision(original)
+    )
+    with pytest.raises(ValueError, match="geometry revision"):
+        require_calibration_club_binding(
+            binding, profile=p, club_model=replace(original, width_mm=61.),
+        )
+
+
+def test_missing_geometry_revision_rejected():
+    p = profile()
+    with pytest.raises(ValueError, match="geometry revision required"):
+        require_calibration_club_binding(
+            CalibrationClubBinding(calibration_revision(p), club().model_id),
+            profile=p, club_model=club(),
+        )
+
+
+def test_geometry_revision_is_deterministic_and_provenance_sensitive():
+    original = club()
+    assert club_geometry_revision(original) == club_geometry_revision(club())
+    assert club_geometry_revision(original) != club_geometry_revision(
+        replace(original, evidence_source="other-synthetic-fixture")
+    )
