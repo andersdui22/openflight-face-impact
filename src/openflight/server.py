@@ -1658,9 +1658,13 @@ def windows_usb_camera_status():
     """Report only observed USB acquisition state; no inferred sensor FPS."""
     # Gate 16: report only verified calibration evidence. No persisted profile
     # has been loaded or matched to a verified physical USB camera mode yet.
-    from openflight.camera.calibration_status import calibration_status  # pylint: disable=import-outside-toplevel
+    from openflight.camera.calibration_store import load_calibration_status  # pylint: disable=import-outside-toplevel
 
-    calibration = calibration_status(None, camera_mode_id=None, image_size=None)
+    # An explicit offline profile path is optional. USB capture does not yet
+    # establish a trusted physical mode/crop identity, so compatibility and
+    # physical validation remain false even when a profile loads successfully.
+    profile_path = os.environ.get("OPENFLIGHT_FACE_IMPACT_CALIBRATION_PROFILE")
+    calibration = load_calibration_status(profile_path or None)
     camera = windows_usb_runtime
     if camera is None:
         return jsonify({"enabled": False, "state": "disabled", "calibration": calibration})
