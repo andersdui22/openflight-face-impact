@@ -96,3 +96,10 @@ No individual Gate 17, 18 or 19 is accepted yet. Continue with focused tests, sa
 - No authoritative Face Impact impact-result publication boundary has yet been established by this audit. Until its owner is located and separately evidenced, implementing a runtime measurement guard would risk modifying the wrong pipeline. This checkpoint is not proof that no such boundary exists elsewhere.
 - Gate 19's offline validation and status reporting remain fail-closed; they are not a substitute for physical verification or runtime measurement enforcement.
 - User-directed screenshot deferral is a scheduling decision, **not** a waiver of the PR check. All three gates remain OPEN and PR #44 remains draft.
+
+### Face Impact UI consumer audit (2026-11-11)
+
+- `ui/src/components/FaceImpactCameraPreview.tsx` is the currently inspected Face Impact UI consumer of `/api/camera/usb/status`. It polls the USB status every five seconds and displays a calibration label alongside an MJPEG-independent JPEG preview request. Its own visible disclaimer is `USB preview only · no impact measurement`.
+- The component exposes **no impact measurement action or impact-result publication path**. Adding a measurement blocker to this preview would be misleading: it would not protect a measurement operation.
+- `calibration_status.py` and `calibration_revision_status.py` return status dictionaries and do not acquire camera frames or enforce measurement access. `offline_profile_compatible` remains an offline metadata state; physical validation remains false.
+- **Next Gate 19 design dependency:** locate and audit a genuine Face Impact result producer/consumer before designing any runtime guard. Until then, do not connect Gate 19 to unrelated radar/ballistics paths or claim measurement enforcement exists.
