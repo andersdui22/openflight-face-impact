@@ -1,3 +1,13 @@
+# BATCH B — VERSIONED PYTHON / REACT OFFLINE RESULT CONTRACT (2026-11-12)
+
+- Introduced `serialize_offline_impact_evidence` with explicit schema v1, source `offline_synthetic_analysis`, shot/session/frame provenance, finite coordinate validation and strict `physically_validated=False`.
+- Added Python JSON serialization and rejection tests; rejected evidence cannot carry a frame index or impact coordinates.
+- Added matching React discriminated-union type and fail-closed runtime validator for future event ingestion. **No Socket.IO emission, UI ingestion, session persistence or physical measurement is claimed yet.**
+- Existing synthetic demo event is separate from this offline export contract. Next functional batch must wire actual offline handoff outputs into a real backend event and dashboard state without treating them as measured.
+- Exact SHA `0d2c2219` CI was pending at review, PR Checks still failing; do not infer green. Gates 20–24 OPEN; physical tests deferred; no merge/release.
+
+---
+
 # BATCH A CI RECONCILIATION — REAL BROWSER FAILURES (2026-11-12)
 
 - Reviewed exact SHA `ec95a5dd`: Python Tests, Pylint and Documentation passed; UI lint/build passed, but UI format and two browser E2E tests failed; Windows camera and foundation still queued at review. PR Checks still failed.
