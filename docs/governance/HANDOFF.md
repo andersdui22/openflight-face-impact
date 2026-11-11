@@ -1,3 +1,12 @@
+# PHASE 5 PR AND CI CHECKPOINT (2026-11-11)
+
+- Created **draft PR #45**: https://github.com/andersdui22/openflight-face-impact/pull/45, head `mdp-v1.2/phase5-gates20-24-parallel`, base `mdp-v1.2/phase4-gates17-19-parallel`. No merge/release.
+- PR creation triggered GitHub Actions on SHA `d3992511719458bec1d09ca5689cff4f963ad9be`. At observation, Tests, Pylint, UI, Documentation and PR Checks were **in progress**; Face Impact foundation **queued**. No successful same-SHA result yet. Recheck latest HEAD after this handoff commit and verify **its** CI.
+- Gate 20 source and regression test commits: `105e99ec`, `ff801f0e`. Only strict validation of supplied radius and angular residual budget has changed; no physical ball detector or camera reader added.
+- Next: inspect failing CI jobs if any, fix within scope, then continue bounded Gate 20 observation-quality and Gate 21 pose-validation work. Keep this file current after milestones.
+
+---
+
 # PHASE 5 IMPLEMENTATION UPDATE — GATE 20 (2026-11-11)
 
 - Verified Phase 5 branch `mdp-v1.2/phase5-gates20-24-parallel` at prior handoff SHA `2d388f87537ab6216ece5b1b61b84043d9f48822`; no PR-triggered workflow runs were returned for that SHA (not a pass).
