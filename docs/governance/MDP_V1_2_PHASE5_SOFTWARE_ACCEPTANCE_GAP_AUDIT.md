@@ -17,7 +17,7 @@ Date: 2026-11-11. Scope: current branch `mdp-v1.2/phase5-gates20-24-parallel`, d
 | --- | --- | --- |
 | P0 | 20–24 | Exact-SHA CI all required checks green; record result and any environment-only failures distinctly |
 | P0 | 20–24 | Recover and reconcile the canonical approved Master Development Plan V1.2 acceptance criteria, absent from inspected repository; do not substitute this audit for the canonical plan |
-| P0 | 23–24 | Positive, unmocked image-to-batch-to-timing-to-export **synthetic** regression with explicit frame/session identity and rejection counterparts |
+| P0 | 23–24 | Positive, unmocked image-to-batch-to-timing-to-export **synthetic** regression with explicit frame/session identity and rejection counterparts; **still open** (existing integration only exercises rejection) |
 | P1 | 21 | Demonstrate synthetic face-corner detection provenance and rejection of ambiguous/non-planar/unobservable scenes; no real clubface claim |
 | P1 | 22 | Explicit temporal evidence policy: unique geometry is not a contact instant; define offline handoff limits and rejected cases |
 | P1 | 20,24 | Expand segmentation/occlusion/noise and batch consistency tests with bounded inputs and fail-closed results |

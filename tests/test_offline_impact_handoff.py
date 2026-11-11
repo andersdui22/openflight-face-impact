@@ -140,6 +140,24 @@ def test_empty_frame_assessments_rejected_before_export():
         )
 
 
+def test_handoff_respects_configured_frame_budget_before_export():
+    capture, batch = fixture()
+    with pytest.raises(ValueError, match="nonempty bounded"):
+        prepare_offline_impact_handoff(
+            capture, batch, max_sensor_gap_ns=100, max_host_gap_ns=1000,
+            max_frames=1,
+        )
+
+
+def test_reordered_capture_frames_cannot_reuse_old_batch():
+    capture, batch = fixture()
+    reordered = replace(capture, frames=tuple(reversed(capture.frames)))
+    with pytest.raises(ValueError, match="does not belong"):
+        prepare_offline_impact_handoff(
+            reordered, batch, max_sensor_gap_ns=100, max_host_gap_ns=1000,
+        )
+
+
 def test_wrong_batch_type_rejected():
     capture, _ = fixture()
     with pytest.raises(ValueError, match="typed offline"):

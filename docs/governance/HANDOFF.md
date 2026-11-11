@@ -1,3 +1,12 @@
+# PHASE 5 HANDOFF REGRESSION COVERAGE AND ACCEPTANCE RECONCILIATION (2026-11-11)
+
+- Extended the unmocked synthetic-image capture handoff tests to reject over-budget frame batches and reordered frame captures even when frame count and identities otherwise match. This verifies both bounded processing and capture fingerprint provenance.
+- Reconfirmed the canonical Phase 5 gap audit's P0 **positive** image-to-export synthetic success path remains open. No synthetic acceptance result has been fabricated to satisfy the test.
+- Exact SHA `a38cc9f9` workflows were queued/in progress at review. No CI success is inferred from earlier SHAs. PR screenshot requirement remains unresolved.
+- Gates 20–24 OPEN. Physical ELP validation postponed; no merge/release.
+
+---
+
 # PHASE 5 OFFLINE HANDOFF FRAME IDENTITY INTEGRITY (2026-11-11)
 
 - Audited the genuine `prepare_offline_impact_handoff` chain against the Phase 5 acceptance gap document. Added early rejection of empty/oversized assessed frame batches, duplicated frame identities and out-of-capture indices before audit/timing/export. This prevents ambiguous or fabricated frame identities from reaching evidence export.
