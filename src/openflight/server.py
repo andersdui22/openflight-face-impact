@@ -1656,9 +1656,18 @@ def init_kld7(
 @app.route("/api/camera/usb/status")
 def windows_usb_camera_status():
     """Report only observed USB acquisition state; no inferred sensor FPS."""
+    # Gate 16: report only verified calibration evidence. No persisted profile
+    # has been loaded or matched to a verified physical USB camera mode yet.
+    from openflight.camera.calibration_store import load_calibration_status  # pylint: disable=import-outside-toplevel
+
+    # An explicit offline profile path is optional. USB capture does not yet
+    # establish a trusted physical mode/crop identity, so compatibility and
+    # physical validation remain false even when a profile loads successfully.
+    profile_path = os.environ.get("OPENFLIGHT_FACE_IMPACT_CALIBRATION_PROFILE")
+    calibration = load_calibration_status(profile_path or None)
     camera = windows_usb_runtime
     if camera is None:
-        return jsonify({"enabled": False, "state": "disabled"})
+        return jsonify({"enabled": False, "state": "disabled", "calibration": calibration})
     if camera.last_error:
         state = "error"
     elif camera.is_running:
@@ -1675,6 +1684,7 @@ def windows_usb_camera_status():
         "timestamp_source": "host_arrival_monotonic",
         "actual_fps_measured": measured_fps is not None,
         "delivered_fps": measured_fps,
+        "calibration": calibration,
     })
 
 

@@ -3,10 +3,37 @@ import { getServerOrigin } from '../utils/serverOrigin';
 
 type CameraState = 'checking' | 'disabled' | 'starting' | 'running' | 'stopped' | 'error' | 'offline';
 
+type CalibrationState =
+  'not_calibrated' | 'mode_unknown' | 'mode_incompatible' | 'profile_invalid' | 'offline_profile_compatible';
+
+interface CalibrationStatus {
+  state: CalibrationState;
+  physical_validation: false;
+  evidence_kind: 'synthetic_offline' | null;
+  fit_rms_px: number | null;
+  validation_rms_px: number[] | null;
+}
+
 interface UsbStatus {
   enabled: boolean;
   state: 'disabled' | 'starting' | 'running' | 'stopped' | 'error';
   last_error?: string | null;
+  calibration?: CalibrationStatus;
+}
+
+function calibrationLabel(status: CalibrationStatus | null): string {
+  switch (status?.state) {
+    case 'offline_profile_compatible':
+      return 'Offline calibration profile compatible · physical validation not performed';
+    case 'mode_incompatible':
+      return 'Calibration profile incompatible with camera mode';
+    case 'profile_invalid':
+      return 'Calibration profile invalid or unreadable';
+    case 'mode_unknown':
+      return 'Calibration profile loaded · camera mode not verified';
+    default:
+      return 'Camera not physically calibrated';
+  }
 }
 
 function backendOrigin(): string {
@@ -21,6 +48,7 @@ export function FaceImpactCameraPreview() {
   const [error, setError] = useState<string | null>(null);
   const [previewFailed, setPreviewFailed] = useState(false);
   const [frameKey, setFrameKey] = useState(0);
+  const [calibration, setCalibration] = useState<CalibrationStatus | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,6 +73,7 @@ export function FaceImpactCameraPreview() {
         }
         const nextState: CameraState = status.enabled ? status.state : 'disabled';
         setState(nextState);
+        setCalibration(status.calibration ?? null);
         setError(nextState === 'error' ? (status.last_error ?? 'Camera error') : null);
         setPreviewFailed(false);
         if (nextState === 'running') {
@@ -53,6 +82,7 @@ export function FaceImpactCameraPreview() {
       } catch {
         if (mounted && !controller.signal.aborted) {
           setState('offline');
+          setCalibration(null);
           setError(null);
         }
       } finally {
@@ -84,6 +114,7 @@ export function FaceImpactCameraPreview() {
       )}
       {error && <span role="alert">{error}</span>}
       <small>USB preview only · no impact measurement</small>
+      <small aria-label="Camera calibration status">{calibrationLabel(calibration)}</small>
     </div>
   );
 }
