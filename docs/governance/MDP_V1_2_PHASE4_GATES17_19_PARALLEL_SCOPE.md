@@ -55,13 +55,13 @@ Acceptance proposal: fail-closed mismatch/staleness tests, no extra camera reade
 
 ## Implementation evidence and remaining acceptance (2026-11-11)
 
-This is a progress inventory, **not** a gate closeout. The three workstreams share draft PR #44, based on Gate 16 closeout. A prior integrated commit `355fe47045f4b6a354c8623abf79bc741d4b03a0` passed all six CI workflows. Later commits require independent same-SHA verification before acceptance.
+This is a progress inventory, **not** a gate closeout. The three workstreams share draft PR #44, based on Gate 16 closeout. The integrated commit `f1fa9dc4f4b35fb347b2ad3c8b5a7b5defc7b933` passed all six CI workflows. Later commits, including USB status API integration, require independent same-SHA verification before acceptance.
 
 | Gate | Implemented offline evidence | Not yet established |
 | --- | --- | --- |
 | 17 | `rigid_frame.py`, `face_reference_points.py`, `planar_face_reference.py`; synthetic inverse/compose, proper rotation and reference-point tests | Real camera-to-face pose, actual club orientation, pixel-to-face intersection/depth, physical impact point |
 | 18 | `club_face_model.py`; driver/wood/iron/wedge families, optional provenance-tagged dimensions, planar versus curved metadata, synthetic tests | Real measured club geometries, actual curved-surface solver, sourced model assets/licensing, physical geometry verification |
-| 19 | `calibration_revision.py`, `calibration_revision_status.py`, `calibration_club_binding.py`; offline revision/mode/model identity guards and tests | Persisted independent revision binding integrated into active workflow, reliable camera mode identity, physically measured calibration, user-facing lifecycle UI |
+| 19 | `calibration_revision.py`, `calibration_revision_status.py`, `calibration_club_binding.py`, `calibration_club_binding_store.py`, `calibration_club_lifecycle.py`, `calibration_api_status.py`; independent JSON binding, atomic persistence, stale revision API state and UI labels with synthetic tests | Verified camera mode identity, physically measured calibration, actual club geometry/pose, enforced impact measurement guard; UI screenshot evidence is missing |
 
 ### Coordinate and provenance contract
 
@@ -71,8 +71,18 @@ This is a progress inventory, **not** a gate closeout. The three workstreams sha
 - The planar model treats a dimensioned face as a centered rectangular reference **for synthetic tests only**. Actual striking-face boundaries may not be rectangular, and curved faces are rejected rather than flattened.
 - The Gate 18 `evidence_source` string is provenance metadata, **not verification** that a measurement or source is trustworthy. Synthetic fixtures must never be represented as real club specifications.
 - A SHA-256 revision is a byte-level offline profile identity, **not** calibration expiry, physical mode verification or calibration accuracy. A caller must persist the expected revision independently; deriving it from the candidate profile at check time defeats stale detection.
-- `CalibrationClubBinding` binds a revision to a model identifier, **not** the geometry contents. Changing dimensions under the same model identifier is not detected by that binding; model geometry versioning or a content digest is required before production use.
+- `CalibrationClubBinding` now requires a persisted `club_geometry_revision` SHA-256 digest in addition to model identity and optics revision. The offline lifecycle rejects changed dimensions or evidence-source metadata under the same model identifier. A digest does **not** authenticate the evidence source or physically verify the model.
 
 ### Review and stop decision
 
 No individual Gate 17, 18 or 19 is accepted yet. Continue with focused tests, same-SHA CI, provenance-aware geometry revision validation and integration design. Do not merge, release, perform physical ELP testing or claim millimeter impact precision.
+
+
+### Gate 19 active USB status API contract (2026-11-11)
+
+- Optional environment variables: `OPENFLIGHT_FACE_IMPACT_CALIBRATION_PROFILE` (versioned offline optics JSON) and `OPENFLIGHT_FACE_IMPACT_CALIBRATION_CLUB_BINDING` (independently stored, versioned JSON binding).
+- With both paths configured, `/api/camera/usb/status` checks the stored binding's optics revision against the loaded profile and reports `revision_invalid` for stale/missing/malformed binding. Missing/corrupt optics remains `profile_invalid`.
+- Without a binding path, the API preserves the Gate 16 legacy calibration status contract. An absent binding configuration is **not** permission to use the data for physical impact measurements.
+- Even with a matching revision, `mode_unknown` and `physical_validation=false` remain mandatory until physical camera mode/crop evidence exists. `club_geometry_compatible=false` is also reported; no active club model is independently verified.
+- UI labels for `revision_invalid`, `binding_incompatible` and `evidence_invalid` are present, but no screenshot/manual visual evidence has been admitted. The GitHub PR description check correctly fails until genuine UI screenshot evidence is supplied; do not bypass it.
+- This is **read-only status reporting**, not enforcement of an impact measurement guard. No new USB reader, camera reconfiguration or calibration procedure has been introduced.
