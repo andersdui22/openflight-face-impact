@@ -1,3 +1,12 @@
+# PHASE 5 GATES 23/24 OFFLINE IMPACT EVIDENCE HANDOFF (2026-11-11)
+
+- Verified `8fee97fe` exact-SHA CI: all six workflows SUCCESS.
+- Added typed `offline_impact_evidence.py` export for selected **synthetic-only** impact coordinates. Preserves shot/session/frame and rejects coordinate disclosure if timing or uniqueness gates fail. Physical validation remains false; uncertainty remains unknown. Cross-checks selected accepted indices against provided candidate batch.
+- Tests: accepted synthetic coordinates, ambiguous and invalid-timing fail-closed, mismatched selection, forbidden physical claims and rejected coordinates, invalid input.
+- No real contact instant, camera hardware tests, merge or release. Gates 20–24 OPEN; new SHA CI pending.
+
+---
+
 # PHASE 5 GATES 22/24 COMBINED OFFLINE TEMPORAL EVIDENCE (2026-11-11)
 
 - Added `offline_temporal_evidence.py` to compose existing strict frame-spacing validation with existing unique synthetic geometry frame selector. Only an unambiguous synthetic candidate **and** valid bounded timing can pass the offline analysis gate; no physical contact claim.
