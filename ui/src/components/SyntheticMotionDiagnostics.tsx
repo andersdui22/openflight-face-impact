@@ -1,6 +1,10 @@
 /** Gate 24: read-only, explicitly synthetic camera motion diagnostics. */
 
-export type SyntheticMotionPayload = {
+import type { SyntheticMotionPayload } from '../types/syntheticMotionPayload';
+
+export type { SyntheticMotionPayload } from '../types/syntheticMotionPayload';
+
+/* export type SyntheticMotionPayload = {
   schema_version: number;
   kind: string;
   physical_contact_confirmed: false;
@@ -21,6 +25,7 @@ export type SyntheticMotionPayload = {
   }[];
 };
 
+*/
 export function SyntheticMotionDiagnostics({ payload }: { payload: SyntheticMotionPayload | null }) {
   const valid = payload?.schema_version === 1 &&
     payload.kind === 'synthetic_image_space_motion' &&

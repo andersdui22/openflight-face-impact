@@ -14,6 +14,7 @@ import { SyntheticFaceImpactDemo } from './components/SyntheticFaceImpactDemo';
 import { FaceImpactSessionDemo, type DemoShot } from './components/FaceImpactSessionDemo';
 import { FaceImpactControls } from './components/FaceImpactControls';
 import { SyntheticMotionDiagnostics } from './components/SyntheticMotionDiagnostics';
+import { useSyntheticMotionStore } from './stores/useSyntheticMotionStore';
 import { FaceImpactCameraPreview } from './components/FaceImpactCameraPreview';
 import { DisplayMode } from './components/DisplayMode';
 import { SimShotBadges } from './components/SimShotBadges';
@@ -57,6 +58,7 @@ function FaceImpactDashboard({
   onNavigate: (view: PanelView) => void;
   shotCount: number;
 }) {
+  const syntheticMotion = useSyntheticMotionStore((state) => state.payload);
   const [demoEnabled, setDemoEnabled] = useState(false);
   const [demoShots, setDemoShots] = useState<DemoShot[]>([]);
   const demoAverage = (axis: 'x' | 'y') =>
@@ -207,7 +209,7 @@ function FaceImpactDashboard({
           setShots={setDemoShots}
         />
         <FaceImpactControls />
-        <SyntheticMotionDiagnostics payload={null} />
+        <SyntheticMotionDiagnostics payload={syntheticMotion} />
         {demoEnabled && (
           <section className="impact-controls" aria-label="Simulated Face Impact metrics">
             <strong>DEMO METRICS — SIMULATED, NOT MEASURED</strong>

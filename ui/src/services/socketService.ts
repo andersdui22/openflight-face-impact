@@ -1,4 +1,6 @@
 import { io, type Socket } from 'socket.io-client';
+import { useSyntheticMotionStore } from '../stores/useSyntheticMotionStore';
+import { isSyntheticMotionPayload } from '../types/syntheticMotionPayload';
 import { isSyntheticFaceImpactResponse, type SyntheticFaceImpactResponse } from '../types/syntheticFaceImpact';
 import { useSystemStore } from '../stores/useSystemStore';
 import { useShotStore } from '../stores/useShotStore';
@@ -56,7 +58,16 @@ class SocketService {
       this.socket?.emit('get_profiles');
     });
 
+    this.socket.on('synthetic_motion_diagnostics', (data: unknown) => {
+      if (isSyntheticMotionPayload(data)) {
+        useSyntheticMotionStore.getState().setPayload(data);
+      } else {
+        useSyntheticMotionStore.getState().clear();
+      }
+    });
+
     this.socket.on('disconnect', () => {
+      useSyntheticMotionStore.getState().clear();
       console.log('Disconnected from server');
       useSystemStore.getState().setConnected(false);
       useShotStore.getState().finishShotProcessing();
