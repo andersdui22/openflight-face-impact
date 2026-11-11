@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from openflight.camera.club_face_model import ClubFaceModel, ClubFamily, FaceSurface
-from openflight.camera.face_reference_points import planar_face_references
+from openflight.camera.face_reference_points import PlanarFaceReferences, planar_face_references
 from openflight.camera.planar_face_reference import planar_face_points_to_camera
 from openflight.camera.rigid_frame import RigidFrameTransform
 
@@ -36,3 +36,23 @@ def test_reference_points_require_evidenced_planar_face():
             ClubFamily.DRIVER, "synthetic-driver", FaceSurface.CURVED,
             width_mm=90., height_mm=40., evidence_source="synthetic-test-fixture",
         ))
+
+
+def test_reference_points_copy_and_freeze_caller_arrays():
+    source = np.array([1., 2., 3.])
+    refs = PlanarFaceReferences(source, source, source, source, source)
+    source[0] = 99.
+    assert refs.center_mm[0] == 1.
+    assert refs.heel_mm[0] == 1.
+    with pytest.raises(ValueError):
+        refs.center_mm[0] = 42.
+
+
+@pytest.mark.parametrize("invalid", [
+    [1., 2.], [1., 2., float("nan")], [1., 2., float("inf")],
+    ["1", "2", "3"], [True, False, True],
+])
+def test_reference_points_reject_malformed_coordinates(invalid):
+    point = np.array(invalid)
+    with pytest.raises(ValueError, match="finite XYZ"):
+        PlanarFaceReferences(point, point, point, point, point)
