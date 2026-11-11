@@ -1,3 +1,14 @@
+# PHASE 5 SYNTHETIC RESPONSE CONTRACT HARDENING (2026-11-11)
+
+- Extended React synthetic Socket.IO response contract to require nonempty case/label identifiers, nonempty error text, and to forbid impact data attached to a failed response.
+- Rejected self-intersecting face outlines in the response guard, in addition to existing finite-coordinate, nonzero-area, bounded-vertex and point-inside-face checks.
+- Added negative tests for malformed error payloads, missing labels and crossing polygons. No change to physically unverified status.
+- Prior exact SHA `1d29bc67` had successful `Tests`, `Face Impact foundation`, `Pylint`, `Documentation`, and `Face Impact Windows USB camera` workflows; `UI` was still in progress and `PR Checks` failed due to missing authentic UI screenshot. The new SHA requires independent CI validation.
+- The P0 positive unmocked synthetic image-to-batch-to-export integration test remains **outstanding**. This contract hardening is not a substitute for that Gate acceptance requirement.
+- Gates 20–24 OPEN; no physical testing, merges or releases.
+
+---
+
 # PHASE 5 SOCKET PAYLOAD IMPACT-BOUNDARY VALIDATION (2026-11-11)
 
 - Strengthened `isSyntheticFaceImpactResponse` at the network boundary: rejects degenerate zero-area and oversized polygons, non-finite coordinates and successful impact points outside the supplied face polygon. Existing `FaceImpactView` fail-closed checks remain independent defense in depth.

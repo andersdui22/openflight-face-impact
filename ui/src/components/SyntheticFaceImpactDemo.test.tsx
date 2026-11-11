@@ -40,6 +40,18 @@ describe('SyntheticFaceImpactDemo', () => {
     expect(isSyntheticFaceImpactResponse({ ...valid, polygon_face_mm: [[0, 0], [1, 1], [2, 2]] })).toBe(false);
     expect(isSyntheticFaceImpactResponse({ ...valid, result: { ...valid.result, x_mm: 500 } })).toBe(false);
     expect(isSyntheticFaceImpactResponse({ ...valid, result: { ...valid.result, x_mm: Number.NaN } })).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...valid, label: '' })).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...valid, case_id: '' })).toBe(false);
+    expect(isSyntheticFaceImpactResponse({
+      ...valid, polygon_face_mm: [[0, 0], [4, 4], [0, 5], [5, 0]],
+    })).toBe(false);
+  });
+
+  it('rejects malformed error payloads that could smuggle a displayed result', () => {
+    const error = { schema_version: 1, source: 'synthetic_python_pipeline', ok: false, error: 'rejected' };
+    expect(isSyntheticFaceImpactResponse(error)).toBe(true);
+    expect(isSyntheticFaceImpactResponse({ ...error, result: { status: 'ok', x_mm: 0, y_mm: 0 } })).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...error, error: '  ' })).toBe(false);
   });
 
   it('rejects contact coordinates in a rejected result', () => {
