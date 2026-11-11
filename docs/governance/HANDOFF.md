@@ -1,3 +1,11 @@
+# PHASE 5 GATE 24 END-TO-END SYNTHETIC QUALITY COMPOSITION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `ea34c998371f5d3bbfaa09defbd493ee497af62c`: Foundation, Pylint, Documentation SUCCESS; Tests and UI IN PROGRESS; PR Checks FAILURE.
+- Added `assess_capture_ball_synthetic_impact` composing selected-frame bright contour, synthetic face impact and explicit quality assessment in one offline call. Integration test verifies absent ball produces no coordinates, carries rejection reason consistently and never invents physical validation or millimetre uncertainty.
+- Face landmarks remain externally supplied; successful real-world impact, physical timing and accuracy unverified. Gates 20–24 OPEN. No hardware tests, merges or releases; new SHA CI pending.
+
+---
+
 # PHASE 5 GATE 24 SYNTHETIC QUALITY CONTRACT (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `60f558feab6425b9ec57890f13ba7f6f6c986ec4`: Documentation and Pylint SUCCESS; Tests, UI, Foundation IN PROGRESS; PR Checks FAILURE.
