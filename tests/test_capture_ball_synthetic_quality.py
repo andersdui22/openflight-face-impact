@@ -99,3 +99,36 @@ def test_real_selected_disk_passes_contour_stage_but_rejects_bad_face_pose():
     assert result.quality.reason == result.impact.rejection_reason
     assert result.quality.physically_validated is False
     assert result.impact.x_mm is None and result.impact.y_mm is None
+
+
+def test_mismatched_face_frame_metadata_rejects_before_geometry():
+    from openflight.camera.capture_ball_synthetic_impact import (
+        calculate_capture_ball_synthetic_impact,
+    )
+    result = calculate_capture_ball_synthetic_impact(
+        None, None, 2, None, None, None,
+        ball_radius_mm=21.35, max_ball_residual_rad=0.02,
+        max_face_rms_px=0.5, min_face_margin_px=0.1,
+        contact_tolerance_mm=0.01, threshold=100,
+        min_area_px=100., ball_border_margin_px=2.,
+        face_observation_frame_index=1,
+    )
+    assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert "face observation frame index differs" in result.rejection_reason
+    assert result.x_mm is None and result.y_mm is None
+
+
+def test_boolean_face_frame_metadata_rejected():
+    from openflight.camera.capture_ball_synthetic_impact import (
+        calculate_capture_ball_synthetic_impact,
+    )
+    result = calculate_capture_ball_synthetic_impact(
+        None, None, 2, None, None, None,
+        ball_radius_mm=21.35, max_ball_residual_rad=0.02,
+        max_face_rms_px=0.5, min_face_margin_px=0.1,
+        contact_tolerance_mm=0.01, threshold=100,
+        min_area_px=100., ball_border_margin_px=2.,
+        face_observation_frame_index=True,
+    )
+    assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert result.x_mm is None

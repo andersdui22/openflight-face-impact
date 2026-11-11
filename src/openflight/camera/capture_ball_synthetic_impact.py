@@ -33,13 +33,20 @@ def calculate_capture_ball_synthetic_impact(  # pylint: disable=too-many-argumen
     min_area_px: float,
     ball_border_margin_px: float,
     min_circularity: float = 0.0,
+    face_observation_frame_index: int | None = None,
 ) -> SyntheticImpactResult:
     """Evaluate image-derived ball contour with externally supplied face pixels.
 
     This is an offline synthetic geometry integration, not a physical
     impact-time detector or independently verified face observation.
+    Optional face frame identity checks caller metadata, not pixel provenance.
     """
     try:
+        if face_observation_frame_index is not None:
+            if (not isinstance(face_observation_frame_index, int)
+                    or isinstance(face_observation_frame_index, bool)
+                    or face_observation_frame_index != candidate_frame_index):
+                raise ValueError("face observation frame index differs from candidate frame")
         observation = extract_capture_ball_contour(
             capture,
             candidate_frame_index,

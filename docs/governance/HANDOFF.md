@@ -1,3 +1,11 @@
+# PHASE 5 GATE 21/23 OPTIONAL FACE-FRAME IDENTITY GUARD (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `bdf5580dd05ecde77c88c92ee9d903e511ca3a4f`: Tests, Pylint, Foundation, Documentation SUCCESS; UI IN PROGRESS; PR Checks FAILURE.
+- Added opt-in `face_observation_frame_index` to selected-frame synthetic impact calculation. If supplied, mismatched or boolean frame identity is rejected before contour processing and without impact coordinates. Existing callers remain unchanged.
+- This is **metadata consistency only**, not proof that externally supplied face landmarks were detected from that frame. Positive image-to-contact integration and actual face feature extraction remain open. No physical tests, merge, release. New SHA CI pending.
+
+---
+
 # PHASE 5 GATE 24 SELECTED-FRAME POSITIVE CONTOUR / NEGATIVE FACE REGRESSION (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `ab6bbd2e690991169173e9563cca95c6a0ecef4f`: Documentation SUCCESS; Tests, Pylint, Foundation, UI IN PROGRESS; PR Checks FAILURE.
