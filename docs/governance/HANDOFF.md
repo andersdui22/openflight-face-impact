@@ -1,3 +1,13 @@
+# USER-APPROVED SOFTWARE-FIRST CRITICAL PATH (2026-11-11)
+
+- User explicitly approved changing development priority from serial micro-hardening to larger functional batches and deferring camera-specific fine-tuning to physical tests.
+- New canonical execution guide: `docs/governance/FACE_IMPACT_SOFTWARE_FIRST_CRITICAL_PATH.md`. Batches A (positive unmocked offline synthetic export), B (Python result to UI/session), C (ELP-only capture/replay), D (Windows launcher/package), E (physical validation deferred).
+- Audited actual `ui/electron/main.js`, `ui/package.json`, `ui/src/App.tsx`, `ui/src/services/socketService.ts`: existing Electron portable UI is **not** proof of a bundled Python backend; synthetic demo is **not** a measured impact. Do not claim complete EXE or physical accuracy.
+- Exact SHA `9136ba07`: Tests, Foundation, Pylint, Documentation, Windows USB camera passed; UI still in progress, PR Checks failed on authentic screenshot requirement at review.
+- No Gate closed; no physical tests, merge or release.
+
+---
+
 # PHASE 5 REJECTED-RESULT FIELD ISOLATION (2026-11-11)
 
 - Reconciled React Socket.IO result validation with Python `SyntheticImpactResult` invariants: accepted synthetic impacts cannot also contain a rejection reason; rejected impacts cannot expose horizontal/vertical regions, in addition to coordinates. Added regressions for both contradictory payload classes.
