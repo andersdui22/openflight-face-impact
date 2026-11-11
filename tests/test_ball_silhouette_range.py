@@ -94,3 +94,22 @@ def test_rejects_too_few_duplicate_and_unnormalized_rays(angles):
                                (rays * 2, "unit length")):
         with pytest.raises(ValueError, match=message):
             estimate_ball_position(malformed, radius_mm=RADIUS, max_residual_rad=1e-6)
+
+
+@pytest.mark.parametrize("bad_radius", [
+    None, True, False, "21.35", [], {}, np.array([21.35]),
+])
+def test_gate20_malformed_radius_fails_closed(angles, bad_radius):
+    rays = tangent_rim([0, 0, 500], angles)
+    with pytest.raises(ValueError, match="ball radius"):
+        estimate_ball_position(rays, radius_mm=bad_radius, max_residual_rad=1e-6)
+
+
+@pytest.mark.parametrize("bad_budget", [
+    None, True, False, "0.001", [], {}, np.array([0.001]),
+    0., -0.1, float("nan"), float("inf"), np.pi / 2,
+])
+def test_gate20_malformed_residual_budget_fails_closed(angles, bad_budget):
+    rays = tangent_rim([0, 0, 500], angles)
+    with pytest.raises(ValueError, match="angular residual limit"):
+        estimate_ball_position(rays, radius_mm=RADIUS, max_residual_rad=bad_budget)
