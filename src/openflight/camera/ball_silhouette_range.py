@@ -22,6 +22,19 @@ class BallSilhouettePosition:
     angular_radius_rad: float
     max_residual_rad: float
 
+    def __post_init__(self) -> None:
+        """Keep the accepted camera-space centre independent of caller mutation."""
+        center = np.asarray(self.center_camera_mm)
+        if (
+            center.shape != (3,)
+            or center.dtype.kind not in "iuf"
+            or not np.all(np.isfinite(center))
+        ):
+            raise ValueError("ball centre must be a finite XYZ camera position")
+        immutable = np.array(center, dtype=np.float64, copy=True)
+        immutable.setflags(write=False)
+        object.__setattr__(self, "center_camera_mm", immutable)
+
 
 def _unit_edge_rays(edge_rays: np.ndarray) -> np.ndarray:
     rays = np.asarray(edge_rays)
