@@ -1,3 +1,12 @@
+# PHASE 5 GATE 21 SYNTHETIC CAPTURE-TO-POSE COMPOSITION (2026-11-11)
+
+- Audited existing selected-frame synthetic corner extractor and `estimate_synthetic_face_pose` planar PnP contract before implementation. Added `estimate_capture_synthetic_face_pose` as a thin provenance-preserving bridge, **not** a duplicate pose solver or camera reader.
+- Tests verify selected-frame image-derived pixels reach the existing solver, rejection before solver on missing image evidence, propagation of ambiguous pose rejection and invalid frame identity. The positive wiring test spies on the solver; it is **not** an unmocked physical or positive pose-accuracy test.
+- Rectangle fixture is synthetic only; real clubface landmark identity, arbitrary perspective corner extraction and contact instant remain unverified. No physical tests until all 35 Gates developed software-first; no merge/release.
+- CI on the exact new SHA remains to be verified.
+
+---
+
 # PHASE 5 GATE 21 IMAGE-DERIVED SYNTHETIC LANDMARK PROVENANCE (2026-11-11)
 
 - Audited existing Gate 08/10 synthetic IR face-region proposal, Gate 22 selected-frame image validator and Gate 21 supplied-landmark pose solver. Reused the strict rectangular detector rather than creating a competing clubface detector or camera owner.
