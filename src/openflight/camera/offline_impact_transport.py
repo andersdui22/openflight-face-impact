@@ -16,6 +16,13 @@ def serialize_offline_impact_evidence(evidence: OfflineImpactEvidence) -> dict:
         raise ValueError("offline transport requires typed impact evidence")
     if evidence.physically_validated is not False or evidence.position_uncertainty_mm is not None:
         raise ValueError("offline transport cannot claim physical validation")
+    if any(not isinstance(value, str) or not value.strip() or len(value) > 256
+           for value in (evidence.shot_id, evidence.session_id)):
+        raise ValueError("offline evidence requires bounded nonempty shot/session identity")
+    if not isinstance(evidence.reason, str) or not evidence.reason.strip() or len(evidence.reason) > 2048:
+        raise ValueError("offline evidence requires bounded nonempty reason")
+    if not isinstance(evidence.accepted_for_offline_analysis, bool):
+        raise ValueError("offline evidence acceptance must be boolean")
     payload = {
         "schema_version": 1,
         "source": "offline_synthetic_analysis",
@@ -58,6 +65,8 @@ def publish_offline_impact_handoff(handoff, emit, *, recipient: str) -> dict:
         raise ValueError("offline publication requires completed typed handoff")
     if not isinstance(recipient, str) or not recipient.strip():
         raise ValueError("offline publication requires an explicit recipient")
+    if not callable(emit):
+        raise ValueError("offline publication requires callable emitter")
     payload = serialize_offline_impact_evidence(handoff.impact)
     emit("offline_impact_evidence", payload, to=recipient)
     return payload

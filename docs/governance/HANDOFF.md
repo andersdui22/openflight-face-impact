@@ -1,3 +1,11 @@
+# BATCH A — OFFLINE EVIDENCE BOUNDARY HARDENING (2026-11-12)
+
+- Strengthened the Python Socket.IO transport boundary: reject missing/whitespace/oversized shot and session identifiers, missing/oversized reasons, nonboolean acceptance, and noncallable emitter before any event publication. Added parameterized negative contract tests.
+- Diagnosed PR Checks failure on `2074790c`: PR description lacks a real UI screenshot; the required headings and other checks passed. Do not bypass by inventing screenshots; capture authentic browser/Electron evidence in a later UI test.
+- Exact-SHA CI for this commit must still be reviewed. Physical camera validation remains deferred; Gates 20–24 OPEN.
+
+---
+
 # AUTONOMOUS LARGE-BATCH DEVELOPMENT DIRECTIVE — 2026-11-12
 
 User explicitly requested the largest practical autonomous development cycles. Prioritize complete functional slices and batch tests over micro-edits. The software-first batch sequence and acceptance conditions are recorded in `docs/governance/SOFTWARE_FIRST_AUTONOMOUS_DELIVERY_PLAN.md`. No change to Project Law V1 approval boundaries, no merges/releases, no physical tests yet.

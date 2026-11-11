@@ -74,3 +74,39 @@ def test_publication_rejects_untyped_or_unaddressed_evidence():
 
     with pytest.raises(ValueError, match="completed typed handoff"):
         publish_offline_impact_handoff({}, lambda *_args, **_kwargs: None, recipient="client")
+
+
+@pytest.mark.parametrize("shot_id,session_id", [
+    ("", "session"), ("shot", " "), (None, "session"),
+    ("shot", None), ("x" * 257, "session"), ("shot", "x" * 257),
+])
+def test_offline_transport_rejects_invalid_capture_identity(shot_id, session_id):
+    evidence = OfflineImpactEvidence(
+        shot_id, session_id, 2, True, 12., 5., "toe", "high",
+        "synthetic geometry only",
+    )
+    with pytest.raises(ValueError, match="shot/session identity"):
+        serialize_offline_impact_evidence(evidence)
+
+
+@pytest.mark.parametrize("reason", ["", " ", None, "x" * 2049])
+def test_offline_transport_rejects_invalid_reason(reason):
+    evidence = OfflineImpactEvidence(
+        "shot", "session", None, False, None, None, None, None, reason,
+    )
+    with pytest.raises(ValueError, match="nonempty reason"):
+        serialize_offline_impact_evidence(evidence)
+
+
+def test_offline_transport_refuses_noncallable_emitter_without_sending():
+    from openflight.camera.offline_impact_handoff import OfflineImpactHandoff
+    from openflight.camera.offline_impact_transport import publish_offline_impact_handoff
+
+    evidence = OfflineImpactEvidence(
+        "shot", "session", None, False, None, None, None, None, "rejected",
+    )
+    with pytest.raises(ValueError, match="callable emitter"):
+        publish_offline_impact_handoff(
+            OfflineImpactHandoff(temporal=None, impact=evidence),
+            None, recipient="client-1",
+        )
