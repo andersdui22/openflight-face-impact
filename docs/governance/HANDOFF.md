@@ -1,3 +1,13 @@
+# BATCH B — ACTUAL OFFLINE ANALYSIS TO EVENT ORCHESTRATION (2026-11-12)
+
+- Added `analyze_and_publish_offline_capture` trusted Python entry point: unmocked captured-frame assessment, fingerprint-bound audit, temporal handoff, and targeted Socket.IO event publishing. It validates recipient/emitter before expensive analysis and aborts on errors without a fabricated impact.
+- Added unmocked two-frame raster integration regression asserting a **rejected** synthetic result arrives as `offline_impact_evidence` with shot/session identity and no coordinates; and missing-recipient no-emission test.
+- Existing earlier positive raster-to-export regression covers accepted synthetic geometry, but **a single accepted image-to-socket-to-browser regression is not yet demonstrated**.
+- This runner is not wired into a live camera or automatic server capture callback. Explicit synthetic face landmarks remain supplied inputs. No physical measurements, merges, or releases.
+- Previous exact SHA `d46ae6ad` CI still running at start of this batch. Verify new SHA CI; Gates 20–24 OPEN.
+
+---
+
 # CI REGRESSION REPAIR — SSR ZUSTAND SNAPSHOT (2026-11-12)
 
 - Investigated exact SHA `f7dede01` CI: Python Tests, Pylint, Documentation, Windows USB camera and UI browser E2E passed. UI format failed (existing Prettier drift), and Foundation ui-unit-linux failed 3 new `OfflineImpactReview` tests (275 others passed).
