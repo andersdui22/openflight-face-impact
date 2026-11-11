@@ -103,3 +103,32 @@ def test_geometry_revision_is_deterministic_and_provenance_sensitive():
     assert club_geometry_revision(original) != club_geometry_revision(
         replace(original, evidence_source="other-synthetic-fixture")
     )
+
+
+@pytest.mark.parametrize("change", [
+    {"family": ClubFamily.WEDGE},
+    {"surface": FaceSurface.CURVED},
+    {"height_mm": 31.},
+    {"model_id": "synthetic-8iron"},
+    {"evidence_source": "revised-synthetic-fixture"},
+])
+def test_geometry_revision_detects_every_model_contract_change(change):
+    original = club()
+    changed = replace(original, **change)
+    assert club_geometry_revision(original) != club_geometry_revision(changed)
+
+
+def test_geometry_revision_detects_curved_surface_radii_changes():
+    original = ClubFaceModel(
+        ClubFamily.DRIVER, "synthetic-driver", FaceSurface.CURVED,
+        width_mm=90., height_mm=45., bulge_radius_mm=250.,
+        roll_radius_mm=300., evidence_source="synthetic-test-fixture",
+    )
+    for field in ("bulge_radius_mm", "roll_radius_mm"):
+        changed = replace(original, **{field: getattr(original, field) + 1.})
+        assert club_geometry_revision(original) != club_geometry_revision(changed)
+
+
+def test_geometry_revision_rejects_unvalidated_input():
+    with pytest.raises(ValueError, match="validated club model"):
+        club_geometry_revision(None)
