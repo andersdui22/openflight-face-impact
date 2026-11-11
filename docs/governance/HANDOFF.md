@@ -1,3 +1,12 @@
+# PHASE 5 SOCKET PAYLOAD IMPACT-BOUNDARY VALIDATION (2026-11-11)
+
+- Strengthened `isSyntheticFaceImpactResponse` at the network boundary: rejects degenerate zero-area and oversized polygons, non-finite coordinates and successful impact points outside the supplied face polygon. Existing `FaceImpactView` fail-closed checks remain independent defense in depth.
+- Extended synthetic backend contract tests for collinear face vertices, outside impact and NaN coordinates. This is **synthetic** geometry validation only; physical contact remains unverified.
+- At the time of review, exact SHA `1d29bc67` Documentation succeeded, PR Checks failed due to missing genuine screenshot, and remaining CI workflows were still running. Verify new exact SHA before Gate decisions.
+- Gates 20–24 OPEN; no hardware tests, merges, releases.
+
+---
+
 # PHASE 5 UI REGRESSION TEST FIX (2026-11-11)
 
 - Investigated failed `Face Impact foundation` job for SHA `f5feff11` using the actual GitHub Actions log. `SyntheticMotionDiagnostics.test.tsx` still failed: regex omitted the literal space between 'frame' and React's `<!-- -->` SSR separator. Updated both assertions to normalize React SSR comment separators before asserting exact user-visible text. This is a test-only correction; no application runtime behavior changed.

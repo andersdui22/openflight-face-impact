@@ -37,6 +37,9 @@ describe('SyntheticFaceImpactDemo', () => {
     expect(isSyntheticFaceImpactResponse(valid)).toBe(true);
     expect(isSyntheticFaceImpactResponse({ ...valid, result: { status: 'ok', x_mm: 12 } })).toBe(false);
     expect(isSyntheticFaceImpactResponse({ ...valid, polygon_face_mm: [[0, 0]] })).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...valid, polygon_face_mm: [[0, 0], [1, 1], [2, 2]] })).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...valid, result: { ...valid.result, x_mm: 500 } })).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...valid, result: { ...valid.result, x_mm: Number.NaN } })).toBe(false);
   });
 
   it('rejects contact coordinates in a rejected result', () => {
