@@ -36,6 +36,28 @@ class SyntheticImpactResult:
     vertical_region: str | None = None
     rejection_reason: str | None = None
 
+    def __post_init__(self) -> None:
+        """Reject contradictory accepted/rejected synthetic impact records."""
+        if not isinstance(self.status, SyntheticImpactStatus):
+            raise ValueError("invalid synthetic impact status")
+        coordinates = (self.x_mm, self.y_mm)
+        regions = (self.horizontal_region, self.vertical_region)
+        if self.status is SyntheticImpactStatus.OK:
+            if (
+                any(not isinstance(value, (int, float, np.integer, np.floating))
+                    or isinstance(value, (bool, np.bool_))
+                    or not np.isfinite(value) for value in coordinates)
+                or any(not isinstance(value, str) or not value for value in regions)
+                or self.rejection_reason is not None
+            ):
+                raise ValueError("accepted synthetic impact requires finite coordinates and regions")
+        elif (
+            any(value is not None for value in (*coordinates, *regions))
+            or not isinstance(self.rejection_reason, str)
+            or not self.rejection_reason.strip()
+        ):
+            raise ValueError("rejected synthetic impact cannot expose coordinates")
+
 
 def calculate_synthetic_face_impact(
     ball_center_world_mm: np.ndarray,
