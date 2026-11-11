@@ -83,3 +83,24 @@ def test_invalid_polygon_returns_invalid_geometry():
     result = impact([0., 0., 21.], polygon=polygon)
     assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
     assert result.y_mm is None
+
+
+@pytest.mark.parametrize("kwargs", [
+    {"status": SyntheticImpactStatus.OK, "x_mm": 1., "y_mm": None,
+     "horizontal_region": "toe", "vertical_region": "center"},
+    {"status": SyntheticImpactStatus.OK, "x_mm": float("nan"), "y_mm": 0.,
+     "horizontal_region": "toe", "vertical_region": "center"},
+    {"status": SyntheticImpactStatus.OK, "x_mm": 1., "y_mm": 0.,
+     "horizontal_region": "toe", "vertical_region": "center",
+     "rejection_reason": "contradiction"},
+    {"status": SyntheticImpactStatus.OUTSIDE_FACE, "x_mm": 1.,
+     "rejection_reason": "outside"},
+    {"status": SyntheticImpactStatus.NO_TANGENCY, "horizontal_region": "heel",
+     "rejection_reason": "no contact"},
+    {"status": SyntheticImpactStatus.INVALID_GEOMETRY},
+])
+def test_gates23_24_reject_contradictory_impact_results(kwargs):
+    from openflight.camera.synthetic_impact_pipeline import SyntheticImpactResult
+
+    with pytest.raises(ValueError):
+        SyntheticImpactResult(**kwargs)
