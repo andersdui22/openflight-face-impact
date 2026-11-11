@@ -39,10 +39,20 @@ def analyze_marker_observed_offline_capture(
     """
     if not isinstance(marker_images_by_frame, dict) or not marker_images_by_frame:
         raise ValueError("marker observations require nonempty frame mapping")
-    if not isinstance(reference_pixels_px, np.ndarray):
-        raise ValueError("marker reference must be an explicit numeric array")
+    if (not isinstance(reference_pixels_px, np.ndarray)
+            or reference_pixels_px.ndim != 2
+            or reference_pixels_px.shape[1] != 2
+            or reference_pixels_px.dtype.kind not in "iuf"
+            or not np.all(np.isfinite(reference_pixels_px))
+            or not 3 <= len(reference_pixels_px) <= 8):
+        raise ValueError("marker reference must contain 3..8 finite labelled Nx2 pixels")
+    if not isinstance(max_marker_distance_px, (int, float)) or isinstance(max_marker_distance_px, bool):
+        raise ValueError("marker distance budget must be numeric")
     if not callable(analysis_options.get("emit")):
         raise ValueError("marker runner requires callable emitter")
+    if any(not isinstance(index, int) or isinstance(index, bool)
+           for index in marker_images_by_frame):
+        raise ValueError("marker frame indices must be integers")
     candidates = []
     for frame_index, image in sorted(marker_images_by_frame.items()):
         if (not isinstance(frame_index, int) or isinstance(frame_index, bool)

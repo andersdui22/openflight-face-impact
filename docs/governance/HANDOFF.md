@@ -1,3 +1,11 @@
+# BATCH A — CI REVIEW AND MARKER INPUT GUARDS (2026-11-12)
+
+- Verified CI for `b0c83560`: Python Tests, Pylint, Face Impact foundation, Windows USB camera, Documentation and browser E2E passed; UI lint/build passed. UI format still fails due Prettier drift across 13 files; PR Checks still requires authentic screenshot.
+- Hardened marker runner's trusted-reference input: finite numeric 3..8 Nx2 landmarks, numeric distance budget, and integer-only frame keys before sorting. Added tests for malformed reference shapes, NaN, too many reference points, invalid frame keys and fail-closed multi-frame partial observations.
+- **Not** a physically validated or unmarked clubface detector. Gates 20–24 OPEN; do not claim closure; exact new SHA CI pending.
+
+---
+
 # BATCH A — RASTER MARKERS THROUGH OFFLINE PIPELINE (2026-11-12)
 
 - Added `offline_marker_runner.py`, a bounded adapter from **controlled marker raster images** to extracted unlabelled fiducials, trusted-reference correspondence, typed `SyntheticFrameCandidate` entries and the existing complete offline analysis/Socket.IO publication runner.

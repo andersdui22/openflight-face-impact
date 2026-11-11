@@ -78,3 +78,29 @@ def test_untrusted_reference_displacement_aborts_without_emitting():
     image, *_ = _inputs()
     with pytest.raises(ValueError, match="distance budget"):
         _run({0: image}, reference=np.zeros((4, 2)))
+
+
+@pytest.mark.parametrize("reference", [
+    np.empty((0, 2)),
+    np.zeros((4, 3)),
+    np.array([[0., 0.], [1., 1.], [float("nan"), 2.], [3., 3.]]),
+    np.zeros((9, 2)),
+])
+def test_invalid_reference_shape_or_values_rejected(reference):
+    image, *_ = _inputs()
+    with pytest.raises(ValueError, match="3..8 finite labelled"):
+        _run({0: image}, reference=reference)
+
+
+def test_invalid_frame_index_rejected_before_sorting_or_emission():
+    image, *_ = _inputs()
+    with pytest.raises(ValueError, match="frame indices must be integers"):
+        _run({"bad": image})
+
+
+def test_partial_marker_batch_failure_does_not_publish_previous_frame():
+    image, *_ = _inputs()
+    missing = image.copy()
+    cv.circle(missing, (40, 45), 6, 0, -1)
+    with pytest.raises(ValueError, match="unexpected blob count"):
+        _run({0: image, 1: missing})
