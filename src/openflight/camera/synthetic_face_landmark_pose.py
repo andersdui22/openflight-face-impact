@@ -68,6 +68,7 @@ def estimate_synthetic_face_pose(  # pylint: disable=too-many-arguments
     image_size: tuple[int, int],
     max_rms_px: float,
     min_margin_px: float,
+    landmark_border_margin_px: float = 0.0,
 ) -> FaceLandmarkPose:
     """Solve a labelled planar face in the optical right/down/forward frame.
 
@@ -88,11 +89,24 @@ def estimate_synthetic_face_pose(  # pylint: disable=too-many-arguments
     ):
         raise ValueError("pose score thresholds must be positive and finite")
 
+    if (
+        not isinstance(landmark_border_margin_px, (int, float, np.integer, np.floating))
+        or isinstance(landmark_border_margin_px, (bool, np.bool_))
+        or not math.isfinite(landmark_border_margin_px)
+        or landmark_border_margin_px < 0
+    ):
+        raise ValueError("landmark border margin must be finite and nonnegative")
+
     objects = _plane_points(landmarks_face_mm)
     pixels = np.asarray(pixels_px)
     if pixels.shape != (len(objects), 2):
         raise ValueError("each planar landmark requires a corresponding pixel")
     rays = calibrated_pixel_rays(calibration, pixels, image_size=image_size)
+    if (
+        np.any(pixels < landmark_border_margin_px)
+        or np.any(pixels >= np.asarray(image_size) - landmark_border_margin_px)
+    ):
+        raise ValueError("face landmark is inside the excluded image border")
     normalized = rays[:, :2] / rays[:, 2, None]
     if len(np.unique(pixels, axis=0)) != len(pixels):
         raise ValueError("observed pixels must be distinct")

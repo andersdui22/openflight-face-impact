@@ -1,3 +1,11 @@
+# PHASE 5 GATE 21 LANDMARK BORDER QUALITY (2026-11-11)
+
+- Read-only audit PR #45 head `dffc2efa8b2673d6eafd106f64918ed7901ab7c2`: Documentation and Pylint SUCCESS; Tests, Foundation and UI IN PROGRESS; PR Checks FAILURE.
+- Added optional, explicitly bounded image-edge margin to existing planar face landmark pose estimator. Calibrated pixels within the excluded border now reject before pose estimation. Preserves default behavior and existing camera ownership; synthetic acceptance, rejection and invalid-parameter tests added.
+- This is a supplied-landmark observation-quality check, **not automatic clubface landmark extraction** or physical accuracy evidence. Gates 20–24 OPEN; no physical tests, merge or release. New SHA CI pending.
+
+---
+
 # PHASE 5 GATE 20 OPTIONAL SILHOUETTE CIRCULARITY (2026-11-11)
 
 - Exact-SHA startup audit of PR #45 `32003d727ab6254146187dfe192e6531e9688715`: Tests, Pylint, Foundation, UI and Documentation SUCCESS; PR Checks FAILURE.
