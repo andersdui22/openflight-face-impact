@@ -74,6 +74,7 @@ def assess_offline_capture_batch(  # pylint: disable=too-many-arguments
     A successful synthetic geometry result is not proof of physical impact.
     Every candidate is supplied explicitly; no best frame is selected.
     """
+    source_fingerprint = capture_fingerprint(capture)
     frames = assess_synthetic_frame_candidates(
         calibration, capture, candidates, landmarks_face_mm, polygon,
         ball_radius_mm=ball_radius_mm,
@@ -87,8 +88,10 @@ def assess_offline_capture_batch(  # pylint: disable=too-many-arguments
         min_circularity=min_circularity,
         max_candidates=max_candidates,
     )
+    if capture_fingerprint(capture) != source_fingerprint:
+        raise ValueError("capture changed during offline assessment")
     return OfflineCaptureBatchResult(
         frames=frames,
         audit=audit_synthetic_candidate_batch(frames),
-        source_capture_fingerprint=capture_fingerprint(capture),
+        source_capture_fingerprint=source_fingerprint,
     )
