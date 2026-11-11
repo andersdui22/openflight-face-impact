@@ -12,18 +12,26 @@ from dataclasses import dataclass
 from .calibration_profile import CameraCalibrationProfile
 from .calibration_revision import require_calibration_revision
 from .club_face_model import ClubFaceModel
+from .club_geometry_revision import club_geometry_revision
 
 
 @dataclass(frozen=True)
 class CalibrationClubBinding:
     calibration_revision: str
     club_model_id: str
+    club_geometry_revision: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.calibration_revision, str) or not self.calibration_revision:
             raise ValueError("explicit calibration revision required")
         if not isinstance(self.club_model_id, str) or not self.club_model_id.strip():
             raise ValueError("explicit club model identity required")
+        if self.club_geometry_revision is not None and (
+            not isinstance(self.club_geometry_revision, str)
+            or len(self.club_geometry_revision) != 64
+            or any(char not in "0123456789abcdef" for char in self.club_geometry_revision)
+        ):
+            raise ValueError("club geometry revision must be a SHA-256 hex digest")
 
 
 def require_calibration_club_binding(
@@ -42,3 +50,7 @@ def require_calibration_club_binding(
         raise ValueError("evidenced club geometry required")
     if binding.club_model_id != club_model.model_id:
         raise ValueError("club model identity incompatible with calibration binding")
+    if binding.club_geometry_revision is None:
+        raise ValueError("explicit club geometry revision required")
+    if binding.club_geometry_revision != club_geometry_revision(club_model):
+        raise ValueError("club geometry revision is stale or incompatible")
