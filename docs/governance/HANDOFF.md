@@ -1,3 +1,14 @@
+# PHASE 5 PARALLEL GATES 21, 23, 24 — CHECKPOINT (2026-11-11)
+
+- Branch `mdp-v1.2/phase5-gates20-24-parallel`, draft PR #45 https://github.com/andersdui22/openflight-face-impact/pull/45 (unmerged). At previous SHA `70093cfae191068f4eb7056f5b43e4c65e575e9b`, Documentation, foundation and Pylint succeeded, UI and Tests were still in progress, and PR Checks failed on the deferred screenshot policy. These are NOT checks on the new commits below.
+- **Gate 21** code `5c91e524e274b037267954e9dfdf8d36300b22bf`: existing synthetic planar pose estimator rejects malformed RMS/margin thresholds before OpenCV. Tests `01f09cc1b3d4f893b0d0a7bb63b977962a07dd0b`: invalid scalar/bool/array/nonfinite thresholds.
+- **Gates 23–24** code `7e6002af00663ee2af776ac530cf9ffdc01c7621`: synthetic impact result contract enforces finite coordinates and populated region labels for accepted results, and forbids coordinates/regions on rejected results, requiring an explicit rejection reason. Tests `061a6ee3bbff102af4ef6b0953c87536f029a900`: contradictory-result regressions.
+- **Gate 20** earlier code and tests remain on the branch; Gate 22 timing/trigger provenance audit is still pending.
+- All new code is synthetic/offline only; no physical camera tests, merge, release, new camera receive owner, or claims of physical pose/impact accuracy.
+- **Immediate next step:** verify the new exact-SHA technical CI; inspect and correct failures. Audit all existing `SyntheticImpactResult` constructors for compatibility with new fail-closed invariant. Then audit Gate 22 timestamp source and shot/session ownership. Update this handoff after meaningful milestones. This handoff commit advances SHA, so re-fetch remote HEAD.
+
+---
+
 # PHASE 5 GATE 20 IMMUTABILITY CHECKPOINT (2026-11-11)
 
 - Draft PR #45 remains unmerged. At last observed PR HEAD `7c2b89af1cf96d27cb55e2f97d4465e23c331f83`, Documentation succeeded, other technical CI workflows were in progress, and PR Checks failed under the previously deferred screenshot requirement. Do not claim technical CI passed.
