@@ -2,7 +2,11 @@
 
 from unittest.mock import patch
 
+import cv2 as cv
 import numpy as np
+
+from openflight.camera.checkerboard_calibration import CheckerboardCalibration
+from openflight.camera.synthetic_face_polygon import SyntheticFacePolygon
 import pytest
 
 from openflight.camera.offline_image_impact_pipeline import (
@@ -62,3 +66,52 @@ def test_invalid_frame_selection_fails_before_assessment(indices):
     image = np.zeros((160, 240), dtype=np.uint8)
     with pytest.raises(ValueError, match="frame indices"):
         run_pipeline([image, image], indices)
+
+
+def test_real_geometry_pipeline_rejects_mixed_ball_and_face_scene():
+    """One grayscale mask cannot disambiguate a bright ball and bright face."""
+    image = np.zeros((240, 320), dtype=np.uint8)
+    cv.rectangle(image, (35, 40), (115, 95), 230, -1)
+    cv.circle(image, (240, 150), 20, 220, -1)
+    calibration = CheckerboardCalibration(
+        (320, 240),
+        np.array([[260., 0., 160.], [0., 260., 120.], [0., 0., 1.]]),
+        np.zeros(5), 0., (),
+    )
+    landmarks = np.array([[-20., -10.], [20., -10.], [20., 10.], [-20., 10.]])
+    result = assess_image_derived_synthetic_impact(
+        calibration, capture([image, image.copy()]), (0, 1),
+        landmarks, SyntheticFacePolygon(landmarks),
+        image_size=(320, 240), ball_radius_mm=21.35,
+        max_ball_residual_rad=0.02, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+        ball_threshold=100, ball_min_area_px=100.,
+        ball_border_margin_px=2.,
+    )
+    assert result.assessment is None
+    assert len(result.observations.rejected) == 2
+    assert all("exactly one" in reason for _, reason in result.observations.rejected)
+    assert result.physical_contact_confirmed is False
+
+
+def test_real_geometry_pipeline_rejects_ball_only_scene():
+    image = np.zeros((240, 320), dtype=np.uint8)
+    cv.circle(image, (160, 120), 20, 220, -1)
+    calibration = CheckerboardCalibration(
+        (320, 240),
+        np.array([[260., 0., 160.], [0., 260., 120.], [0., 0., 1.]]),
+        np.zeros(5), 0., (),
+    )
+    landmarks = np.array([[-20., -10.], [20., -10.], [20., 10.], [-20., 10.]])
+    result = assess_image_derived_synthetic_impact(
+        calibration, capture([image, image.copy()]), (0, 1),
+        landmarks, SyntheticFacePolygon(landmarks),
+        image_size=(320, 240), ball_radius_mm=21.35,
+        max_ball_residual_rad=0.02, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+        ball_threshold=100, ball_min_area_px=100.,
+        ball_border_margin_px=2.,
+    )
+    assert result.assessment is None
+    assert len(result.observations.rejected) == 2
+    assert result.physical_contact_confirmed is False
