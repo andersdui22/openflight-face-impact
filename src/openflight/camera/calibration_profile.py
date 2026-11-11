@@ -61,7 +61,15 @@ class CameraCalibrationProfile:
 
     def require_mode(self, camera_mode_id: str, image_size: tuple[int, int]) -> None:
         """Fail closed if either explicit mode identity or dimensions differ."""
-        if camera_mode_id != self.camera_mode_id or image_size != self.calibration.image_size:
+        if (
+            not isinstance(camera_mode_id, str)
+            or not camera_mode_id.strip()
+            or not isinstance(image_size, tuple)
+            or len(image_size) != 2
+            or any(type(dimension) is not int or dimension <= 0 for dimension in image_size)
+            or camera_mode_id != self.camera_mode_id
+            or image_size != self.calibration.image_size
+        ):
             raise ValueError("calibration profile is incompatible with camera mode")
 
     def to_json(self) -> str:

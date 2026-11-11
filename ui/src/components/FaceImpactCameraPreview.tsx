@@ -4,7 +4,14 @@ import { getServerOrigin } from '../utils/serverOrigin';
 type CameraState = 'checking' | 'disabled' | 'starting' | 'running' | 'stopped' | 'error' | 'offline';
 
 type CalibrationState =
-  'not_calibrated' | 'mode_unknown' | 'mode_incompatible' | 'profile_invalid' | 'offline_profile_compatible';
+  | 'not_calibrated'
+  | 'mode_unknown'
+  | 'mode_incompatible'
+  | 'profile_invalid'
+  | 'revision_invalid'
+  | 'binding_incompatible'
+  | 'evidence_invalid'
+  | 'offline_profile_compatible';
 
 interface CalibrationStatus {
   state: CalibrationState;
@@ -29,6 +36,12 @@ function calibrationLabel(status: CalibrationStatus | null): string {
       return 'Calibration profile incompatible with camera mode';
     case 'profile_invalid':
       return 'Calibration profile invalid or unreadable';
+    case 'revision_invalid':
+      return 'Calibration revision missing or stale · not validated for measurements';
+    case 'binding_incompatible':
+      return 'Club model or calibration binding incompatible · not validated for measurements';
+    case 'evidence_invalid':
+      return 'Calibration or club evidence invalid · not validated for measurements';
     case 'mode_unknown':
       return 'Calibration profile loaded · camera mode not verified';
     default:

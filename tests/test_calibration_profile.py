@@ -68,3 +68,18 @@ def test_nonfinite_optics_rejected():
     data["camera_matrix"][0][0] = float("nan")
     with pytest.raises(ValueError, match="finite"):
         CameraCalibrationProfile.from_json(json.dumps(data))
+
+
+@pytest.mark.parametrize("bad_size", [
+    [640, 400], np.array([640, 400]), (True, 400),
+    (640.0, 400), (640, 0), (640,), "640x400",
+])
+def test_require_mode_rejects_malformed_dimensions(bad_size):
+    with pytest.raises(ValueError, match="incompatible"):
+        make_profile().require_mode("synthetic:640x400:full-frame", bad_size)
+
+
+@pytest.mark.parametrize("bad_mode", [[], {}, 640, "", "  "])
+def test_require_mode_rejects_malformed_mode_identity(bad_mode):
+    with pytest.raises(ValueError, match="incompatible"):
+        make_profile().require_mode(bad_mode, (640, 400))
