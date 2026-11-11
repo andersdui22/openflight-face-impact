@@ -1,3 +1,11 @@
+# PHASE 5 GATE 22 CI CONTRACT FIX (2026-11-11)
+
+- Read-only audit at `2d1fab4cd3502319790c3c7c3c40f2db17e86869`: Documentation, Pylint, Face Impact foundation and UI passed; Tests failed 3 assertions on changed error wording. PR Checks still fail title/description. CI logs show all 3 failures expect substring `missing capture identity` while the new stricter identity validator returned `missing or invalid capture identity`.
+- This atomic batch preserves existing diagnostic contract `missing capture identity` while retaining the new requirement that shot_id and session_id be nonblank strings. No test weakening, no hardware changes. All source/tests from previous batch remain.
+- CI for new SHA must be checked; gates 20–24 remain OPEN. No physical tests, merge or release.
+
+---
+
 # PHASE 5 GATE 22 IDENTITY VALIDATION BATCH (2026-11-11)
 
 - Read-only startup audit of draft PR #45, head `b7483af87ba55972df97239bfbcf736376e85af7`: Tests, Pylint, Face Impact foundation, UI and Documentation all SUCCESS. PR Checks FAILURE: title and missing required description headings.
