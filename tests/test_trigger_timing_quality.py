@@ -113,3 +113,16 @@ def test_gate22_candidate_frame_selection_rejects_invalid_capture(capture):
     invalid = replace(capture, session_id="")
     with pytest.raises(ValueError, match="invalid capture timing"):
         validate_candidate_frame_index(invalid, 1)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("shot_id", 123),
+    ("session_id", True),
+    ("shot_id", "   "),
+    ("session_id", []),
+])
+def test_gate22_malformed_capture_identity_fails_closed(capture, field, value):
+    quality = assess_trigger_timing(replace(capture, **{field: value}))
+    assert not quality.valid
+    assert "capture identity" in quality.reason
+    assert not quality.trigger_between_host_frames

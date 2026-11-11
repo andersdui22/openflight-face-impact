@@ -41,8 +41,11 @@ def assess_trigger_timing(capture: TriggeredCapture) -> TriggerTimingQuality:
         or capture.trigger_host_timestamp_ns < 0
     ):
         return reject("invalid host trigger timestamp")
-    if not capture.shot_id or not capture.session_id:
-        return reject("missing capture identity")
+    if any(
+        not isinstance(identity, str) or not identity.strip()
+        for identity in (capture.shot_id, capture.session_id)
+    ):
+        return reject("missing or invalid capture identity")
 
     for field in ("sensor_timestamp_ns", "host_timestamp_ns"):
         timestamps = [getattr(frame, field) for frame in frames]

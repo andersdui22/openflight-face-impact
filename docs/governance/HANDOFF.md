@@ -1,3 +1,12 @@
+# PHASE 5 GATE 22 IDENTITY VALIDATION BATCH (2026-11-11)
+
+- Read-only startup audit of draft PR #45, head `b7483af87ba55972df97239bfbcf736376e85af7`: Tests, Pylint, Face Impact foundation, UI and Documentation all SUCCESS. PR Checks FAILURE: title and missing required description headings.
+- Gate 22 hardening: require both shot_id and session_id to be nonblank strings, not merely truthy values; reject malformed integers, booleans, lists and whitespace-only identity. New focused regression tests. This protects offline provenance validation only; it does not infer physical contact or bind supplied pixels to a capture frame.
+- Changes to source, tests and handoff committed atomically once to minimize GitHub CI. New commit CI must be verified before claiming acceptance. PR metadata still requires edit; no tool currently available for PR edits.
+- All Gates 20–24 OPEN; physical testing deferred until all 35 Gates developed. No merges/releases.
+
+---
+
 # PHASE 5 GATE 22 BATCH REGRESSION CHECKPOINT (2026-11-11)
 
 - CI on `ae78a6991a5c239084e8e092087eec9dc2943fdb`: **all five technical workflows passed** (Tests, Pylint, Face Impact foundation, UI, Documentation). PR Checks failed exclusively on conventional title and required PR-description sections. Do not claim PR Checks green.
