@@ -54,6 +54,7 @@ def test_missing_binding_rejected(tmp_path):
     result = load_revision_bound_calibration_status(optics, binding)
     assert result["state"] == "revision_invalid"
     assert result["binding_loaded"] is False
+    assert result["club_geometry_compatible"] is False
 
 
 def test_absent_profile_uses_existing_status():
@@ -67,6 +68,9 @@ def test_corrupt_profile_fails_closed(tmp_path):
     optics.write_text("not json", encoding="utf-8")
     result = load_revision_bound_calibration_status(optics, binding)
     assert result["state"] == "profile_invalid"
+    assert result["binding_loaded"] is False
+    assert result["revision_compatible"] is False
+    assert result["club_geometry_compatible"] is False
     assert result["physical_validation"] is False
 
 
@@ -83,6 +87,7 @@ def test_malformed_binding_is_revision_invalid(tmp_path):
     result = load_revision_bound_calibration_status(optics, binding)
     assert result["state"] == "revision_invalid"
     assert result["binding_loaded"] is False
+    assert result["club_geometry_compatible"] is False
     assert result["physical_validation"] is False
 
 
