@@ -1,3 +1,12 @@
+# PHASE 5 GATES 20–24 SOFTWARE EVIDENCE REVIEW (2026-11-11)
+
+- Read-only PR #45 audit at exact SHA `925c1a3f3248c0112ff7708356117fde20b0a9d0`: Tests, Foundation, UI, Pylint and Documentation all SUCCESS; PR Checks FAILURE (PR metadata). Positive rendered-image integration is in the passing test suite; this does not prove physical accuracy.
+- Reconciled stale Phase 5 scope status and recorded per-Gate implemented offline evidence, concrete missing software and separately deferred physical work in `MDP_V1_2_PHASE5_GATES20_24_PARALLEL_SCOPE.md`. Gates 20–24 remain OPEN. In particular, image-derived clubface landmark extraction and contact-frame selection remain absent; supplied face pixels and manually chosen frames must not be described as measured detections.
+- Canonical approved MDP V1.2 acceptance text not verified in repository. No final Gate closure without reconciliation. All physical tests postponed until all 35 Gates are developed as far as possible without hardware. No merge/release.
+- This documentation change requires its own new-SHA CI verification; previous successful CI belongs only to the audited SHA.
+
+---
+
 # PHASE 5 CI REPAIR AND TEST BOUNDARY (2026-11-11)
 
 - Read-only audit exact SHA `b81b14e128fbfde8c83ac685da9a35f4f6fdb87d`: Tests FAILURE (Python 3.11: 2751 passed, 1 failed, 7 skipped; 3.10 and 3.12 cancelled), Foundation/Pylint/UI/Documentation SUCCESS; PR Checks FAILURE.

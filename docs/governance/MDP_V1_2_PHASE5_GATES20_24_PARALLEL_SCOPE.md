@@ -1,6 +1,6 @@
 # Phase 5 Gates 20–24 — authorized parallel read-only startup audit
 
-Status: **READ-ONLY AUDIT COMPLETE; IMPLEMENTATION NOT YET STARTED** (2026-11-11). This is a scope and evidence record, not Gate acceptance.
+Status: **OFFLINE IMPLEMENTATION IN PROGRESS; SOFTWARE ACCEPTANCE NOT YET RECORDED** (2026-11-11). This is a scope and evidence record, not Gate acceptance. See the dated status matrix below for the verified current SHA.
 
 ## Authorization and immutable baseline
 
@@ -42,3 +42,24 @@ Status: **READ-ONLY AUDIT COMPLETE; IMPLEMENTATION NOT YET STARTED** (2026-11-11
 5. Stop on a material contradiction with canonical plan, unavailable license/provenance, out-of-scope behavior or unverified physical assumptions. No physical tests, merge, release, fabricated screenshot, PR check bypass or claimed measured impact accuracy.
 
 **Next implementation candidate:** a bounded pure Gate 20 observation-quality validator around supplied ball silhouette samples, *not* a second detector or camera reader. Audit its current tests and the existing `ball_silhouette_range` contract before coding.
+
+## Current software evidence matrix — exact SHA `925c1a3f3248c0112ff7708356117fde20b0a9d0` (2026-11-11)
+
+Read-only GitHub PR #45 audit: **Tests, Face Impact foundation, UI, Pylint and Documentation SUCCESS** on this exact SHA; **PR Checks FAILURE** (PR metadata; not waived). Draft PR #45 remains open, unmerged. The positive rendered-image test `tests/test_positive_rendered_capture_impact.py` is included in the passing test suite, but this is only synthetic accuracy against a known constructed scene, not physical measurement accuracy.
+
+| Gate | Implemented and CI-tested offline evidence | Still missing before software-only closeout | Deferred physical evidence | Disposition |
+| --- | --- | --- | --- | --- |
+| 20 | Grayscale bright-contour extraction, circularity/edge/ambiguity rejection, calibrated-ray sphere estimation and image-derived positive rendered-scene regression | Robust golf-ball identification under realistic background/occlusion, detection coverage and acceptance thresholds; no claim that any bright circular region is a golf ball | Real camera exposure, optics, segmentation and sphere-range accuracy | **OPEN — offline partial** |
+| 21 | Labelled planar face-landmark pose estimation, border/ambiguity rejection and projected-landmark positive synthetic regression | **Actual clubface landmark detection from frame pixels is absent**; current pipeline receives caller-supplied face pixels and cannot prove their provenance | Physical clubface observability and pose precision | **OPEN — offline partial** |
+| 22 | Single camera owner and bounded capture-buffer/timing guards; explicit selected frame, shot/session identity and frame metadata consistency; multi-frame offline assessment | **Contact instant is not inferred or selected**; a candidate index must be provided; no subframe reconstruction or evidence-based frame ranking | Camera timing/trigger synchronization and actual contact moment | **OPEN — offline partial** |
+| 23 | Synthetic planar tangency, bounded polygon contact and regions, explicit no-tangency/outside-face rejection; positive unmocked image-to-impact synthetic regression | End-to-end observed face landmarks and physical face model provenance missing; no measured contact claim | Actual face coordinates and boundary accuracy | **OPEN — offline partial** |
+| 24 | Typed fail-closed impact and quality, per-frame and batch audits, rejection matrix, no invented physical uncertainty | **No calibrated uncertainty estimator or defensible statistical confidence**; no automatic selection or physical validity declaration | Measurement uncertainty/repeatability and independent ground truth | **OPEN — offline partial** |
+
+### Software-first completion rule
+
+All **35 Gates** must be developed as far as feasible without physical hardware before any physical testing begins. Offline software completeness and physical acceptance are separate statuses; hardware-dependent evidence is deferred, **not silently accepted**. Do not block authorized independent software development merely because physical validation is deferred. The canonical Master Development Plan V1.2 acceptance criteria remain unavailable in this inspected repository; individual final Gate closeout requires reconciliation with that approved source. No merges, releases, physical tests or PR-check bypass are authorized.
+
+### Next coherent software batch
+
+Prioritize a bounded **image-derived clubface landmark provenance path** and an explicit **offline candidate-frame selection policy** (or documented rejection if unobservable), using the existing camera owner, immutable capture metadata and synthetic tests. Avoid inventing face detections, contact timing, calibrated accuracy or confidence from synthetic data. Implement in one reviewed package with tests and same-SHA CI.
+
