@@ -1,3 +1,11 @@
+# CI REGRESSION REPAIR — SSR ZUSTAND SNAPSHOT (2026-11-12)
+
+- Investigated exact SHA `f7dede01` CI: Python Tests, Pylint, Documentation, Windows USB camera and UI browser E2E passed. UI format failed (existing Prettier drift), and Foundation ui-unit-linux failed 3 new `OfflineImpactReview` tests (275 others passed).
+- Cause: server-side `renderToStaticMarkup` uses Zustand's initial server snapshot, not a mutated client store; tests incorrectly expected injected runtime state to appear in SSR. Added explicit optional evidence injection to the review component and passed the validated store entries from the three tests. Normal production rendering still subscribes to the live store. This is a testability seam, not a bypass of the runtime transport validator.
+- CI for this repair must be checked at its new exact SHA. PR Checks still failing, format not yet repaired, Gates 20–24 OPEN.
+
+---
+
 # BATCH B — SERVER-SIDE OFFLINE RESULT PUBLICATION SEAM (2026-11-12)
 
 - Added `publish_offline_impact_handoff`: accepts only a typed `OfflineImpactHandoff`, serializes via schema-v1 offline evidence, and emits `offline_impact_evidence` to one explicit Socket.IO recipient. Added server adapter `publish_completed_offline_impact` and publisher contract tests.

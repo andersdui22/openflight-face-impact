@@ -24,7 +24,7 @@ describe('offline synthetic impact review', () => {
 
   it('renders a synthetic marker and source identity for accepted evidence', () => {
     useOfflineImpactStore.getState().ingest(accepted);
-    const html = renderToStaticMarkup(<OfflineImpactReview />);
+    const html = renderToStaticMarkup(<OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />);
     expect(html).toContain('shot-a');
     expect(html).toContain('NOT CAMERA MEASUREMENTS');
     expect(html).toContain('synthetic-impact-marker');
@@ -36,14 +36,14 @@ describe('offline synthetic impact review', () => {
       shot_id: 'shot-b', session_id: 'session-a', accepted: false,
       reason: 'ambiguous frame', physically_validated: false, position_uncertainty_mm: null,
     });
-    const html = renderToStaticMarkup(<OfflineImpactReview />);
+    const html = renderToStaticMarkup(<OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />);
     expect(html).toContain('ambiguous frame');
     expect(html).not.toContain('synthetic-impact-marker');
   });
 
   it('does not draw outside the illustrative reference outline', () => {
     useOfflineImpactStore.getState().ingest({ ...accepted, x_mm: 200 });
-    const html = renderToStaticMarkup(<OfflineImpactReview />);
+    const html = renderToStaticMarkup(<OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />);
     expect(html).toContain('no marker displayed');
     expect(html).not.toContain('synthetic-impact-marker');
   });

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useOfflineImpactStore } from '../stores/useOfflineImpactStore';
+import type { OfflineImpactEvidence } from '../types/offlineImpactEvidence';
 import { FaceImpactView } from './FaceImpactView';
 
 // Reference outline is synthetic and illustrative, never a camera-calibrated face.
@@ -7,8 +8,9 @@ const referenceFace: [number, number][] = [
   [-45, -25], [45, -25], [45, 25], [-45, 25],
 ];
 
-export function OfflineImpactReview() {
-  const entries = useOfflineImpactStore((state) => state.entries);
+export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvidence[] } = {}) {
+  const liveEntries = useOfflineImpactStore((state) => state.entries);
+  const entries = evidence ?? liveEntries;
   const [selectedShotId, setSelectedShotId] = useState<string | null>(null);
   const selected = entries.find((entry) => entry.shot_id === selectedShotId) ?? entries[entries.length - 1];
   const accepted = entries.filter((entry) => entry.accepted);
