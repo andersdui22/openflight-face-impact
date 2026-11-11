@@ -1,3 +1,11 @@
+# PHASE 5 GATE 24 RESULT INVARIANT BATCH (2026-11-11)
+
+- Read-only startup audit of PR #45 head `f9c1fef0be725cf922988fa772a984d01cd5b4d7`: Tests, Pylint, Face Impact foundation, UI and Documentation SUCCESS; PR Checks FAILURE (title/description metadata).
+- Gate 24: accepted synthetic impact results now reject whitespace-only horizontal or vertical region labels, consistent with existing rejected-result nonblank reason validation. Added four offline regression cases. No change to physical measurement semantics.
+- Source, tests and handoff committed atomically to minimize CI runs. New exact-SHA CI is pending. Gates 20–24 remain OPEN. No physical camera test, merge, release or PR-check bypass.
+
+---
+
 # PHASE 5 GATE 20 RESULT-CONTRACT HARDENING (2026-11-11)
 
 - Read-only startup audit of draft PR #45 at `bbb8a5f7a14da70ea975e1fd9f60a931fbe76b40`: all five technical workflows SUCCESS; PR Checks FAILURE due title and required PR-description sections. Source and tests inspected before editing.

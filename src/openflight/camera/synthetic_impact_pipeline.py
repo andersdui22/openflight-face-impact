@@ -47,7 +47,7 @@ class SyntheticImpactResult:
                 any(not isinstance(value, (int, float, np.integer, np.floating))
                     or isinstance(value, (bool, np.bool_))
                     or not np.isfinite(value) for value in coordinates)
-                or any(not isinstance(value, str) or not value for value in regions)
+                or any(not isinstance(value, str) or not value.strip() for value in regions)
                 or self.rejection_reason is not None
             ):
                 raise ValueError("accepted synthetic impact requires finite coordinates and regions")

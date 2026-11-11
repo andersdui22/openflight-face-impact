@@ -104,3 +104,20 @@ def test_gates23_24_reject_contradictory_impact_results(kwargs):
 
     with pytest.raises(ValueError):
         SyntheticImpactResult(**kwargs)
+
+
+@pytest.mark.parametrize(("horizontal", "vertical"), [
+    (" ", "center"),
+    ("toe", "\\t"),
+    ("", "high"),
+    ("heel", "  "),
+])
+def test_gate24_rejects_blank_accepted_impact_regions(horizontal, vertical):
+    from openflight.camera.synthetic_impact_pipeline import SyntheticImpactResult
+
+    with pytest.raises(ValueError, match="accepted synthetic impact"):
+        SyntheticImpactResult(
+            status=SyntheticImpactStatus.OK,
+            x_mm=0., y_mm=0.,
+            horizontal_region=horizontal, vertical_region=vertical,
+        )
