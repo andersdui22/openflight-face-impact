@@ -110,3 +110,14 @@ No individual Gate 17, 18 or 19 is accepted yet. Continue with focused tests, sa
 - This **is a real result-publication boundary for the synthetic demonstration only**. Its coordinates are synthetic millimetres; it is not a physical ELP observation, verified camera pose or live impact result.
 - The existing synthetic pipeline rejects outside-face, no-tangency and invalid geometry without returning partial impact coordinates. This is distinct from the Gate 19 optics/club binding guard, which has not been integrated into this synthetic-only endpoint.
 - Do **not** make the synthetic demo require physical camera calibration; that would break its deliberate hardware-free test role. A future physical Face Impact result endpoint should enforce the validated optics/mode/club/pose prerequisites before publishing measured impact coordinates, once that endpoint and its ownership are independently established.
+
+
+### Technical checkpoint and deferred physical testing (2026-11-11)
+
+- User decision: postpone **all physical ELP/hardware testing** until development of all 35 Gates is complete. This changes scheduling only; it does not constitute physical acceptance evidence, a Golden baseline, merge/release permission or a Project Law amendment.
+- At integration HEAD `8e44a8584d95dfa6ea5229e9af5072c862fcfb60`, all six technical workflows passed on the same SHA: Tests, Pylint, UI, Documentation, Face Impact foundation, and Face Impact Windows USB camera. PR Checks failed on the separately deferred screenshot requirement; no bypass or screenshot waiver is asserted.
+- Gate 17: coordinate transforms and planar synthetic reference checks implemented and tested. Real camera-to-face pose, depth and observed physical alignment remain unverified.
+- Gate 18: typed club families, sourced-dimension requirements and geometry revision checks implemented and tested. Physical club geometries and curved-surface impact solving remain unverified/unimplemented where required.
+- Gate 19: offline optics and club-binding revision guards, atomic persistence, fail-closed runtime mode validation, status API and synthetic regression coverage implemented and tested. No verified physical camera mode, physical calibration, actual pose or runtime physical impact publication guard exists.
+- **Disposition:** technical CI checkpoint complete; Gates 17–19 remain OPEN pending individually documented acceptance decisions. Physical acceptance is explicitly deferred until after development of all Gates. Do not represent offline compatibility as physical validation.
+- Phase 5 (Gates 20–24) may be read-only audited and dependencies planned, but this Phase 4 authorization does **not** grant Phase 5 production-code implementation authority. A separately approved Active Change Gate is required.
