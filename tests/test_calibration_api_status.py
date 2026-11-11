@@ -68,3 +68,27 @@ def test_corrupt_profile_fails_closed(tmp_path):
     result = load_revision_bound_calibration_status(optics, binding)
     assert result["state"] == "profile_invalid"
     assert result["physical_validation"] is False
+
+
+def test_optional_binding_preserves_legacy_unknown_mode_status(tmp_path):
+    optics, _ = files(tmp_path)
+    result = load_revision_bound_calibration_status(optics, None)
+    assert result["state"] == "mode_unknown"
+    assert result["physical_validation"] is False
+
+
+def test_malformed_binding_is_revision_invalid(tmp_path):
+    optics, binding = files(tmp_path)
+    binding.write_text("not json", encoding="utf-8")
+    result = load_revision_bound_calibration_status(optics, binding)
+    assert result["state"] == "revision_invalid"
+    assert result["binding_loaded"] is False
+    assert result["physical_validation"] is False
+
+
+def test_missing_profile_does_not_validate_binding(tmp_path):
+    optics, binding = files(tmp_path)
+    optics.unlink()
+    result = load_revision_bound_calibration_status(optics, binding)
+    assert result["state"] == "profile_invalid"
+    assert result["physical_validation"] is False
