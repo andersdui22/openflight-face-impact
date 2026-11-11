@@ -3,7 +3,12 @@ import { getServerOrigin } from '../utils/serverOrigin';
 
 type CameraState = 'checking' | 'disabled' | 'starting' | 'running' | 'stopped' | 'error' | 'offline';
 
-type CalibrationState = 'not_calibrated' | 'mode_unknown' | 'mode_incompatible' | 'profile_invalid' | 'offline_profile_compatible';
+type CalibrationState =
+  | 'not_calibrated'
+  | 'mode_unknown'
+  | 'mode_incompatible'
+  | 'profile_invalid'
+  | 'offline_profile_compatible';
 
 interface CalibrationStatus {
   state: CalibrationState;
@@ -106,8 +111,8 @@ export function FaceImpactCameraPreview() {
             : calibration?.state === 'profile_invalid'
               ? 'Calibration profile invalid or unreadable'
               : calibration?.state === 'mode_unknown'
-              ? 'Calibration profile loaded · camera mode not verified'
-              : 'Camera not physically calibrated'}
+                ? 'Calibration profile loaded · camera mode not verified'
+                : 'Camera not physically calibrated'}
       </small>
     </div>
   );
