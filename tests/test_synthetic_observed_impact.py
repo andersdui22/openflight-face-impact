@@ -171,3 +171,31 @@ def test_invalid_polygon_is_rejected_by_existing_contact_pipeline(calibration):
     assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
     assert "polygon" in result.rejection_reason
     assert result.x_mm is None and result.y_mm is None
+
+
+def test_gate20_clipped_ball_contour_fails_before_geometry(calibration):
+    ball_pixels, face_pixels = synthetic_pixels(calibration, [10., 0., RADIUS_MM])
+    ball_pixels[0] = [0., 50.]
+    result = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        image_size=SIZE, ball_radius_mm=RADIUS_MM,
+        max_ball_residual_rad=1e-6, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+        ball_border_margin_px=2.,
+    )
+    assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert "border margin" in result.rejection_reason
+    assert result.x_mm is None and result.y_mm is None
+
+
+def test_gate20_valid_contour_integrates_with_observed_impact(calibration):
+    ball_pixels, face_pixels = synthetic_pixels(calibration, [12., 5., RADIUS_MM])
+    result = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        image_size=SIZE, ball_radius_mm=RADIUS_MM,
+        max_ball_residual_rad=1e-6, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+        ball_border_margin_px=1.,
+    )
+    assert result.status is SyntheticImpactStatus.OK
+    assert result.x_mm == pytest.approx(12., abs=0.01)
