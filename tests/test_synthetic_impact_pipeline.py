@@ -108,7 +108,7 @@ def test_gates23_24_reject_contradictory_impact_results(kwargs):
 
 @pytest.mark.parametrize(("horizontal", "vertical"), [
     (" ", "center"),
-    ("toe", "\\t"),
+    ("toe", "\t"),
     ("", "high"),
     ("heel", "  "),
 ])

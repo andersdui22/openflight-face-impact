@@ -1,3 +1,11 @@
+# PHASE 5 GATE 24 CI TEST-DATA FIX (2026-11-11)
+
+- Exact-SHA CI at `bf87de053d90ea996077c549731c35b027722c2a`: Tests FAILURE (Python 3.10: 2650 passed, 1 failed, 7 skipped); Pylint, foundation, UI and Documentation SUCCESS; PR Checks FAILURE on metadata.
+- Root cause: Gate 24 regression parameter contained literal backslash+t rather than a tab character; whitespace-only validation correctly did not reject that nonblank string. Test now uses the actual tab escape in Python source. Production code unchanged, assertions retained.
+- Batch updates test and handoff together; reverify CI on the new SHA. Gates 20–24 OPEN; no hardware tests, merge or release.
+
+---
+
 # PHASE 5 GATE 24 RESULT INVARIANT BATCH (2026-11-11)
 
 - Read-only startup audit of PR #45 head `f9c1fef0be725cf922988fa772a984d01cd5b4d7`: Tests, Pylint, Face Impact foundation, UI and Documentation SUCCESS; PR Checks FAILURE (title/description metadata).
