@@ -1,3 +1,12 @@
+# PHASE 5 GATE 22 RING INTEGRATION TEST CHECKPOINT (2026-11-11)
+
+- PR #45 read-only audit: HEAD `85e87a96545adbb117f966907ea17a216405085b`, draft, unmerged. All six PR workflows were **queued** when checked, including Tests, Pylint, UI, Documentation, foundation and PR Checks. **No same-SHA pass has been verified.**
+- Commit `872a3ff4b19495ced1e2f225ef9a05801ca5ec39` adds an offline Gate 22 regression test feeding actual `TriggeredFrameBuffer` frames, firing a deterministic host trigger, consuming `TriggeredCapture`, checking shot/session identity and passing it to `assess_trigger_timing`. Also tests rejection when trigger precedes the last pre-frame host timestamp. No hardware involved.
+- **Important:** This integration test only exercises synthetic frame metadata and the existing ring buffer; no physical contact timestamp is inferred. Gate 22 validator is still standalone and not connected to real measurement publication.
+- NEXT: Recheck GitHub CI on latest HEAD after this handoff commit; avoid repeatedly pushing documentation-only commits if CI is queued. If technical CI fails, inspect job logs and fix. Also inspect existing `SyntheticImpactResult` constructors for Gate 23–24 contract compatibility and reconcile exact MDP V1.2 Gate definitions before closeout. Continue approved parallel Gates 20–24, no merge/release/physical testing.
+
+---
+
 # PHASE 5 GATE 22 OFFLINE TIMING PROVENANCE (2026-11-11)
 
 - Draft PR #45 remains the approved Phase 5 work surface; no merge/release/physical tests.
