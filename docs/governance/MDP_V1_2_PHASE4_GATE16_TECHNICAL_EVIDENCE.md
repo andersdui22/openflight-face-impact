@@ -23,8 +23,8 @@ Status: **OPEN / not merged**. This report documents only automated, hardware-fr
 
 CI results must be evaluated against the **exact current PR head**; earlier green workflows are not proof that a later commit passed.
 
-- Capture a genuine screenshot of the UI calibration status and attach it to PR #43 to satisfy the existing PR check. Do not use a fabricated screenshot or bypass the requirement.
-- Verify UI format/build/lint/E2E, Python tests, USB fixtures, Pylint, foundation and documentation at the final SHA.
+- **Deferred by user:** A genuine screenshot of the UI calibration status remains required by the existing PR check. The user has explicitly confirmed that this screenshot is postponed, as for Gates 14/15. The PR Checks workflow is expected to remain red for this documented reason; do not fabricate an image or use the `no-screenshots-needed` bypass for a visible UI change.
+- **Verified baseline `64a4525e261b1e2fecfdb9b88f700e51cfabee36`:** all six technical workflows passed on this exact SHA: UI (format, build, lint, E2E), Tests, Face Impact Windows USB camera, Pylint, Face Impact foundation, Documentation. The seventh workflow, PR Checks, failed only on the deferred screenshot, with title and PR-content checks passing. This evidence is for that immutable SHA only; any subsequent documentation commit needs its own CI verification.
 - Physical validation, stable physical camera-mode identity and impact accuracy remain outside the demonstrated evidence; do not close these by inference.
 - PR #43 stays draft and unmerged until separately authorized.
 
