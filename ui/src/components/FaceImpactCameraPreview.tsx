@@ -25,6 +25,21 @@ interface UsbStatus {
   calibration?: CalibrationStatus;
 }
 
+function calibrationLabel(status: CalibrationStatus | null): string {
+  switch (status?.state) {
+    case 'offline_profile_compatible':
+      return 'Offline calibration profile compatible · physical validation not performed';
+    case 'mode_incompatible':
+      return 'Calibration profile incompatible with camera mode';
+    case 'profile_invalid':
+      return 'Calibration profile invalid or unreadable';
+    case 'mode_unknown':
+      return 'Calibration profile loaded · camera mode not verified';
+    default:
+      return 'Camera not physically calibrated';
+  }
+}
+
 function backendOrigin(): string {
   const origin = getServerOrigin();
   // Packaged Electron uses file:// and has no bundled Python backend.
@@ -103,17 +118,7 @@ export function FaceImpactCameraPreview() {
       )}
       {error && <span role="alert">{error}</span>}
       <small>USB preview only · no impact measurement</small>
-      <small aria-label="Camera calibration status">
-        {calibration?.state === 'offline_profile_compatible'
-          ? 'Offline calibration profile compatible · physical validation not performed'
-          : calibration?.state === 'mode_incompatible'
-            ? 'Calibration profile incompatible with camera mode'
-            : calibration?.state === 'profile_invalid'
-              ? 'Calibration profile invalid or unreadable'
-              : calibration?.state === 'mode_unknown'
-                ? 'Calibration profile loaded · camera mode not verified'
-                : 'Camera not physically calibrated'}
-      </small>
+      <small aria-label="Camera calibration status">{calibrationLabel(calibration)}</small>
     </div>
   );
 }
