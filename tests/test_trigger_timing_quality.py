@@ -1,0 +1,67 @@
+"""Gate 22 offline timing-provenance checks without camera hardware."""
+
+from dataclasses import replace
+
+import numpy as np
+import pytest
+
+from openflight.camera.trigger_timing_quality import assess_trigger_timing
+from openflight.camera.triggered_buffer import CameraFrame, TriggeredCapture
+
+
+def frame(sensor, host):
+    return CameraFrame(np.zeros((2, 2), dtype=np.uint8), sensor, host, 100, 1.0)
+
+
+@pytest.fixture
+def capture():
+    return TriggeredCapture(
+        frames=(frame(100, 1000), frame(200, 2000), frame(300, 3000)),
+        pre_trigger_count=2,
+        trigger_host_timestamp_ns=2500,
+        shot_id="shot-1",
+        session_id="session-1",
+    )
+
+
+def test_valid_timing_reports_provenance_not_contact(capture):
+    quality = assess_trigger_timing(capture)
+    assert quality.valid
+    assert quality.reason is None
+    assert quality.frame_count == 3
+    assert quality.trigger_between_host_frames
+
+
+@pytest.mark.parametrize(("change", "reason"), [
+    ({"pre_trigger_count": 0}, "missing pre-trigger"),
+    ({"pre_trigger_count": 3}, "missing pre-trigger"),
+    ({"trigger_host_timestamp_ns": 3500}, "not bracketed"),
+    ({"trigger_host_timestamp_ns": -1}, "invalid host"),
+    ({"shot_id": ""}, "missing capture identity"),
+    ({"session_id": ""}, "missing capture identity"),
+])
+def test_invalid_capture_rejected(capture, change, reason):
+    quality = assess_trigger_timing(replace(capture, **change))
+    assert not quality.valid
+    assert reason in quality.reason
+
+
+def test_nonmonotonic_sensor_clock_rejected(capture):
+    bad = replace(capture, frames=(frame(100, 1000), frame(100, 2000), frame(300, 3000)))
+    quality = assess_trigger_timing(bad)
+    assert not quality.valid
+    assert "sensor_timestamp_ns" in quality.reason
+
+
+def test_nonmonotonic_host_clock_rejected(capture):
+    bad = replace(capture, frames=(frame(100, 1000), frame(200, 1000), frame(300, 3000)))
+    quality = assess_trigger_timing(bad)
+    assert not quality.valid
+    assert "host_timestamp_ns" in quality.reason
+
+
+def test_trigger_host_time_not_compared_to_sensor_clock(capture):
+    shifted = replace(capture, frames=(
+        frame(900_000, 1000), frame(900_100, 2000), frame(900_200, 3000),
+    ))
+    assert assess_trigger_timing(shifted).valid
