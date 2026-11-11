@@ -1,3 +1,11 @@
+# PHASE 5 SOFTWARE-ONLY ACCEPTANCE GAP AUDIT (2026-11-11)
+
+- Added `docs/governance/MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md` with explicit Gate 20–24 evidence, remaining P0/P1 software gaps and hardware-deferred acceptance.
+- `fa0972cc` CI queued at audit time. Prior `d99ea571` exact-SHA six workflows SUCCESS; not transferable to newer commits.
+- Gates 20–24 remain OPEN; canonical approved MDP V1.2 acceptance criteria still absent in inspected repository. No merge/release/physical tests.
+
+---
+
 # PHASE 5 GATES 20–24 AUDITED OFFLINE HANDOFF INTEGRATION (2026-11-11)
 
 - Exact-SHA `d99ea571`: all six CI workflows SUCCESS.
