@@ -150,8 +150,9 @@ def test_delivered_fps_is_observed_and_reset_on_restart():
     assert camera.delivered_fps is None
     camera.start()
     try:
-        wait_until(lambda: camera.frames_received >= 5)
-        assert camera.delivered_fps is not None
+        # Frame count can advance before the reader publishes its FPS samples.
+        # Wait for the actual observable being asserted, not a racing counter.
+        wait_until(lambda: camera.delivered_fps is not None)
         assert camera.delivered_fps > 0
         assert camera.negotiated["reported_fps"] == 120.0
     finally:
