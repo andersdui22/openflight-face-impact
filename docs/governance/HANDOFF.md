@@ -1,3 +1,11 @@
+# BATCH A — FRAME PROVENANCE AND FAIL-CLOSED MARKER INPUT (2026-11-12)
+
+- Marker-image adapter now fingerprints the typed capture before and after marker extraction/association and aborts if frame bytes, timing or identity changed. Explicit recipient is required before expensive analysis; no silent fallback publication.
+- Added regressions for empty mapping, out-of-range frame, image size mismatch and no mutation of supplied raster input.
+- Latest CI on `e50e1d92` was still in progress at inspection; prior `b0c83560` passed Python, Pylint, foundation, Windows USB and E2E, but UI formatting and PR screenshot checks remained red. No merges/releases, Gates 20–24 OPEN, physical tests deferred.
+
+---
+
 # BATCH A — CI REVIEW AND MARKER INPUT GUARDS (2026-11-12)
 
 - Verified CI for `b0c83560`: Python Tests, Pylint, Face Impact foundation, Windows USB camera, Documentation and browser E2E passed; UI lint/build passed. UI format still fails due Prettier drift across 13 files; PR Checks still requires authentic screenshot.

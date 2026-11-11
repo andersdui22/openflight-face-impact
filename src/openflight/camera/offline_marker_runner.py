@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import numpy as np
 
+from .offline_capture_batch import capture_fingerprint
 from .experimental_face_markers import (
     associate_markers_with_reference,
     extract_unlabelled_bright_markers,
@@ -50,9 +51,13 @@ def analyze_marker_observed_offline_capture(
         raise ValueError("marker distance budget must be numeric")
     if not callable(analysis_options.get("emit")):
         raise ValueError("marker runner requires callable emitter")
+    if (not isinstance(analysis_options.get("recipient"), str)
+            or not analysis_options["recipient"].strip()):
+        raise ValueError("marker runner requires explicit recipient")
     if any(not isinstance(index, int) or isinstance(index, bool)
            for index in marker_images_by_frame):
         raise ValueError("marker frame indices must be integers")
+    source_fingerprint = capture_fingerprint(capture)
     candidates = []
     for frame_index, image in sorted(marker_images_by_frame.items()):
         if (not isinstance(frame_index, int) or isinstance(frame_index, bool)
@@ -74,6 +79,8 @@ def analyze_marker_observed_offline_capture(
             max_distance_px=max_marker_distance_px,
         )
         candidates.append(SyntheticFrameCandidate(frame_index, labelled_pixels))
+    if capture_fingerprint(capture) != source_fingerprint:
+        raise ValueError("capture changed during marker observation")
     return analyze_and_publish_offline_capture(
         calibration, capture, tuple(candidates),
         landmarks_face_mm, polygon, **analysis_options,

@@ -104,3 +104,27 @@ def test_partial_marker_batch_failure_does_not_publish_previous_frame():
     cv.circle(missing, (40, 45), 6, 0, -1)
     with pytest.raises(ValueError, match="unexpected blob count"):
         _run({0: image, 1: missing})
+
+
+def test_no_marker_observations_rejected():
+    with pytest.raises(ValueError, match="nonempty frame mapping"):
+        _run({})
+
+
+def test_out_of_range_marker_frame_rejected():
+    image, *_ = _inputs()
+    with pytest.raises(ValueError, match="outside capture"):
+        _run({2: image})
+
+
+def test_marker_image_shape_must_match_capture_frame():
+    image, *_ = _inputs()
+    with pytest.raises(ValueError, match="dimensions differ"):
+        _run({0: np.zeros((100, 100), dtype=np.uint8)})
+
+
+def test_marker_input_images_are_not_modified_by_extraction():
+    image, *_ = _inputs()
+    before = image.copy()
+    _run({0: image})
+    np.testing.assert_array_equal(image, before)
