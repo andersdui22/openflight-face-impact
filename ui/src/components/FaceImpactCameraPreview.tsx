@@ -118,9 +118,7 @@ export function FaceImpactCameraPreview() {
       )}
       {error && <span role="alert">{error}</span>}
       <small>USB preview only · no impact measurement</small>
-      <small aria-label="Camera calibration status">
-        {calibrationLabel(calibration)}
-      </small>
+      <small aria-label="Camera calibration status">{calibrationLabel(calibration)}</small>
     </div>
   );
 }
