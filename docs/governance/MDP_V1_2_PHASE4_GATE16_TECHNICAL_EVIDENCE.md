@@ -1,6 +1,6 @@
 # Gate 16 — technical evidence and remaining acceptance items
 
-Status: **OPEN / not merged**. This report documents only automated, hardware-free evidence; it is not a physical ELP camera acceptance record.
+Status: **USER-APPROVED TECHNICAL CLOSEOUT / draft PR unmerged**. The user explicitly approved Gate 16 technical closeout with the documented offline-only limitations, and prohibited merge, release and physical ELP testing. This is not a physical ELP camera acceptance record.
 
 ## Implemented
 
@@ -31,3 +31,12 @@ CI results must be evaluated against the **exact current PR head**; earlier gree
 ## Acceptance interpretation
 
 Gate 16 provides a reproducible **offline optics-profile pipeline** with pixel residual evidence and conservative status reporting. It does not yet demonstrate reproducible physical face-impact measurements or a verified ELP capture-mode binding. Those claims require actual hardware evidence and a separately approved validation step.
+
+## User decision and closeout disposition (2026-11-11)
+
+- **Decision:** User approved technical closeout of Gate 16 with the documented boundaries; no merge, release or physical ELP test.
+- **Reviewed implementation SHA:** `83fab8d163bffcb7ce4001b0ef467eae0262f5ee`; draft PR #43, base `mdp-v1.2/phase3-gate14-15-integration` at `0915aef8ab3c132cf66d943764024ac75bbb0100`. The PR remains open and unmerged.
+- **Same-SHA CI:** Documentation, Pylint, Face Impact foundation, Face Impact Windows USB camera, UI (build, lint, format, E2E) and Tests all completed successfully on the reviewed implementation SHA. PR Checks failed solely on the genuine screenshot requirement, expressly deferred by the user; no policy bypass was applied.
+- **Accepted limitation:** Offline, synthetic checkerboard optics and pixel-RMS evidence only; no verified physical camera mode, lens/crop/focus/exposure identity, physical ELP captures or measured impact accuracy.
+- **Disposition:** Technical implementation accepted for Gate 16; integration, screenshot and physical validation remain outstanding. This documentation-only commit is a new SHA and its own CI results must be checked separately before reporting it as green.
+- **Next authority:** No Gate 17 implementation, merge or release authorized by this closeout. Read-only preparation for the next proposed Gate is permitted under Project Law V1.
