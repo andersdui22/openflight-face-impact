@@ -167,3 +167,24 @@ def test_missing_image_size_fails_closed(tmp_path):
     assert result["mode_compatible"] is False
     assert result["club_geometry_compatible"] is False
     assert result["physical_validation"] is False
+
+
+@pytest.mark.parametrize("bad_size", [
+    [640, 400], np.array([640, 400]), (True, 400),
+    (640., 400), (0, 400), (640, -1), (640,), "640x400",
+])
+def test_malformed_runtime_image_size_fails_closed(tmp_path, bad_size):
+    result = check(saved(tmp_path), size=bad_size)
+    assert result["state"] == "mode_incompatible"
+    assert result["mode_compatible"] is False
+    assert result["revision_compatible"] is False
+    assert result["club_geometry_compatible"] is False
+    assert result["physical_validation"] is False
+
+
+@pytest.mark.parametrize("bad_mode", [[], {}, 640, "", "  "])
+def test_malformed_runtime_mode_identity_fails_closed(tmp_path, bad_mode):
+    result = check(saved(tmp_path), mode=bad_mode)
+    assert result["state"] == "mode_incompatible"
+    assert result["mode_compatible"] is False
+    assert result["physical_validation"] is False
