@@ -1,3 +1,12 @@
+# PHASE 5 GATES 20–24 INTEGRATED OFFLINE BATCH ENTRY POINT (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `b32f84f0bb2100e8813e12a0b3880893001e2231`: Documentation SUCCESS; Tests, UI, Pylint, Foundation IN PROGRESS; PR Checks FAILURE.
+- Added `assess_offline_capture_batch`, one explicit bounded offline API that composes selected-frame contour extraction, synthetic face observations, per-frame impact/quality and a validated aggregate evidence audit. No physical contact frame selection, accuracy claims or camera acquisition.
+- Integration regression tests cover two independently rejected selected frames (blank vs real disk with degenerate face pixels), batch counts, fail-closed status, duplicate frame and resource limit. Positive full image-to-contact acceptance remains an explicit outstanding item.
+- All hardware-dependent testing postponed until all 35 Gates are developed as far as possible without hardware. Gates 20–24 OPEN; no merges/releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATE 24 BATCH AUDIT HARDENING (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `2c247dc262e08c7100a25fcc65a4364617b26d24`: five technical workflows SUCCESS, PR Checks FAILURE.
