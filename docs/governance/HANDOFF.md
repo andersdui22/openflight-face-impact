@@ -1,3 +1,11 @@
+# PHASE 5 GATES 20–24 BATCH AUDIT AND REJECTION MATRIX (2026-11-11)
+
+- Read-only audit PR #45 SHA `49c9f793375b7aa74f7572ebf54c47ad9ca5d652`: Documentation SUCCESS; Tests, Foundation, UI, Pylint IN PROGRESS; PR Checks FAILURE.
+- Added `audit_synthetic_candidate_batch`: validates consistent synthetic status/quality, distinct frame IDs, rejection reasons and hidden rejected coordinates, and forbids physical accuracy claims. Summarizes all four status categories without selecting a physical contact frame. Offline tests cover four statuses and contradictory/invalid results.
+- Positive end-to-end image-derived impact remains pending; this audit does not replace it. Gates 20–24 OPEN. No hardware tests, merges or releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATES 20–24 BATCH DEVELOPMENT: MULTI-FRAME OFFLINE ASSESSMENT (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `2f66f312ac08b50a94093b5e2991aa51f0e2e38e`: all five technical workflows SUCCESS (Tests, UI, Pylint, Foundation, Documentation); PR Checks FAILURE (PR metadata).
