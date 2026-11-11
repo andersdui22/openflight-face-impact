@@ -95,3 +95,40 @@ def test_stale_optics_revision_rejected(tmp_path):
     result = check((optics, binding), mode="other")
     assert result["state"] == "binding_incompatible"
     assert not result["revision_compatible"]
+
+
+def test_corrupt_binding_fails_closed_without_false_compatibility(tmp_path):
+    optics, binding = saved(tmp_path)
+    binding.write_text('{"version": 999}', encoding="utf-8")
+    result = check((optics, binding))
+    assert result["state"] == "evidence_invalid"
+    assert result["profile_loaded"]
+    assert not result["binding_loaded"]
+    assert not result["mode_compatible"]
+    assert result["physical_validation"] is False
+
+
+def test_corrupt_profile_fails_closed_without_loading_binding(tmp_path):
+    optics, binding = saved(tmp_path)
+    optics.write_text('{"version": 999}', encoding="utf-8")
+    result = check((optics, binding))
+    assert result["state"] == "evidence_invalid"
+    assert not result["profile_loaded"]
+    assert not result["binding_loaded"]
+    assert result["physical_validation"] is False
+
+
+def test_unknown_geometry_rejected_even_with_matching_model_identity(tmp_path):
+    result = check(
+        saved(tmp_path), model=ClubFaceModel(ClubFamily.IRON, "synthetic-iron")
+    )
+    assert result["state"] == "binding_incompatible"
+    assert not result["club_geometry_compatible"]
+    assert result["physical_validation"] is False
+
+
+def test_wrong_image_dimensions_rejected(tmp_path):
+    result = check(saved(tmp_path), size=(800, 600))
+    assert result["state"] == "mode_incompatible"
+    assert not result["mode_compatible"]
+    assert result["physical_validation"] is False
