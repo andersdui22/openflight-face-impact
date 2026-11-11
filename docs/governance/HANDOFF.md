@@ -1,3 +1,11 @@
+# PHASE 5 GATE 24 SELECTED-FRAME POSITIVE CONTOUR / NEGATIVE FACE REGRESSION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `ab6bbd2e690991169173e9563cca95c6a0ecef4f`: Documentation SUCCESS; Tests, Pylint, Foundation, UI IN PROGRESS; PR Checks FAILURE.
+- Added actual synthetic grayscale disk frame integration test: selected-frame contour is extracted and passes the single-contour stage, while deliberately degenerate face landmarks must reject downstream geometry without publishing coordinates. Quality reason must match rejection.
+- This is **not** the still-pending positive full impact result. The earlier accepted-quality regression mocks geometry. Face pixel provenance and physical contact remain unverified. Gates 20–24 OPEN; no hardware tests, merges, releases; new SHA CI pending.
+
+---
+
 # PHASE 5 GATE 24 ACCEPTED-RESULT COMPOSITION REGRESSION (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `756aa4cc56876e238d1be53e8aada3e02ef5cd61`: Documentation SUCCESS; Tests, Pylint, Foundation, UI IN PROGRESS; PR Checks FAILURE.
