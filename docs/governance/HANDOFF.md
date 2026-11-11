@@ -1,3 +1,13 @@
+# PHASE 5 GATE 20 IMMUTABILITY CHECKPOINT (2026-11-11)
+
+- Draft PR #45 remains unmerged. At last observed PR HEAD `7c2b89af1cf96d27cb55e2f97d4465e23c331f83`, Documentation succeeded, other technical CI workflows were in progress, and PR Checks failed under the previously deferred screenshot requirement. Do not claim technical CI passed.
+- Gate 20 commit `a155ae8b54fcd13b0e16aedf07f361a227aa80e2`: `BallSilhouettePosition` now validates, copies and write-protects its camera XYZ result array to prevent caller mutation/aliasing of an accepted observation.
+- Gate 20 commit `9d913ecfd1bb8f9d94594b454daf722de0008d9e`: regression tests for write protection, caller-array aliasing and invalid result coordinates.
+- **New commits require same-SHA CI verification**. Next: inspect tests/Pylint on newest head and fix introduced failures. Continue only within approved Gates 20–24; no physical ELP tests, merge or release.
+- This handoff edit advances HEAD again; always fetch current GitHub HEAD and CI before continuing.
+
+---
+
 # PHASE 5 PR AND CI CHECKPOINT (2026-11-11)
 
 - Created **draft PR #45**: https://github.com/andersdui22/openflight-face-impact/pull/45, head `mdp-v1.2/phase5-gates20-24-parallel`, base `mdp-v1.2/phase4-gates17-19-parallel`. No merge/release.
