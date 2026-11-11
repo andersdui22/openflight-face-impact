@@ -18,7 +18,7 @@ def pipeline(centres):
     images = []
     for centre in centres:
         image = np.zeros((240, 320), dtype=np.uint8)
-        cv.rectangle(image, (35, 40), (115, 95), 230, -1)
+        cv.rectangle(image, (35, 110), (115, 190), 230, -1)
         cv.circle(image, (centre, 150), 20, 220, -1)
         images.append(image)
     capture = TriggeredCapture(
