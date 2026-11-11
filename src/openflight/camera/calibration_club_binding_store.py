@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import json
 import re
+import os
+import tempfile
 from pathlib import Path
 
 from .calibration_club_binding import CalibrationClubBinding
@@ -54,9 +56,22 @@ def save_calibration_club_binding(
     path: str | Path, binding: CalibrationClubBinding
 ) -> None:
     """Persist a separately supplied revision binding for later comparison."""
-    Path(path).write_text(
-        serialize_calibration_club_binding(binding) + "\n", encoding="utf-8"
-    )
+    payload = serialize_calibration_club_binding(binding) + "\n"
+    destination = Path(path)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=destination.parent,
+            prefix=f".{destination.name}.", suffix=".tmp", delete=False,
+        ) as handle:
+            temporary_path = Path(handle.name)
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_path, destination)
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
 
 
 def load_calibration_club_binding(path: str | Path) -> CalibrationClubBinding:
