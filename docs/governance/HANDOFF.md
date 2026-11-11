@@ -1,3 +1,12 @@
+# PHASE 5 GATE 21 SYNTHETIC PERSPECTIVE QUADRILATERAL (2026-11-11)
+
+- Preserved existing strict axis-aligned rectangular fixture proposal and pose solver unchanged. Added **optional** `synthetic_face_quadrilateral.py` to extract four ordered image corners from a single isolated convex bright perspective quadrilateral in an offline captured frame.
+- Fail-closed checks: exactly one connected contour, size, convex four-vertex polygon, border margin, fill and upright synthetic ordering. Shot/session/frame provenance retained through existing immutable observation model. Regression tests cover perspective synthetic positive, blank/multiple objects, circle, border, wrong frame and threshold.
+- Explicit limitation: a bright quadrilateral does not identify a real clubface. Corner ordering is only a synthetic upright convention, not arbitrary rotation, handedness or physical contact. No automatic real-world pose/contact claims. Existing camera owner and geometry solver unchanged.
+- Earlier `d410c78b` PR Checks and Documentation passed; remaining CI pending at observation time. Verify CI at new SHA. No merge/release; physical tests and screenshots deferred.
+
+---
+
 # PHASE 5 CI TEST-FIX: TRIGGER BRACKETING (2026-11-11)
 
 - Read exact-SHA CI at `a1d87ce8ab03be1391663874b1caac3ec3956dd8`: PR Checks, Documentation, Pylint, UI, Foundation SUCCESS; Python 3.11 Tests FAILURE: 7 new tests failed because their single-frame synthetic captures violated the pre/post trigger timing contract. Python 3.10/3.12 jobs cancelled.
