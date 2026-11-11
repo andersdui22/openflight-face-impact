@@ -79,6 +79,39 @@ def test_tampered_audit_is_rejected_before_export():
         )
 
 
+def test_cross_capture_handoff_rejected_even_with_same_frame_indices():
+    capture, batch = fixture()
+    other = replace(capture, shot_id="different-shot")
+    with pytest.raises(ValueError, match="does not belong"):
+        prepare_offline_impact_handoff(
+            other, batch, max_sensor_gap_ns=100, max_host_gap_ns=1000,
+        )
+
+
+def test_modified_capture_frame_bytes_rejected():
+    capture, batch = fixture()
+    altered = capture.frames[1].image.copy()
+    altered[0, 0] = 255
+    other = replace(capture, frames=(capture.frames[0], replace(
+        capture.frames[1], image=altered,
+    )))
+    with pytest.raises(ValueError, match="does not belong"):
+        prepare_offline_impact_handoff(
+            other, batch, max_sensor_gap_ns=100, max_host_gap_ns=1000,
+        )
+
+
+def test_modified_capture_timing_rejected():
+    capture, batch = fixture()
+    other = replace(capture, frames=(capture.frames[0], replace(
+        capture.frames[1], sensor_timestamp_ns=201,
+    )))
+    with pytest.raises(ValueError, match="does not belong"):
+        prepare_offline_impact_handoff(
+            other, batch, max_sensor_gap_ns=100, max_host_gap_ns=1000,
+        )
+
+
 def test_wrong_batch_type_rejected():
     capture, _ = fixture()
     with pytest.raises(ValueError, match="typed offline"):

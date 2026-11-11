@@ -7,6 +7,7 @@ contact timing or assigns physically measured confidence.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 
 import numpy as np
 
@@ -19,12 +20,35 @@ from .synthetic_frame_candidates import (
 from .triggered_buffer import TriggeredCapture
 
 
+def capture_fingerprint(capture: TriggeredCapture) -> str:
+    """Bind offline assessments to exact frame bytes, timing and identity."""
+    if not isinstance(capture, TriggeredCapture):
+        raise ValueError("capture fingerprint requires a typed capture")
+    digest = hashlib.sha256()
+    header = (capture.shot_id, capture.session_id,
+              capture.pre_trigger_count, capture.trigger_host_timestamp_ns,
+              len(capture.frames))
+    digest.update(repr(header).encode("utf-8"))
+    for frame in capture.frames:
+        image = np.asarray(frame.image)
+        if image.dtype.hasobject:
+            raise ValueError("capture image cannot have object dtype")
+        metadata = (frame.sensor_timestamp_ns, frame.host_timestamp_ns,
+                    frame.exposure_us, frame.analogue_gain,
+                    image.shape, image.dtype.str)
+        digest.update(repr(metadata).encode("utf-8"))
+        digest.update(np.ascontiguousarray(image).tobytes())
+    return digest.hexdigest()
+
+
+
 @dataclass(frozen=True)
 class OfflineCaptureBatchResult:
     """Frame-preserving synthetic assessments and their consistency audit."""
 
     frames: tuple[AssessedFrameCandidate, ...]
     audit: SyntheticBatchAudit
+    source_capture_fingerprint: str = ""
 
 
 def assess_offline_capture_batch(  # pylint: disable=too-many-arguments
@@ -66,4 +90,5 @@ def assess_offline_capture_batch(  # pylint: disable=too-many-arguments
     return OfflineCaptureBatchResult(
         frames=frames,
         audit=audit_synthetic_candidate_batch(frames),
+        source_capture_fingerprint=capture_fingerprint(capture),
     )

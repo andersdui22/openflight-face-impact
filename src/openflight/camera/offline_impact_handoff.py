@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .offline_capture_batch import OfflineCaptureBatchResult
+from .offline_capture_batch import OfflineCaptureBatchResult, capture_fingerprint
 from .offline_impact_evidence import OfflineImpactEvidence, export_offline_impact_evidence
 from .offline_temporal_evidence import (
     OfflineTemporalEvidence, assess_offline_temporal_evidence,
@@ -36,6 +36,9 @@ def prepare_offline_impact_handoff(
     """Reaudit a batch, validate timing, and export only admissible evidence."""
     if not isinstance(batch, OfflineCaptureBatchResult):
         raise ValueError("handoff requires a typed offline capture batch")
+    if (not batch.source_capture_fingerprint
+            or batch.source_capture_fingerprint != capture_fingerprint(capture)):
+        raise ValueError("offline batch does not belong to this capture")
     audit = audit_synthetic_candidate_batch(batch.frames)
     if audit != batch.audit:
         raise ValueError("offline batch audit does not match frame assessments")
