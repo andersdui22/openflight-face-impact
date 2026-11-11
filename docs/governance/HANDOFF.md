@@ -1,3 +1,12 @@
+# PHASE 5 GATE 22 OBSERVATION-FRAME METADATA BINDING (2026-11-11)
+
+- Startup audit: PR #45 at `1b5e7d55077350dca695eb7ea73e2c9f863bb42b`; CI was in progress for Tests/Pylint/Foundation/UI, Documentation SUCCESS and PR Checks FAILURE on metadata. No CI success inferred.
+- Gate 22 synthetic impact API gains optional `observation_frame_index`. If supplied, it requires a valid capture and a valid index identical to the explicit candidate frame index. Reject mismatched, out-of-range or malformed observation indices without coordinates. Existing callers remain compatible.
+- Important: this binds **caller-provided metadata only**; it cannot prove that pixel observations were extracted from that image, or that the image contains physical contact. Future image extraction must carry trusted frame provenance.
+- Added offline integration regression tests. One atomic source/test/handoff commit; verify exact-SHA CI. Gates 20–24 remain OPEN. No physical tests, merges, releases.
+
+---
+
 # PHASE 5 GATE 24 CI TEST-DATA FIX (2026-11-11)
 
 - Exact-SHA CI at `bf87de053d90ea996077c549731c35b027722c2a`: Tests FAILURE (Python 3.10: 2650 passed, 1 failed, 7 skipped); Pylint, foundation, UI and Documentation SUCCESS; PR Checks FAILURE on metadata.

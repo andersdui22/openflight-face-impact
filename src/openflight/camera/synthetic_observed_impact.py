@@ -34,13 +34,14 @@ def calculate_synthetic_observed_impact(  # pylint: disable=too-many-arguments
     ball_border_margin_px: float = 0.0,
     capture: TriggeredCapture | None = None,
     candidate_frame_index: int | None = None,
+    observation_frame_index: int | None = None,
 ) -> SyntheticImpactResult:
     """Evaluate one supplied synthetic candidate frame in camera millimetres.
 
     Both pixel sets share a calibrated image and instant. Landmark and polygon
     coordinates share a face-local origin and axes. The caller must supply
     all thresholds; this function does not determine the contact instant.
-    An optional capture/index pair checks provenance, not image-observation identity.
+    An optional capture/index pair checks provenance. If supplied, the explicit\n    observation frame index must match the candidate; this verifies caller\n    metadata consistency, not the image contents or physical contact instant.
     """
     try:
         if image_size != calibration.image_size:
@@ -49,6 +50,12 @@ def calculate_synthetic_observed_impact(  # pylint: disable=too-many-arguments
             raise ValueError("candidate frame index requires a capture")
         if capture is not None:
             validate_candidate_frame_index(capture, candidate_frame_index)
+        if observation_frame_index is not None:
+            if capture is None:
+                raise ValueError("observation frame index requires a capture")
+            validate_candidate_frame_index(capture, observation_frame_index)
+            if observation_frame_index != candidate_frame_index:
+                raise ValueError("observation frame index differs from candidate frame")
         contour = validate_ball_contour_pixels(
             ball_edge_pixels_px,
             image_size=image_size,
