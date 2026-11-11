@@ -1,3 +1,11 @@
+# PHASE 5 SYNTHETIC MOTION FRAME INSPECTION (2026-11-11)
+
+- Added selectable observed-frame controls and explicit per-frame pixel separation/sensor timestamp to the existing React diagnostics panel. This is **metadata inspection**, not photographic frame replay or measured impact.
+- Removed obsolete commented duplicate TypeScript payload declaration; retained shared typed contract and fail-closed checks.
+- Extended UI render regression to cover frame controls and selected-frame readout. New exact-SHA CI must be verified; Gates 20–24 OPEN, no physical tests/merge/release.
+
+---
+
 # PHASE 5 SYNTHETIC MOTION DASHBOARD AND SOCKET HANDOFF (2026-11-11)
 
 - Active repository: `andersdui22/openflight-face-impact`; branch `mdp-v1.2/phase5-gates20-24-parallel`; draft PR #45. Latest reviewed implementation SHA before this handoff update: `c9ddf590b4be1d5dc68bbc5827c9e4ead4b1d73a`.

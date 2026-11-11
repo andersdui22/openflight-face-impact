@@ -6,30 +6,10 @@ import type { SyntheticMotionPayload } from '../types/syntheticMotionPayload';
 
 export type { SyntheticMotionPayload } from '../types/syntheticMotionPayload';
 
-/* export type SyntheticMotionPayload = {
-  schema_version: number;
-  kind: string;
-  physical_contact_confirmed: false;
-  impact_frame_index: null;
-  impact_x_mm: null;
-  impact_y_mm: null;
-  position_uncertainty_mm: null;
-  closest_observed_frame_index: number | null;
-  has_observed_approach_and_separation: boolean;
-  motion_reason: string;
-  proximity_reason: string;
-  rejected_frames: { frame_index: number; reason: string }[];
-  proximity_samples: {
-    frame_index: number;
-    sensor_timestamp_ns: number;
-    host_timestamp_ns: number;
-    separation_px: number;
-  }[];
-};
 
-*/
 export function SyntheticMotionDiagnostics({ payload }: { payload: SyntheticMotionPayload | null }) {
   const [error, setError] = useState<string | null>(null);
+  const [selectedFrame, setSelectedFrame] = useState<number | null>(null);
   const requestDemo = () => {
     setError(null);
     socketService.requestSyntheticMotionDemo().catch((reason: unknown) => {
@@ -57,6 +37,9 @@ export function SyntheticMotionDiagnostics({ payload }: { payload: SyntheticMoti
     Number.isFinite(sample.separation_px) && sample.separation_px >= 0
   );
   const max = Math.max(1, ...samples.map((sample) => sample.separation_px));
+  const selected = samples.find((sample) => sample.frame_index === selectedFrame) ??
+    samples.find((sample) => sample.frame_index === payload.closest_observed_frame_index) ??
+    samples[0];
   const points = samples.map((sample, index) =>
     `${20 + index * (260 / Math.max(1, samples.length - 1))},${120 - (sample.separation_px / max) * 100}`
   ).join(' ');
@@ -80,6 +63,18 @@ export function SyntheticMotionDiagnostics({ payload }: { payload: SyntheticMoti
         ))}
         <text x="150" y="137" textAnchor="middle" fontSize="9" fill="currentColor">Frame order · separation in pixels</text>
       </svg>
+      <div role="group" aria-label="Select observed frame" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {samples.map((sample) => (
+          <button key={sample.frame_index} type="button"
+            aria-pressed={selected?.frame_index === sample.frame_index}
+            onClick={() => setSelectedFrame(sample.frame_index)}>
+            Frame {sample.frame_index + 1}
+          </button>
+        ))}
+      </div>
+      {selected && (
+        <p aria-live="polite">Selected frame {selected.frame_index + 1} · Separation {selected.separation_px.toFixed(2)} px · Sensor timestamp {selected.sensor_timestamp_ns} ns</p>
+      )}
       <p>Rejected frames: {payload.rejected_frames.length}. Physical impact and accuracy remain unverified.</p>
     </section>
   );

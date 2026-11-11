@@ -36,6 +36,9 @@ describe('SyntheticMotionDiagnostics', () => {
     expect(html).toContain('separation in pixels');
     expect(html).toContain('Physical impact and accuracy remain unverified');
     expect(html).toContain('<polyline');
+    expect(html).toContain('Select observed frame');
+    expect(html).toContain('Selected frame 2');
+    expect(html).toContain('Separation 2.00 px');
   });
 
   it('rejects payloads that claim physical impact', () => {
