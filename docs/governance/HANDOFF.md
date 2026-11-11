@@ -1,3 +1,9 @@
+# AUTONOMOUS LARGE-BATCH DEVELOPMENT DIRECTIVE — 2026-11-12
+
+User explicitly requested the largest practical autonomous development cycles. Prioritize complete functional slices and batch tests over micro-edits. The software-first batch sequence and acceptance conditions are recorded in `docs/governance/SOFTWARE_FIRST_AUTONOMOUS_DELIVERY_PLAN.md`. No change to Project Law V1 approval boundaries, no merges/releases, no physical tests yet.
+
+---
+
 # BATCH B — FRONTEND REGRESSION HARDENING (2026-11-12)
 
 - Removed brittle exact React SSR whitespace-comment assertion from offline socket-to-review contract test. Added mixed accepted/rejected history test: latest rejected shot must not inherit an earlier accepted impact marker.
