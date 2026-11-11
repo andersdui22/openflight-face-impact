@@ -369,3 +369,55 @@ def test_gate22_observation_frame_metadata_matches_explicit_candidate(calibratio
     )
     assert result.status is SyntheticImpactStatus.OK
     assert result.x_mm == pytest.approx(12., abs=0.01)
+
+
+def test_gate22_opt_in_frame_image_validation_rejects_mismatched_pixels(calibration):
+    from openflight.camera.triggered_buffer import CameraFrame, TriggeredCapture
+
+    ball_pixels, face_pixels = synthetic_pixels(calibration, [12., 5., RADIUS_MM])
+    def frame(sensor, host):
+        return CameraFrame(np.zeros((2, 2), dtype=np.uint8), sensor, host, 100, 1.)
+    capture = TriggeredCapture(
+        frames=(frame(100, 1000), frame(200, 2000), frame(300, 3000)),
+        pre_trigger_count=2, trigger_host_timestamp_ns=2500,
+        shot_id="shot-1", session_id="session-1",
+    )
+    options = dict(
+        image_size=SIZE, ball_radius_mm=RADIUS_MM,
+        max_ball_residual_rad=1e-6, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+        capture=capture, candidate_frame_index=2, validate_frame_image=True,
+    )
+    rejected = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON, **options,
+    )
+    assert rejected.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert "grayscale dimensions" in rejected.rejection_reason
+    assert rejected.x_mm is None and rejected.y_mm is None
+
+    from dataclasses import replace
+    correct = replace(capture, frames=capture.frames[:2] + (
+        frame(300, 3000),))
+    correct_frame = CameraFrame(
+        np.zeros((SIZE[1], SIZE[0]), dtype=np.uint8), 300, 3000, 100, 1.,
+    )
+    correct = replace(correct, frames=correct.frames[:2] + (correct_frame,))
+    accepted = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        **{**options, "capture": correct},
+    )
+    assert accepted.status is SyntheticImpactStatus.OK
+    assert accepted.x_mm == pytest.approx(12., abs=0.01)
+
+
+def test_gate22_opt_in_frame_validation_requires_capture(calibration):
+    ball_pixels, face_pixels = synthetic_pixels(calibration, [12., 5., RADIUS_MM])
+    result = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        image_size=SIZE, ball_radius_mm=RADIUS_MM,
+        max_ball_residual_rad=1e-6, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+        validate_frame_image=True,
+    )
+    assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert "requires a capture" in result.rejection_reason

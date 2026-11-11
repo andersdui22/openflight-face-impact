@@ -1,3 +1,11 @@
+# PHASE 5 GATE 22 OPTIONAL IMAGE-DOMAIN INTEGRATION (2026-11-11)
+
+- Startup audit PR #45 head `57da15f6ac977a263561761844622fe96aa267a0`: Documentation, Pylint, foundation SUCCESS; Tests and UI IN PROGRESS; PR Checks FAILURE on metadata.
+- Integrated `validate_capture_frame_image` into synthetic observed impact behind explicit `validate_frame_image=True` opt-in. A supplied capture/index must now contain a grayscale uint8 image matching calibrated dimensions, otherwise fail closed without impact coordinates. Default False preserves prior synthetic placeholder-frame tests. Added integrated rejection/acceptance and missing-capture regression tests.
+- Fixed accidental literal backslash-n in function docstring. Image validation **does not establish** that independent ball/face pixels came from selected image. No automatic detection, physical contact inference, hardware tests, merge or release. Gates 20–24 OPEN; exact-SHA CI pending.
+
+---
+
 # PHASE 5 GATE 22 OFFLINE CAPTURE IMAGE DOMAIN (2026-11-11)
 
 - Read-only audit of PR #45 head `ddf2b2abc585c669216dcff4927a35605ce2c661`: Pylint, foundation, Documentation SUCCESS; Tests and UI IN PROGRESS at audit; PR Checks FAILURE on metadata. No claim of completed CI.
