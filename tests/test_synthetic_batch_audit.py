@@ -88,3 +88,24 @@ def test_rejects_duplicate_frame_indices():
 def test_rejects_wrong_batch_item_type():
     with pytest.raises(ValueError, match="frame assessments"):
         audit_synthetic_candidate_batch((object(),))
+
+
+def test_rejects_negative_or_boolean_frame_identity():
+    for invalid in (-1, True):
+        bad = replace(item(2, SyntheticImpactStatus.OK), frame_index=invalid)
+        with pytest.raises(ValueError, match="nonnegative integers"):
+            audit_synthetic_candidate_batch((bad,))
+
+
+def test_rejects_malformed_nested_assessment():
+    bad = replace(item(2, SyntheticImpactStatus.OK), assessment=None)
+    with pytest.raises(ValueError, match="synthetic impact assessments"):
+        audit_synthetic_candidate_batch((bad,))
+
+
+def test_rejects_accepted_result_missing_coordinates():
+    good = item(2, SyntheticImpactStatus.OK)
+    bad_impact = replace(good.assessment.impact, x_mm=None)
+    bad = replace(good, assessment=replace(good.assessment, impact=bad_impact))
+    with pytest.raises(ValueError, match="lacks required evidence"):
+        audit_synthetic_candidate_batch((bad,))

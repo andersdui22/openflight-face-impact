@@ -1,3 +1,11 @@
+# PHASE 5 GATE 24 BATCH AUDIT HARDENING (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `2c247dc262e08c7100a25fcc65a4364617b26d24`: five technical workflows SUCCESS, PR Checks FAILURE.
+- Hardened offline aggregate audit against malformed nested assessment types, negative/boolean frame identities and accepted impact results missing coordinates or regions. Added focused regression cases.
+- All physical calibration, camera capture and live golf shots explicitly postponed until all 35 Gates have been developed as far as possible without hardware. Gates 20–24 remain OPEN. No merges or releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATES 20–24 BATCH AUDIT AND REJECTION MATRIX (2026-11-11)
 
 - Read-only audit PR #45 SHA `49c9f793375b7aa74f7572ebf54c47ad9ca5d652`: Documentation SUCCESS; Tests, Foundation, UI, Pylint IN PROGRESS; PR Checks FAILURE.

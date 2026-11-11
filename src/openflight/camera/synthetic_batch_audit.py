@@ -8,7 +8,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .synthetic_frame_candidates import AssessedFrameCandidate
-from .synthetic_impact_pipeline import SyntheticImpactStatus
+from .capture_ball_synthetic_quality import AssessedSyntheticCaptureImpact
+from .synthetic_impact_quality import SyntheticImpactQuality
+from .synthetic_impact_pipeline import SyntheticImpactResult, SyntheticImpactStatus
 
 
 @dataclass(frozen=True)
@@ -34,20 +36,34 @@ def audit_synthetic_candidate_batch(
     if any(not isinstance(item, AssessedFrameCandidate) for item in results):
         raise ValueError("audit requires frame assessments")
     indices = [item.frame_index for item in results]
+    if any(not isinstance(index, int) or isinstance(index, bool) or index < 0
+           for index in indices):
+        raise ValueError("audit frame indices must be nonnegative integers")
     if len(indices) != len(set(indices)):
         raise ValueError("audit frame indices must be distinct")
     counts = {status: 0 for status in SyntheticImpactStatus}
     for item in results:
+        if not isinstance(item.assessment, AssessedSyntheticCaptureImpact):
+            raise ValueError("audit requires synthetic impact assessments")
         result = item.assessment.impact
         quality = item.assessment.quality
+        if not isinstance(result, SyntheticImpactResult) or not isinstance(
+            quality, SyntheticImpactQuality
+        ):
+            raise ValueError("audit requires typed impact and quality evidence")
         if quality.physically_validated or quality.position_uncertainty_mm is not None:
             raise ValueError("offline audit cannot assert physical validation")
         accepted = result.status is SyntheticImpactStatus.OK
         if quality.accepted_synthetic_geometry != accepted:
             raise ValueError("synthetic quality acceptance contradicts impact status")
         if accepted:
-            if result.rejection_reason is not None:
-                raise ValueError("accepted result cannot have rejection reason")
+            if (result.rejection_reason is not None
+                    or quality.reason is None
+                    or not all(value is not None for value in (
+                        result.x_mm, result.y_mm,
+                        result.horizontal_region, result.vertical_region,
+                    ))):
+                raise ValueError("accepted synthetic result lacks required evidence")
         elif (quality.reason != result.rejection_reason
               or any(value is not None for value in (
                   result.x_mm, result.y_mm,
