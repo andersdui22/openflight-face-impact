@@ -421,3 +421,33 @@ def test_gate22_opt_in_frame_validation_requires_capture(calibration):
     )
     assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
     assert "requires a capture" in result.rejection_reason
+
+
+def test_gate22_strict_identity_rejects_missing_observation_frame(calibration):
+    from openflight.camera.triggered_buffer import CameraFrame, TriggeredCapture
+
+    ball_pixels, face_pixels = synthetic_pixels(calibration, [12., 5., RADIUS_MM])
+    frames = tuple(
+        CameraFrame(np.zeros((2, 2), dtype=np.uint8), i * 100, i * 1000, 100, 1.)
+        for i in (1, 2, 3)
+    )
+    capture = TriggeredCapture(frames, 2, 2500, shot_id="s", session_id="session")
+    kwargs = dict(
+        image_size=SIZE, ball_radius_mm=RADIUS_MM,
+        max_ball_residual_rad=1e-6, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+        capture=capture, candidate_frame_index=2,
+        require_observation_frame_identity=True,
+    )
+    missing = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON, **kwargs,
+    )
+    assert missing.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert "explicit observation frame identity" in missing.rejection_reason
+    assert missing.x_mm is None and missing.y_mm is None
+    accepted = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        **{**kwargs, "observation_frame_index": 2},
+    )
+    assert accepted.status is SyntheticImpactStatus.OK
+

@@ -37,6 +37,7 @@ def calculate_synthetic_observed_impact(  # pylint: disable=too-many-arguments
     candidate_frame_index: int | None = None,
     observation_frame_index: int | None = None,
     validate_frame_image: bool = False,
+    require_observation_frame_identity: bool = False,
 ) -> SyntheticImpactResult:
     """Evaluate one supplied synthetic candidate frame in camera millimetres.
 
@@ -52,6 +53,10 @@ def calculate_synthetic_observed_impact(  # pylint: disable=too-many-arguments
             raise ValueError("candidate frame index requires a capture")
         if capture is not None:
             validate_candidate_frame_index(capture, candidate_frame_index)
+        if not isinstance(require_observation_frame_identity, bool):
+            raise ValueError("require_observation_frame_identity must be boolean")
+        if require_observation_frame_identity and observation_frame_index is None:
+            raise ValueError("explicit observation frame identity is required")
         if observation_frame_index is not None:
             if capture is None:
                 raise ValueError("observation frame index requires a capture")

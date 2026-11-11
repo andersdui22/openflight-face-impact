@@ -1,3 +1,11 @@
+# PHASE 5 GATE 22 EXPLICIT OBSERVATION IDENTITY MODE (2026-11-11)
+
+- Startup audit PR #45 exact SHA `885b5ce757f0daa1e0b4ebee9a2fa6c927bbad14`: Documentation SUCCESS; Tests, UI, Pylint, Foundation IN PROGRESS; PR Checks FAILURE.
+- Added opt-in `require_observation_frame_identity=True` to the synthetic impact composition: rejects missing explicit observation index, while existing index consistency and timing checks reject mismatches. Preserves previous synthetic callers by default; added missing-index rejection and matching-index acceptance tests.
+- This verifies only declared metadata consistency, **not** image-pixel provenance, contact instant or real impact accuracy. Gates 20–24 OPEN; no physical tests, merges or releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATE 21 LANDMARK BORDER QUALITY (2026-11-11)
 
 - Read-only audit PR #45 head `dffc2efa8b2673d6eafd106f64918ed7901ab7c2`: Documentation and Pylint SUCCESS; Tests, Foundation and UI IN PROGRESS; PR Checks FAILURE.
