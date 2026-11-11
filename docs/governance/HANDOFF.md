@@ -1,3 +1,13 @@
+# PHASE 5 GATE 20 OBSERVED IMPACT INTEGRATION (2026-11-11)
+
+- Read-only audit of PR #45 at `64e1a674f685898b4331a4301ac84f8d5213ec0c`: draft, technical workflows queued at time of check; no latest-SHA CI success claimed.
+- Commit `8b67a41407edc4e99851151cfc5789b259612b4d`: `calculate_synthetic_observed_impact` now calls `validate_ball_contour_pixels` before calibrated ray inversion. Optional explicit `ball_border_margin_px=0.0` maintains existing caller compatibility. Invalid or clipped contours yield existing `INVALID_GEOMETRY` rejection with no impact coordinates. This is synthetic/offline only.
+- Commit `bafabf36ec3e01887435e78d4d893f616fbf00df`: synthetic observed-impact tests check rejection for border clipping and accepted known contact with positive margin.
+- Important: No actual image contour detector, no physical contact timing, no ELP hardware test, no release/merge. Gate 20–24 remain OPEN. Latest code has NOT been verified against same-SHA CI; inspect and fix technical failures. Reassess whether optional zero margin is sufficient for eventual physical observations (requires evidence).
+- Next: exact-SHA CI, then Gate 21/22/23/24 synthetic end-to-end gating and quality contract; avoid asserting physical accuracy. Handoff update advances SHA.
+
+---
+
 # PHASE 5 GATE 20 IMAGE-DOMAIN CONTOUR QUALITY (2026-11-11)
 
 - Draft PR #45 audited at `9d57a2484e0d94543989c7c332f3bb10bf9e50d4`: Documentation passed; foundation and Pylint in progress; Tests, UI and PR Checks queued. Prior `6c741f57...` had Documentation, Pylint, foundation green; Tests/UI in progress; PR Checks failed. **Do not claim latest SHA CI green.**
