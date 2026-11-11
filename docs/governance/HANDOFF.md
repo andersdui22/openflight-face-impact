@@ -1,3 +1,12 @@
+# PHASE 5 GATE 22 BATCH REGRESSION CHECKPOINT (2026-11-11)
+
+- CI on `ae78a6991a5c239084e8e092087eec9dc2943fdb`: **all five technical workflows passed** (Tests, Pylint, Face Impact foundation, UI, Documentation). PR Checks failed exclusively on conventional title and required PR-description sections. Do not claim PR Checks green.
+- This batch adds synthetic integration regression tests for invalid capture session identity, nonmonotonic host clock, unbracketed trigger and omitted candidate index. Every rejection must expose no impact coordinates or region labels. No actual image-to-frame correspondence verification and no contact timing inference.
+- PR metadata still needs a compliant title and required headings; no connected PR-edit tool available. Do not change CI rules or bypass checks. CI on this batch's new SHA is pending.
+- User-approved batched development: keep code, tests and handoff in same Git tree commit to reduce redundant CI. Gates 20–24 remain OPEN, no physical tests until all 35 Gates developed, no merge/release.
+
+---
+
 # PHASE 5 BATCH CI FAILURE AND FIX (2026-11-11)
 
 - Read-only audit of draft PR #45 at `d6b701f853a6ee35710c30ced2829712458c7109`: Documentation, Pylint and Face Impact foundation passed; Tests FAILED on Python 3.11 (2627 passed, 1 failed, 7 skipped); UI still in progress at audit. PR Checks failed on nonconventional PR title and missing required PR description sections, NOT on screenshot check according to job list.

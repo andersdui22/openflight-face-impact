@@ -248,3 +248,70 @@ def test_gate20_calibration_size_precedes_contour_border_rejection(calibration):
     assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
     assert "dimensions" in result.rejection_reason
     assert result.x_mm is None and result.y_mm is None
+
+
+@pytest.mark.parametrize(("invalid_capture", "expected"), [
+    ("missing_session", "missing capture identity"),
+    ("nonmonotonic_host", "nonmonotonic host_timestamp_ns"),
+    ("unbracketed_trigger", "trigger not bracketed"),
+])
+def test_gate22_invalid_capture_metadata_rejects_impact(
+    calibration, invalid_capture, expected,
+):
+    from dataclasses import replace
+
+    from openflight.camera.triggered_buffer import CameraFrame, TriggeredCapture
+
+    ball_pixels, face_pixels = synthetic_pixels(calibration, [12., 5., RADIUS_MM])
+    def frame(sensor, host):
+        return CameraFrame(np.zeros((2, 2), dtype=np.uint8), sensor, host, 100, 1.)
+
+    capture = TriggeredCapture(
+        frames=(frame(100, 1000), frame(200, 2000), frame(300, 3000)),
+        pre_trigger_count=2, trigger_host_timestamp_ns=2500,
+        shot_id="shot-1", session_id="session-1",
+    )
+    if invalid_capture == "missing_session":
+        capture = replace(capture, session_id="")
+    elif invalid_capture == "nonmonotonic_host":
+        capture = replace(capture, frames=(
+            frame(100, 1000), frame(200, 1000), frame(300, 3000),
+        ))
+    else:
+        capture = replace(capture, trigger_host_timestamp_ns=3500)
+
+    result = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        image_size=SIZE, ball_radius_mm=RADIUS_MM,
+        max_ball_residual_rad=1e-6, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+        capture=capture, candidate_frame_index=2,
+    )
+    assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert expected in result.rejection_reason
+    assert result.x_mm is None and result.y_mm is None
+    assert result.horizontal_region is None and result.vertical_region is None
+
+
+def test_gate22_capture_requires_explicit_candidate_index(calibration):
+    from openflight.camera.triggered_buffer import CameraFrame, TriggeredCapture
+
+    ball_pixels, face_pixels = synthetic_pixels(calibration, [12., 5., RADIUS_MM])
+    def frame(sensor, host):
+        return CameraFrame(np.zeros((2, 2), dtype=np.uint8), sensor, host, 100, 1.)
+
+    capture = TriggeredCapture(
+        frames=(frame(100, 1000), frame(200, 2000), frame(300, 3000)),
+        pre_trigger_count=2, trigger_host_timestamp_ns=2500,
+        shot_id="shot-1", session_id="session-1",
+    )
+    result = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        image_size=SIZE, ball_radius_mm=RADIUS_MM,
+        max_ball_residual_rad=1e-6, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+        capture=capture,
+    )
+    assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert "candidate frame index" in result.rejection_reason
+    assert result.x_mm is None and result.y_mm is None
