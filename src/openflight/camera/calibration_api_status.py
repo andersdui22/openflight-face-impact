@@ -23,7 +23,11 @@ def load_revision_bound_calibration_status(
     try:
         profile = load_calibration_profile(profile_path)
     except (OSError, ValueError, TypeError, KeyError):
-        return load_calibration_status(profile_path)
+        result = load_calibration_status(profile_path)
+        result["binding_loaded"] = False
+        result["revision_compatible"] = False
+        result["club_geometry_compatible"] = False
+        return result
     try:
         binding = load_calibration_club_binding(binding_path)
     except (OSError, ValueError, TypeError, KeyError):
@@ -31,6 +35,7 @@ def load_revision_bound_calibration_status(
             profile, expected_revision=None, camera_mode_id=None, image_size=None
         )
         result["binding_loaded"] = False
+        result["club_geometry_compatible"] = False
         return result
     result = revision_bound_calibration_status(
         profile, expected_revision=binding.calibration_revision,
