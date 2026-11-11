@@ -90,3 +90,26 @@ def test_gate22_rejects_trigger_before_pre_frame_host_clock(capture):
     )
     assert not quality.valid
     assert "not bracketed" in quality.reason
+
+
+@pytest.mark.parametrize("index", [0, 1, 2])
+def test_gate22_candidate_frame_selection_requires_explicit_index(capture, index):
+    from openflight.camera.trigger_timing_quality import validate_candidate_frame_index
+
+    assert validate_candidate_frame_index(capture, index) == index
+
+
+@pytest.mark.parametrize("index", [-1, 3, True, None, "1", 1.0])
+def test_gate22_candidate_frame_selection_rejects_invalid_index(capture, index):
+    from openflight.camera.trigger_timing_quality import validate_candidate_frame_index
+
+    with pytest.raises(ValueError, match="candidate frame index"):
+        validate_candidate_frame_index(capture, index)
+
+
+def test_gate22_candidate_frame_selection_rejects_invalid_capture(capture):
+    from openflight.camera.trigger_timing_quality import validate_candidate_frame_index
+
+    invalid = replace(capture, session_id="")
+    with pytest.raises(ValueError, match="invalid capture timing"):
+        validate_candidate_frame_index(invalid, 1)
