@@ -13,8 +13,9 @@ def fixture():
     image = np.zeros((240, 320), dtype=np.uint8)
     cv.rectangle(image, (100, 80), (180, 130), 220, -1)
     capture = TriggeredCapture(
-        (CameraFrame(image, 100, 1000, 100, 1.0),),
-        0, 1000, shot_id="shot", session_id="session",
+        (CameraFrame(image.copy(), 100, 1000, 100, 1.0),
+         CameraFrame(image.copy(), 200, 2000, 100, 1.0)),
+        1, 1500, shot_id="shot", session_id="session",
     )
     calibration = CheckerboardCalibration(
         (320, 240),
@@ -65,8 +66,9 @@ def test_ambiguous_or_missing_image_never_calls_pose_solver(monkeypatch):
         spy,
     )
     blank = TriggeredCapture(
-        (CameraFrame(image, 100, 1000, 100, 1.0),),
-        0, 1000, shot_id="shot", session_id="session",
+        (CameraFrame(image.copy(), 100, 1000, 100, 1.0),
+         CameraFrame(image.copy(), 200, 2000, 100, 1.0)),
+        1, 1500, shot_id="shot", session_id="session",
     )
     with pytest.raises(ValueError, match="exactly one"):
         estimate_capture_synthetic_face_pose(

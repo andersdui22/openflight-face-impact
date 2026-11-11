@@ -14,8 +14,9 @@ from openflight.camera.triggered_buffer import CameraFrame, TriggeredCapture
 
 def capture_with(image):
     return TriggeredCapture(
-        (CameraFrame(image, 100, 1000, 100, 1.0),),
-        0, 1000, shot_id="shot", session_id="session",
+        (CameraFrame(image.copy(), 100, 1000, 100, 1.0),
+         CameraFrame(image.copy(), 200, 2000, 100, 1.0)),
+        1, 1500, shot_id="shot", session_id="session",
     )
 
 

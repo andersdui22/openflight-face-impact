@@ -1,3 +1,11 @@
+# PHASE 5 CI TEST-FIX: TRIGGER BRACKETING (2026-11-11)
+
+- Read exact-SHA CI at `a1d87ce8ab03be1391663874b1caac3ec3956dd8`: PR Checks, Documentation, Pylint, UI, Foundation SUCCESS; Python 3.11 Tests FAILURE: 7 new tests failed because their single-frame synthetic captures violated the pre/post trigger timing contract. Python 3.10/3.12 jobs cancelled.
+- Fixed **test fixtures only**: two strictly monotonic synthetic frames, pre-trigger count 1, trigger host timestamp bracketed between frames. No weakening of `validate_candidate_frame_index`, camera timing, pose solver or image provenance.
+- Recheck new exact SHA CI; Gates 20–24 remain OPEN; no physical tests, merge or release.
+
+---
+
 # PHASE 5 GATE 21 SYNTHETIC CAPTURE-TO-POSE COMPOSITION (2026-11-11)
 
 - Audited existing selected-frame synthetic corner extractor and `estimate_synthetic_face_pose` planar PnP contract before implementation. Added `estimate_capture_synthetic_face_pose` as a thin provenance-preserving bridge, **not** a duplicate pose solver or camera reader.
