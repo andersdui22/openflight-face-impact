@@ -105,7 +105,8 @@ def test_rejects_malformed_nested_assessment():
 
 def test_rejects_accepted_result_missing_coordinates():
     good = item(2, SyntheticImpactStatus.OK)
-    bad_impact = replace(good.assessment.impact, x_mm=None)
-    bad = replace(good, assessment=replace(good.assessment, impact=bad_impact))
-    with pytest.raises(ValueError, match="lacks required evidence"):
-        audit_synthetic_candidate_batch((bad,))
+    # The immutable impact model rejects missing coordinates at construction.
+    # That is the earliest correct fail-closed boundary; no malformed record
+    # can reach the aggregate audit through its public constructors.
+    with pytest.raises(ValueError, match="requires finite coordinates"):
+        replace(good.assessment.impact, x_mm=None)

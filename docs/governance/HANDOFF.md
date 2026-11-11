@@ -1,3 +1,12 @@
+# PHASE 5 CI REPAIR AND TEST BOUNDARY (2026-11-11)
+
+- Read-only audit exact SHA `b81b14e128fbfde8c83ac685da9a35f4f6fdb87d`: Tests FAILURE (Python 3.11: 2751 passed, 1 failed, 7 skipped; 3.10 and 3.12 cancelled), Foundation/Pylint/UI/Documentation SUCCESS; PR Checks FAILURE.
+- Root cause: test `test_rejects_accepted_result_missing_coordinates` attempted `dataclasses.replace(..., x_mm=None)` and expected aggregate-audit rejection, but `SyntheticImpactResult.__post_init__` correctly fails closed at construction. Updated test to assert the earliest model-validation boundary. No production geometry logic changed.
+- Positive unmocked rendered-image integration test was not listed among failed tests on Python 3.11; this does not establish hardware accuracy or all-version CI success. New SHA CI pending.
+- All physical tests remain postponed until all 35 Gates are as complete as possible without hardware. Gates 20–24 OPEN. No merges/releases.
+
+---
+
 # PHASE 5 GATES 20–24 POSITIVE RENDERED-IMAGE INTEGRATION (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `81effe47bfe20c9111b5d65bfc9e101e1b536016`: Documentation SUCCESS; Tests, Pylint, Foundation, UI IN PROGRESS; PR Checks FAILURE.
