@@ -76,9 +76,19 @@ def estimate_ball_position(
     The caller supplies an angular residual budget in radians. The returned
     residual checks consistency with a sphere, not physical measurement accuracy.
     """
-    if isinstance(radius_mm, bool) or not math.isfinite(radius_mm) or radius_mm <= 0:
+    if (
+        isinstance(radius_mm, (bool, str, bytes))
+        or not isinstance(radius_mm, (int, float, np.integer, np.floating))
+        or not math.isfinite(radius_mm)
+        or radius_mm <= 0
+    ):
         raise ValueError("ball radius must be positive and finite")
-    if not math.isfinite(max_residual_rad) or not 0 < max_residual_rad < math.pi / 2:
+    if (
+        isinstance(max_residual_rad, (bool, str, bytes))
+        or not isinstance(max_residual_rad, (int, float, np.integer, np.floating))
+        or not math.isfinite(max_residual_rad)
+        or not 0 < max_residual_rad < math.pi / 2
+    ):
         raise ValueError("angular residual limit must be between zero and pi/2")
     rays = _unit_edge_rays(edge_rays)
     axis = _cone_axis(rays)
