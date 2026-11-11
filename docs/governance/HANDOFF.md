@@ -1,3 +1,12 @@
+# PHASE 5 GATE 22/24 OFFLINE FRAME EVIDENCE SELECTION (2026-11-11)
+
+- Audited Phase 5 HANDOFF, current scope matrix, existing `synthetic_frame_candidates.py`, `offline_capture_batch.py`, `synthetic_impact_quality.py`, and tests before implementation. The previous batch already assesses explicit frames; do not duplicate capture, geometry or pose solvers.
+- Added isolated `offline_frame_selection.py`: a bounded, deterministic, fail-closed **unique synthetic geometry** selector consuming existing assessed frames. Exactly one accepted synthetic geometry frame yields a synthetic candidate; zero yields no selection; multiple yield an ambiguous result with **no** selected frame. Reject duplicate/malformed identities and inconsistent quality. No physical contact inference, timing, frame ranking, image-derived clubface landmarks or uncertainty estimate.
+- Added hardware-free tests for unique/none/ambiguous outcomes, input limits, contradictory quality, duplicate IDs and forbidden physical validation claims. This is a new software capability, not final Gate 22 or 24 acceptance.
+- All physical ELP tests and user-supplied screenshots remain deferred until all 35 Gates are developed as far as possible without hardware. No merge/release. Exact-new-SHA CI must be checked; do not inherit previous passing CI.
+
+---
+
 # PHASE 5 GATES 20–24 SOFTWARE EVIDENCE REVIEW (2026-11-11)
 
 - Read-only PR #45 audit at exact SHA `925c1a3f3248c0112ff7708356117fde20b0a9d0`: Tests, Foundation, UI, Pylint and Documentation all SUCCESS; PR Checks FAILURE (PR metadata). Positive rendered-image integration is in the passing test suite; this does not prove physical accuracy.
