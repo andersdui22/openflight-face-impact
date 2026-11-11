@@ -30,11 +30,11 @@ function calibrationLabel(status: CalibrationStatus | null): string {
     case 'profile_invalid':
       return 'Calibration profile invalid or unreadable';
     case 'revision_invalid':
-      return 'Calibration revision missing or stale · measurements disabled';
+      return 'Calibration revision missing or stale · not validated for measurements';
     case 'binding_incompatible':
-      return 'Club model or calibration binding incompatible · measurements disabled';
+      return 'Club model or calibration binding incompatible · not validated for measurements';
     case 'evidence_invalid':
-      return 'Calibration or club evidence invalid · measurements disabled';
+      return 'Calibration or club evidence invalid · not validated for measurements';
     case 'mode_unknown':
       return 'Calibration profile loaded · camera mode not verified';
     default:
