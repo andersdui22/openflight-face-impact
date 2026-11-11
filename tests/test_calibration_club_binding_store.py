@@ -64,3 +64,25 @@ def test_cannot_save_missing_geometry_revision(tmp_path):
         save_calibration_club_binding(
             tmp_path / "bad.json", CalibrationClubBinding("a" * 64, "synthetic-iron")
         )
+
+
+def test_atomic_replacement_preserves_previous_binding_if_validation_fails(tmp_path):
+    destination = tmp_path / "binding.json"
+    save_calibration_club_binding(destination, binding())
+    original_bytes = destination.read_bytes()
+    with pytest.raises(ValueError, match="geometry revision"):
+        save_calibration_club_binding(
+            destination, CalibrationClubBinding("a" * 64, "synthetic-iron")
+        )
+    assert destination.read_bytes() == original_bytes
+    assert load_calibration_club_binding(destination) == binding()
+    assert list(tmp_path.iterdir()) == [destination]
+
+
+def test_atomic_replacement_updates_existing_binding_without_temp_files(tmp_path):
+    destination = tmp_path / "binding.json"
+    save_calibration_club_binding(destination, binding())
+    updated = CalibrationClubBinding("c" * 64, "synthetic-wood", "d" * 64)
+    save_calibration_club_binding(destination, updated)
+    assert load_calibration_club_binding(destination) == updated
+    assert list(tmp_path.iterdir()) == [destination]
