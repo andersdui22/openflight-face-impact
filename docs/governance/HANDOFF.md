@@ -1,3 +1,12 @@
+# BATCH A — FIRST POSITIVE UNMOCKED RASTER-TO-EXPORT REGRESSION (2026-11-12)
+
+- Added `tests/test_offline_positive_synthetic_image_export.py`: deterministic projected sphere silhouette rasterized into an actual grayscale `CameraFrame`, with projected six-point synthetic clubface landmarks and calibrated distortion. The test passes the genuine contour extractor, batch assessor, temporal selection and impact exporter without mocks, asserting explicit shot/session/frame identity, expected toe/high impact and `physically_validated=False`.
+- The blank frame is the negative control; the disk frame is the positive candidate. Rasterization quantizes pixels, so synthetic contact tolerance is explicitly 5 mm; this is **not** a claim of 5 mm measured accuracy.
+- Test added to GitHub but **CI not yet verified**. If it fails, inspect the actual failure and correct fixture geometry or document the blocker; do not weaken checks solely to manufacture acceptance.
+- Gates 20–24 remain OPEN pending CI and all acceptance evidence. No physical tests, merges or releases.
+
+---
+
 # USER-APPROVED SOFTWARE-FIRST CRITICAL PATH (2026-11-11)
 
 - User explicitly approved changing development priority from serial micro-hardening to larger functional batches and deferring camera-specific fine-tuning to physical tests.
