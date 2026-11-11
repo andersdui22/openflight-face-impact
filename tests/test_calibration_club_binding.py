@@ -73,7 +73,7 @@ def test_malformed_binding_rejected():
     with pytest.raises(ValueError, match="revision"):
         CalibrationClubBinding("", "synthetic-7iron")
     with pytest.raises(ValueError, match="identity"):
-        CalibrationClubBinding("placeholder", " ")
+        CalibrationClubBinding("a" * 64, " ")
 
 
 def test_same_club_identity_but_changed_dimensions_rejected():
@@ -132,3 +132,12 @@ def test_geometry_revision_detects_curved_surface_radii_changes():
 def test_geometry_revision_rejects_unvalidated_input():
     with pytest.raises(ValueError, match="validated club model"):
         club_geometry_revision(None)
+
+
+@pytest.mark.parametrize("bad_revision", [
+    "placeholder", "a" * 63, "a" * 65, "A" * 64,
+    "g" * 64, None, 42,
+])
+def test_binding_constructor_rejects_non_sha256_optics_revision(bad_revision):
+    with pytest.raises(ValueError, match="SHA-256 calibration revision"):
+        CalibrationClubBinding(bad_revision, "synthetic-7iron")
