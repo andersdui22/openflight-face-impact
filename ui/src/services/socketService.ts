@@ -1,5 +1,6 @@
-import { io, type Socket } from 'socket.io-client';
 import { useOfflineImpactStore } from '../stores/useOfflineImpactStore';
+import { io, type Socket } from 'socket.io-client';
+import { ingestOfflineImpactSocketEvent } from './offlineImpactSocketIngestion';
 import { useSyntheticMotionStore } from '../stores/useSyntheticMotionStore';
 import { isSyntheticMotionPayload } from '../types/syntheticMotionPayload';
 import { isSyntheticFaceImpactResponse, type SyntheticFaceImpactResponse } from '../types/syntheticFaceImpact';
@@ -60,7 +61,7 @@ class SocketService {
     });
 
     this.socket.on('offline_impact_evidence', (data: unknown) => {
-      useOfflineImpactStore.getState().ingest(data);
+      ingestOfflineImpactSocketEvent(data);
     });
 
     this.socket.on('synthetic_motion_diagnostics', (data: unknown) => {

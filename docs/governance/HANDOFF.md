@@ -1,3 +1,12 @@
+# BATCH B — SOCKET EVENT TO REACT VIEW CONTRACT (2026-11-12)
+
+- Extracted the actual `offline_impact_evidence` Socket.IO listener ingestion to a shared typed handler, used by production listener and new contract tests.
+- Tests exercise event payload -> strict runtime validation -> Zustand history -> server-rendered React review, accepted marker, rejected no-marker, and forged physical-validation rejection. This is **not** a live browser-to-Python network E2E test.
+- Python real Socket.IO test and accepted raster emission tests are in preceding commits, pending CI. This adds UI side coverage without claiming live ELP or physical measurement.
+- Gates 20–24 OPEN; no merge/release; camera tests deferred.
+
+---
+
 # BATCH B — IN-PROCESS REAL FLASK-SOCKETIO DELIVERY (2026-11-12)
 
 - Extended positive unmocked synthetic raster integration to instantiate a real Flask-SocketIO test client, send the completed typed offline handoff through `server.publish_completed_offline_impact`, and assert the delivered `offline_impact_evidence` payload matches the independently asserted runner payload.
