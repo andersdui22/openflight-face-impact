@@ -13,6 +13,7 @@ import { DebugPanel } from './components/DebugPanel';
 import { SyntheticFaceImpactDemo } from './components/SyntheticFaceImpactDemo';
 import { FaceImpactSessionDemo, type DemoShot } from './components/FaceImpactSessionDemo';
 import { FaceImpactControls } from './components/FaceImpactControls';
+import { SyntheticMotionDiagnostics } from './components/SyntheticMotionDiagnostics';
 import { FaceImpactCameraPreview } from './components/FaceImpactCameraPreview';
 import { DisplayMode } from './components/DisplayMode';
 import { SimShotBadges } from './components/SimShotBadges';
@@ -206,6 +207,7 @@ function FaceImpactDashboard({
           setShots={setDemoShots}
         />
         <FaceImpactControls />
+        <SyntheticMotionDiagnostics payload={null} />
         {demoEnabled && (
           <section className="impact-controls" aria-label="Simulated Face Impact metrics">
             <strong>DEMO METRICS — SIMULATED, NOT MEASURED</strong>
