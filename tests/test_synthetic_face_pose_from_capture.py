@@ -149,3 +149,52 @@ def test_unsupported_mode_fails_before_pose_solver(monkeypatch):
             max_rms_px=0.5, min_margin_px=0.1,
             observation_mode="auto",
         )
+
+
+def test_perspective_capture_recovers_metric_pose_without_mocking():
+    """Rendered image -> extracted pixels -> real IPPE pose solver."""
+    camera_matrix = np.array([
+        [530., 0., 315.], [0., 525., 198.], [0., 0., 1.],
+    ])
+    calibration = CheckerboardCalibration(
+        (640, 400), camera_matrix, np.zeros(5), 0., (),
+    )
+    landmarks = np.array([
+        [-44., -19.], [42., -17.], [36., 22.], [-35., 18.],
+    ])
+    rotation_vector = np.array([0.29, -0.32, 0.2])
+    tilted, _ = cv.Rodrigues(rotation_vector)
+    known_rotation = tilted @ np.diag([1., -1., -1.])
+    known_translation = np.array([64., -22., 420.])
+    known_rvec, _ = cv.Rodrigues(known_rotation)
+    points_3d = np.column_stack((landmarks, np.zeros(4)))
+    projected, _ = cv.projectPoints(
+        points_3d, known_rvec, known_translation, camera_matrix, np.zeros(5),
+    )
+    image = np.zeros((400, 640), dtype=np.uint8)
+    cv.fillConvexPoly(
+        image, np.rint(projected.reshape(4, 2)).astype(np.int32), 220,
+    )
+    capture = TriggeredCapture(
+        (CameraFrame(image.copy(), 100, 1000, 100, 1.0),
+         CameraFrame(image.copy(), 200, 2000, 100, 1.0)),
+        1, 1500, shot_id="shot", session_id="session",
+    )
+
+    result = estimate_capture_synthetic_face_pose(
+        calibration, capture, 1, landmarks,
+        max_rms_px=2., min_margin_px=0.1,
+        observation_mode="quadrilateral",
+    )
+
+    assert result.observation.frame_index == 1
+    assert result.observation.shot_id == "shot"
+    assert result.pose.rms_px < 2.
+    np.testing.assert_allclose(
+        result.pose.pose_model_to_camera.translation_model_to_world_mm,
+        known_translation, atol=5.,
+    )
+    np.testing.assert_allclose(
+        result.pose.pose_model_to_camera.rotation_model_to_world,
+        known_rotation, atol=0.08,
+    )

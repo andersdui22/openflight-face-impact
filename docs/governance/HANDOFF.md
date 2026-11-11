@@ -1,3 +1,12 @@
+# PHASE 5 GATE 21 UNMOCKED SYNTHETIC PERSPECTIVE POSE REGRESSION (2026-11-11)
+
+- Verified exact-SHA `3dd6f5ca`: all six GitHub Actions workflows SUCCESS.
+- Added end-to-end **unmocked** synthetic regression: render a tilted planar quadrilateral from known metric pose using OpenCV camera projection, place it in a correctly bracketed two-frame capture, extract its image corners through the new quadrilateral mode, and solve with the existing real IPPE pose estimator. Assert reprojection RMS and metric translation/rotation within tolerances that account for integer rasterization.
+- This is simulated image-domain evidence only, not real clubface recognition, hardware calibration or contact timing. Gate 21 remains OPEN pending real-world evidence and further robustness; all physical tests deferred until all Gates are software-complete.
+- New SHA CI still requires verification. No merge or release.
+
+---
+
 # PHASE 5 GATE 21 QUADRILATERAL-TO-EXISTING-POSE BRIDGE (2026-11-11)
 
 - Verified exact-SHA `d410c78b` and `c3652a5e` CI: all six workflows SUCCESS for both.
