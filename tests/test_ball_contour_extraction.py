@@ -66,3 +66,20 @@ def test_invalid_threshold_rejected(threshold):
 def test_invalid_area_rejected(area):
     with pytest.raises(ValueError, match="minimum area"):
         extract(image_with_disk(), min_area_px=area)
+
+
+def test_circularity_accepts_synthetic_disk():
+    assert len(extract(image_with_disk(), min_circularity=0.8)) >= 5
+
+
+def test_circularity_rejects_elongated_bright_shape():
+    image = np.zeros((100, 120), dtype=np.uint8)
+    cv.rectangle(image, (20, 40), (100, 50), 220, thickness=-1)
+    with pytest.raises(ValueError, match="circularity"):
+        extract(image, min_circularity=0.8)
+
+
+@pytest.mark.parametrize("minimum", [-0.1, 1.1, float("nan"), True])
+def test_circularity_limit_must_be_valid(minimum):
+    with pytest.raises(ValueError, match="minimum circularity"):
+        extract(image_with_disk(), min_circularity=minimum)

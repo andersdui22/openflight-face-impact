@@ -19,6 +19,7 @@ def estimate_bright_ball_position(
     border_margin_px: float,
     ball_radius_mm: float,
     max_ball_residual_rad: float,
+    min_circularity: float = 0.0,
 ) -> BallSilhouettePosition:
     """Estimate a synthetic candidate sphere from one grayscale silhouette.
 
@@ -36,6 +37,7 @@ def estimate_bright_ball_position(
         threshold=threshold,
         min_area_px=min_area_px,
         border_margin_px=border_margin_px,
+        min_circularity=min_circularity,
     )
     rays = calibrated_pixel_rays(calibration, contour, image_size=image_size)
     return estimate_ball_position(

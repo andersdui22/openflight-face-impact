@@ -1,3 +1,11 @@
+# PHASE 5 GATE 20 OPTIONAL SILHOUETTE CIRCULARITY (2026-11-11)
+
+- Exact-SHA startup audit of PR #45 `32003d727ab6254146187dfe192e6531e9688715`: Tests, Pylint, Foundation, UI and Documentation SUCCESS; PR Checks FAILURE.
+- Added explicit optional `min_circularity` threshold (0..1) to the existing bright-contour extractor, forwarded by contour-to-ball-range composition. Rejects elongated candidates using OpenCV area/perimeter, with offline disk, elongated shape and invalid-threshold tests. Default zero preserves prior synthetic callers.
+- Circularity is a shape heuristic, not golf-ball identification or physical accuracy. Gates 20–24 OPEN; no hardware tests, merges, releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATE 20 OFFLINE CONTOUR-TO-SPHERE COMPOSITION (2026-11-11)
 
 - Exact-SHA startup audit of PR #45 `c68deb447d25d1d893ffef9f42474322cfcee6b3`: Tests, Pylint, Foundation, UI and Documentation SUCCESS; PR Checks FAILURE on metadata.
