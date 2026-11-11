@@ -3,6 +3,7 @@
 from dataclasses import replace
 
 import numpy as np
+import pytest
 
 from openflight.camera.calibration_club_binding import CalibrationClubBinding
 from openflight.camera.calibration_club_binding_store import save_calibration_club_binding
@@ -142,4 +143,27 @@ def test_malformed_club_model_is_rejected_without_exception(tmp_path):
     )
     assert result["state"] == "binding_incompatible"
     assert not result["club_geometry_compatible"]
+    assert result["physical_validation"] is False
+
+
+@pytest.mark.parametrize("change", [
+    {"family": ClubFamily.WEDGE},
+    {"surface": FaceSurface.CURVED},
+    {"height_mm": 31.},
+    {"evidence_source": "revised-synthetic-fixture"},
+])
+def test_saved_binding_rejects_club_geometry_contract_changes(tmp_path, change):
+    result = check(saved(tmp_path), model=replace(club(), **change))
+    assert result["state"] == "binding_incompatible"
+    assert result["mode_compatible"] is True
+    assert result["revision_compatible"] is False
+    assert result["club_geometry_compatible"] is False
+    assert result["physical_validation"] is False
+
+
+def test_missing_image_size_fails_closed(tmp_path):
+    result = check(saved(tmp_path), size=None)
+    assert result["state"] == "mode_unknown"
+    assert result["mode_compatible"] is False
+    assert result["club_geometry_compatible"] is False
     assert result["physical_validation"] is False
