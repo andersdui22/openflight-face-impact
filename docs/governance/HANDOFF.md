@@ -1,3 +1,12 @@
+# BATCH A CI RECONCILIATION — REAL BROWSER FAILURES (2026-11-12)
+
+- Reviewed exact SHA `ec95a5dd`: Python Tests, Pylint and Documentation passed; UI lint/build passed, but UI format and two browser E2E tests failed; Windows camera and foundation still queued at review. PR Checks still failed.
+- Both browser failures were caused by a stale assertion demanding eight `not measured` metric labels. The eighth tile is intentionally a session shot count with `session shots` label. Updated both E2E assertions to target the eight metric sublabels and require seven `not measured` plus one `session shots`, preserving the invariant that no fabricated camera measurement appears.
+- Prettier format job independently reports eight unformatted UI source files; this commit does not claim to fix that formatting gate. PR screenshot evidence must still be resolved with authentic running-app capture.
+- The newly added unmocked positive raster-to-export test was part of the successful Python Tests workflow, but a separate foundation run was pending at review. Gates 20–24 OPEN. No physical tests, merges or releases.
+
+---
+
 # BATCH A — FIRST POSITIVE UNMOCKED RASTER-TO-EXPORT REGRESSION (2026-11-12)
 
 - Added `tests/test_offline_positive_synthetic_image_export.py`: deterministic projected sphere silhouette rasterized into an actual grayscale `CameraFrame`, with projected six-point synthetic clubface landmarks and calibrated distortion. The test passes the genuine contour extractor, batch assessor, temporal selection and impact exporter without mocks, asserting explicit shot/session/frame identity, expected toe/high impact and `physically_validated=False`.
