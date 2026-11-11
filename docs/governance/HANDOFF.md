@@ -1,3 +1,12 @@
+# PHASE 5 GATES 20–24 AUDITED OFFLINE HANDOFF INTEGRATION (2026-11-11)
+
+- Exact-SHA `d99ea571`: all six CI workflows SUCCESS.
+- Added `offline_impact_handoff.py`: composes existing audited capture batch, independent host/sensor timing checks, unique synthetic frame selection and fail-closed impact export. Reaudits batch before export to reject stale or tampered audit counts.
+- Added unmocked synthetic image integration tests for rejected candidate geometry, invalid timing, tampered audit and wrong input type. This tests the actual contour-to-batch-to-handoff rejection path; it does NOT demonstrate successful physical impact detection or contact timing.
+- Gates 20–24 remain OPEN pending software acceptance audit; physical tests deferred. No merge/release. Verify new SHA CI.
+
+---
+
 # PHASE 5 GATES 23/24 OFFLINE IMPACT EVIDENCE HANDOFF (2026-11-11)
 
 - Verified `8fee97fe` exact-SHA CI: all six workflows SUCCESS.
