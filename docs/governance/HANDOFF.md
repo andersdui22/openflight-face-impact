@@ -1,3 +1,11 @@
+# PHASE 5 GATES 20/22 SELECTED-FRAME CONTOUR PROVENANCE (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `8ca95cd1c817102a6ddebfdb7037f7f093dca3dc`: Tests, Pylint, Foundation and Documentation SUCCESS; UI IN PROGRESS; PR Checks FAILURE.
+- Added `extract_capture_ball_contour`: validates a selected buffered frame and extracts a contour **from that frame's copied image**. Returns immutable contour with shot/session/frame identity, unlike independent caller-supplied pixels. Tests cover valid extraction, wrong frame, invalid capture identity/dimensions and ambiguous components.
+- Does not identify the object as a golf ball, establish contact time, derive face landmarks, or publish a physical impact. Gates 20–24 OPEN. No hardware tests, merge or release; new SHA CI pending.
+
+---
+
 # PHASE 5 GATE 22 EXPLICIT OBSERVATION IDENTITY MODE (2026-11-11)
 
 - Startup audit PR #45 exact SHA `885b5ce757f0daa1e0b4ebee9a2fa6c927bbad14`: Documentation SUCCESS; Tests, UI, Pylint, Foundation IN PROGRESS; PR Checks FAILURE.
