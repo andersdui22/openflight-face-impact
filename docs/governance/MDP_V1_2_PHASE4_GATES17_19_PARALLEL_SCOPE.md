@@ -55,13 +55,13 @@ Acceptance proposal: fail-closed mismatch/staleness tests, no extra camera reade
 
 ## Implementation evidence and remaining acceptance (2026-11-11)
 
-This is a progress inventory, **not** a gate closeout. The three workstreams share draft PR #44, based on Gate 16 closeout. The integrated commit `f1fa9dc4f4b35fb347b2ad3c8b5a7b5defc7b933` passed all six CI workflows. Later commits, including USB status API integration, require independent same-SHA verification before acceptance.
+This is a progress inventory, **not** a gate closeout. The three workstreams share draft PR #44, based on Gate 16 closeout. The integrated commit `9458d36d45a26f3ef435a5a66fe390f928b0d3d4` passed all six technical CI workflows on the same SHA: Tests, UI, Pylint, Documentation, Face Impact foundation, and Face Impact Windows USB camera. The separate PR Checks workflow fails on the deferred genuine UI screenshot requirement; this is not represented as a pass.
 
 | Gate | Implemented offline evidence | Not yet established |
 | --- | --- | --- |
 | 17 | `rigid_frame.py`, `face_reference_points.py`, `planar_face_reference.py`; synthetic inverse/compose, proper rotation and reference-point tests | Real camera-to-face pose, actual club orientation, pixel-to-face intersection/depth, physical impact point |
 | 18 | `club_face_model.py`; driver/wood/iron/wedge families, optional provenance-tagged dimensions, planar versus curved metadata, synthetic tests | Real measured club geometries, actual curved-surface solver, sourced model assets/licensing, physical geometry verification |
-| 19 | `calibration_revision.py`, `calibration_revision_status.py`, `calibration_club_binding.py`, `calibration_club_binding_store.py`, `calibration_club_lifecycle.py`, `calibration_api_status.py`; independent JSON binding, atomic persistence, stale revision API state and UI labels with synthetic tests | Verified camera mode identity, physically measured calibration, actual club geometry/pose, enforced impact measurement guard; UI screenshot evidence is missing |
+| 19 | `calibration_revision.py`, `calibration_revision_status.py`, `calibration_club_binding.py`, `calibration_club_binding_store.py`, `calibration_club_lifecycle.py`, `calibration_api_status.py`; independent JSON binding, atomic persistence, stale revision API state and UI labels with synthetic tests | Verified camera mode identity, physically measured calibration, actual club geometry/pose, enforced impact measurement guard; UI screenshot evidence is deferred by explicit user instruction |
 
 ### Coordinate and provenance contract
 
@@ -84,5 +84,15 @@ No individual Gate 17, 18 or 19 is accepted yet. Continue with focused tests, sa
 - With both paths configured, `/api/camera/usb/status` checks the stored binding's optics revision against the loaded profile and reports `revision_invalid` for stale/missing/malformed binding. Missing/corrupt optics remains `profile_invalid`.
 - Without a binding path, the API preserves the Gate 16 legacy calibration status contract. An absent binding configuration is **not** permission to use the data for physical impact measurements.
 - Even with a matching revision, `mode_unknown` and `physical_validation=false` remain mandatory until physical camera mode/crop evidence exists. `club_geometry_compatible=false` is also reported; no active club model is independently verified.
-- UI labels for `revision_invalid`, `binding_incompatible` and `evidence_invalid` are present, but no screenshot/manual visual evidence has been admitted. The GitHub PR description check correctly fails until genuine UI screenshot evidence is supplied; do not bypass it.
+- UI labels for `revision_invalid`, `binding_incompatible` and `evidence_invalid` are present, but no screenshot/manual visual evidence has been admitted. The user explicitly deferred screenshot capture. The GitHub PR description check remains failing and must not be bypassed or represented as passed.
 - This is **read-only status reporting**, not enforcement of an impact measurement guard. No new USB reader, camera reconfiguration or calibration procedure has been introduced.
+
+
+### Read-only measurement-pipeline audit checkpoint (2026-11-11)
+
+- At `9458d36d45a26f3ef435a5a66fe390f928b0d3d4`, all six technical workflows passed; PR Checks failed solely under the previously documented screenshot policy.
+- Reviewed `src/openflight/server.py` and the camera-specific Gate 17–19 modules. The existing USB route `/api/camera/usb/status` reports offline calibration state but does **not** authorize or block measurements.
+- The broader server contains radar/ballistic measurement handling outside the approved Face Impact-only scope. **Do not attach a clubface guard to radar shot processing** or assert that it is the Face Impact measurement owner.
+- No authoritative Face Impact impact-result publication boundary has yet been established by this audit. Until its owner is located and separately evidenced, implementing a runtime measurement guard would risk modifying the wrong pipeline. This checkpoint is not proof that no such boundary exists elsewhere.
+- Gate 19's offline validation and status reporting remain fail-closed; they are not a substitute for physical verification or runtime measurement enforcement.
+- User-directed screenshot deferral is a scheduling decision, **not** a waiver of the PR check. All three gates remain OPEN and PR #44 remains draft.
