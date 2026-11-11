@@ -228,6 +228,24 @@ class SocketService {
     });
   }
 
+  requestSyntheticMotionDemo(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket?.connected) {
+        reject(new Error('OpenFlight backend is disconnected'));
+        return;
+      }
+      this.socket.timeout(15000).emit('request_synthetic_motion_demo',
+        (error: Error | null, response: unknown) => {
+          if (error || typeof response !== 'object' || response === null ||
+              (response as { ok?: unknown }).ok !== true) {
+            reject(new Error('Synthetic motion demo unavailable'));
+            return;
+          }
+          resolve();
+        });
+    });
+  }
+
   clearSession(profileId: string) {
     this.socket?.emit('clear_session', { profile_id: profileId });
   }

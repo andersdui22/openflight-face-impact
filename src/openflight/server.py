@@ -1837,6 +1837,16 @@ def handle_get_synthetic_face_impact(data=None):
     return synthetic_face_impact_response(case_id)
 
 
+@socketio.on("request_synthetic_motion_demo")
+def handle_request_synthetic_motion_demo():
+    """Explicit synthetic fixture only; never camera-derived live impact."""
+    from .camera.synthetic_motion_socket import synthetic_motion_demo_response
+
+    payload = synthetic_motion_demo_response()
+    socketio.emit("synthetic_motion_diagnostics", payload, to=request.sid)
+    return {"ok": True, "kind": "synthetic_image_space_motion"}
+
+
 @socketio.on("get_camera_capture_settings")
 def handle_get_camera_capture_settings():
     """Send current high-speed capture settings to the requesting UI."""

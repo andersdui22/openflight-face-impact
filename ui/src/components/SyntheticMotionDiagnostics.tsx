@@ -1,5 +1,7 @@
 /** Gate 24: read-only, explicitly synthetic camera motion diagnostics. */
 
+import { useState } from 'react';
+import { socketService } from '../services/socketService';
 import type { SyntheticMotionPayload } from '../types/syntheticMotionPayload';
 
 export type { SyntheticMotionPayload } from '../types/syntheticMotionPayload';
@@ -27,6 +29,13 @@ export type { SyntheticMotionPayload } from '../types/syntheticMotionPayload';
 
 */
 export function SyntheticMotionDiagnostics({ payload }: { payload: SyntheticMotionPayload | null }) {
+  const [error, setError] = useState<string | null>(null);
+  const requestDemo = () => {
+    setError(null);
+    socketService.requestSyntheticMotionDemo().catch((reason: unknown) => {
+      setError(reason instanceof Error ? reason.message : 'Synthetic demo failed');
+    });
+  };
   const valid = payload?.schema_version === 1 &&
     payload.kind === 'synthetic_image_space_motion' &&
     payload.physical_contact_confirmed === false &&
@@ -39,6 +48,8 @@ export function SyntheticMotionDiagnostics({ payload }: { payload: SyntheticMoti
       <section className="impact-controls" aria-label="Synthetic motion diagnostics">
         <strong>SYNTHETIC MOTION · NOT MEASURED</strong>
         <p>Awaiting offline synthetic camera analysis. No physical impact detected.</p>
+        <button type="button" onClick={requestDemo}>Load synthetic motion demo</button>
+        {error && <p role="alert">{error}</p>}
       </section>
     );
   }
@@ -52,6 +63,8 @@ export function SyntheticMotionDiagnostics({ payload }: { payload: SyntheticMoti
   return (
     <section className="impact-controls" aria-label="Synthetic motion diagnostics">
       <strong>SYNTHETIC MOTION · PIXELS ONLY · NOT PHYSICAL CONTACT</strong>
+      <button type="button" onClick={requestDemo}>Reload synthetic motion demo</button>
+      {error && <p role="alert">{error}</p>}
       <p>{payload.motion_reason}</p>
       <p>Closest observed frame: {payload.closest_observed_frame_index ?? 'not established'}</p>
       <p>Approach and separation: {payload.has_observed_approach_and_separation ? 'observed' : 'not established'}</p>
