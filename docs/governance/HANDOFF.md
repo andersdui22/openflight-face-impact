@@ -1,3 +1,15 @@
+# PHASE 5 GATE 22 OFFLINE TIMING PROVENANCE (2026-11-11)
+
+- Draft PR #45 remains the approved Phase 5 work surface; no merge/release/physical tests.
+- Read `triggered_buffer.py`, `capture_runtime.py` and `test_camera_triggered_buffer.py`. Existing `TriggeredCapture` has distinct sensor timestamps, host timestamps, host trigger time, shot/session IDs and pre/post frame boundary. This is a pre-existing camera ring, not proof of actual impact instant.
+- Gate 22 implementation commit `e2d7859f14f9c7ad985440f5f6cb97828c99c89c`: new pure `src/openflight/camera/trigger_timing_quality.py` rejects missing pre/post frames, bad/missing shot/session identity, invalid/nonmonotonic sensor or host clocks and host triggers not bracketed by the pre/post host timestamps. It **does not** compare unrelated sensor and host clock epochs, infer contact time or create a second acquisition owner.
+- Gate 22 synthetic tests commit `94ff3f3b89b3aed21895b0d72fc6c6e2eb0d7042`: valid and rejected capture provenance, nonmonotonic clocks and distinct clock origins.
+- This is an **offline validator not yet wired to a physical publication path**. It is not hardware calibration or exposure-time verification.
+- The latest new commit's CI is not verified. Inspect exact-SHA workflow outcomes and fix failures; consider whether the host trigger bracketing rule is too strict for a real asynchronous trigger before integrating (keep it a conservative rejection until justified).
+- Gate 20, 21, 23 and 24 changes are documented in preceding handoff sections. Recheck their CI and result-constructor compatibility. Current handoff edit advances HEAD.
+
+---
+
 # PHASE 5 PARALLEL GATES 21, 23, 24 — CHECKPOINT (2026-11-11)
 
 - Branch `mdp-v1.2/phase5-gates20-24-parallel`, draft PR #45 https://github.com/andersdui22/openflight-face-impact/pull/45 (unmerged). At previous SHA `70093cfae191068f4eb7056f5b43e4c65e575e9b`, Documentation, foundation and Pylint succeeded, UI and Tests were still in progress, and PR Checks failed on the deferred screenshot policy. These are NOT checks on the new commits below.
