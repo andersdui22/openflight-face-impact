@@ -38,7 +38,10 @@ def test_usb_status_disabled(monkeypatch):
     monkeypatch.setattr(server, "windows_usb_runtime", None)
     response = server.app.test_client().get("/api/camera/usb/status")
     assert response.status_code == 200
-    assert response.json == {"enabled": False, "state": "disabled"}
+    assert response.json["enabled"] is False
+    assert response.json["state"] == "disabled"
+    assert response.json["calibration"]["state"] == "not_calibrated"
+    assert response.json["calibration"]["physical_validation"] is False
 
 
 def test_usb_status_running_does_not_claim_measured_fps(monkeypatch):
@@ -53,6 +56,7 @@ def test_usb_status_running_does_not_claim_measured_fps(monkeypatch):
     assert response.json["frames_received"] == 12
     assert response.json["actual_fps_measured"] is False
     assert response.json["timestamp_source"] == "host_arrival_monotonic"
+    assert response.json["calibration"]["physical_validation"] is False
 
 
 def test_usb_status_reports_disconnect_error(monkeypatch):
@@ -101,3 +105,13 @@ def test_usb_status_exposes_observed_fps_only_while_running(monkeypatch):
     stopped = server.app.test_client().get("/api/camera/usb/status")
     assert stopped.json["actual_fps_measured"] is False
     assert stopped.json["delivered_fps"] is None
+
+
+def test_usb_status_invalid_profile_is_reported_without_camera_access(monkeypatch, tmp_path):
+    monkeypatch.setattr(server, "windows_usb_runtime", None)
+    missing = tmp_path / "missing-optics.json"
+    monkeypatch.setenv("OPENFLIGHT_FACE_IMPACT_CALIBRATION_PROFILE", str(missing))
+    response = server.app.test_client().get("/api/camera/usb/status")
+    assert response.status_code == 200
+    assert response.json["calibration"]["state"] == "profile_invalid"
+    assert response.json["calibration"]["physical_validation"] is False
