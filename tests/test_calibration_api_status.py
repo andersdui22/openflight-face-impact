@@ -97,3 +97,22 @@ def test_missing_profile_does_not_validate_binding(tmp_path):
     result = load_revision_bound_calibration_status(optics, binding)
     assert result["state"] == "profile_invalid"
     assert result["physical_validation"] is False
+
+
+def test_binding_configured_without_optics_profile_fails_closed(tmp_path):
+    _, binding = files(tmp_path)
+    result = load_revision_bound_calibration_status(None, binding)
+    assert result["state"] == "profile_invalid"
+    assert result["binding_loaded"] is False
+    assert result["revision_compatible"] is False
+    assert result["club_geometry_compatible"] is False
+    assert result["physical_validation"] is False
+
+
+def test_legacy_status_never_admits_geometry_or_revision(tmp_path):
+    optics, _ = files(tmp_path)
+    result = load_revision_bound_calibration_status(optics, None)
+    assert result["state"] == "mode_unknown"
+    assert result["binding_loaded"] is False
+    assert result["revision_compatible"] is False
+    assert result["club_geometry_compatible"] is False
