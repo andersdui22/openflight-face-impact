@@ -16,23 +16,23 @@ Status: **USER-APPROVED PARALLEL DEVELOPMENT; READ-ONLY AUDIT IN PROGRESS** (202
 - `src/openflight/camera/calibrated_rays.py`: existing Brown-five pixel-to-optical-unit-ray conversion; image pixel coordinates (column,row), camera rays +x right, +y down, +z forward; **no depth inferred**. Reuse rather than duplicate.
 - `src/openflight/camera/synthetic_calibration.py`: synthetic affine planar pixel-to-mm utility, explicitly **not** a physically calibrated camera model.
 - Gate 16 calibration profiles: strict versioned offline optics, mode identity, fail-closed profile loading; runtime does not establish a trusted physical mode, so status remains `mode_unknown` and `physical_validation=false`.
-- **Unresolved authoritative-plan audit:** exact Gate 17–19 wording and acceptance criteria in Master Development Plan V1.2 have not yet been independently located in repository file paths. The user-facing proposed areas below are provisional until reconciled with the authoritative plan. Do not silently substitute provisional wording for that plan.
+- **Plan wording recovered from the prior user-approved Master Development Plan V1.2 conversation (2026-11-09):** Gate 17 “Køllefladens position, orientering og referencepunkter”, acceptance “Koordinatsystemer og transformeringer verificeret”; Gate 18 “Køllespecifikke fysiske modeller og dimensioner”, acceptance driver, wood, iron and wedge each handled according to its actual geometry; Gate 19 “Kalibreringsworkflow, lagring og kontrol af gyldighed”, acceptance rejection of invalid or outdated calibration. This is conversation-derived plan evidence, **not** a verified copy of the plan file in GitHub. The exact canonical plan document path remains unlocated.
 
 ## Parallel workstreams and provisional boundaries
 
-### Gate 17 — coordinate frames and clubhead pose references
+### Gate 17 — Køllefladens position, orientering og referencepunkter
 
 Scope: establish explicit camera, image and clubface coordinate conventions, unit and handedness semantics; pure validated transformations, only where existing implementation lacks them. No assumed 3D depth or physical pose from a single image.
 
 Acceptance proposal: deterministic synthetic round-trip/reference tests; reject degenerate, nonfinite and ambiguous transforms; provenance of every coordinate convention; no inferred physical accuracy.
 
-### Gate 18 — club-specific geometry/model identity
+### Gate 18 — Køllespecifikke fysiske modeller og dimensioner
 
 Scope: typed club-model metadata and geometric reference definitions for driver, woods, irons and wedges, with unknown dimensions represented as unknown rather than fabricated nominal measurements. Reuse existing admitted model/geometry modules and asset licenses.
 
 Acceptance proposal: explicit model provenance, coordinate-frame compatibility with Gate 17, nonfinite/invalid dimension rejection and deterministic synthetic fixtures; no restricted mesh reuse.
 
-### Gate 19 — calibration workflow, persistence and validity
+### Gate 19 — Kalibreringsworkflow, lagring og kontrol af gyldighed
 
 Scope: reuse Gate 16's versioned optics profiles and persistence; add only needed pure validation and lifecycle checks for calibration/profile/model associations, stale or incompatible profiles and transparent UI status.
 
@@ -40,7 +40,7 @@ Acceptance proposal: fail-closed mismatch/staleness tests, no extra camera reade
 
 ## Dependencies and sequencing
 
-1. Audit existing geometry, model and calibration code and reconcile exact Master Development Plan gate definitions before production-code edits.
+1. Audit existing geometry, model and calibration code; reconcile the recovered user-approved Gate definitions and record any difference from the canonical plan file if located.
 2. Gate 17's coordinate contract must be settled before Gate 18 consumes it; Gate 19 can independently audit profile lifecycle in parallel.
 3. Implement in separate, small reviewable changes; run focused regression tests and same-SHA CI for the shared integration head.
 4. Record individual Gate 17, 18 and 19 evidence and separate technical closeout decisions. Parallel authorization does not imply automatic closeout.
