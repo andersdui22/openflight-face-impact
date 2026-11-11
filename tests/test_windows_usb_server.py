@@ -115,3 +115,32 @@ def test_usb_status_invalid_profile_is_reported_without_camera_access(monkeypatc
     assert response.status_code == 200
     assert response.json["calibration"]["state"] == "profile_invalid"
     assert response.json["calibration"]["physical_validation"] is False
+
+
+def test_usb_status_valid_offline_profile_never_claims_physical_mode(monkeypatch, tmp_path):
+    import numpy as np  # pylint: disable=import-outside-toplevel
+    from openflight.camera.calibration_profile import CameraCalibrationProfile  # pylint: disable=import-outside-toplevel
+    from openflight.camera.calibration_store import save_calibration_profile  # pylint: disable=import-outside-toplevel
+    from openflight.camera.checkerboard_calibration import CheckerboardCalibration  # pylint: disable=import-outside-toplevel
+
+    calibration = CheckerboardCalibration(
+        (640, 400),
+        np.array([[530., 0., 315.], [0., 525., 198.], [0., 0., 1.]]),
+        np.array([-0.24, 0.08, 0.002, -0.003, 0.]),
+        0.22, (0.3, 0.25, 0.28),
+    )
+    path = tmp_path / "optics.json"
+    save_calibration_profile(path, CameraCalibrationProfile(calibration, "synthetic:640x400"))
+    monkeypatch.setenv("OPENFLIGHT_FACE_IMPACT_CALIBRATION_PROFILE", str(path))
+    camera = SimpleNamespace(
+        is_running=True, frames_received=1, last_error=None,
+        negotiated={"width": 640, "height": 400, "reported_fps": 120.0},
+        delivered_fps=None,
+    )
+    monkeypatch.setattr(server, "windows_usb_runtime", camera)
+    response = server.app.test_client().get("/api/camera/usb/status")
+    assert response.status_code == 200
+    assert response.json["calibration"]["profile_loaded"] is True
+    assert response.json["calibration"]["state"] == "mode_unknown"
+    assert response.json["calibration"]["mode_compatible"] is False
+    assert response.json["calibration"]["physical_validation"] is False
