@@ -22,8 +22,12 @@ class CalibrationClubBinding:
     club_geometry_revision: str | None = None
 
     def __post_init__(self) -> None:
-        if not isinstance(self.calibration_revision, str) or not self.calibration_revision:
-            raise ValueError("explicit calibration revision required")
+        if (
+            not isinstance(self.calibration_revision, str)
+            or len(self.calibration_revision) != 64
+            or any(char not in "0123456789abcdef" for char in self.calibration_revision)
+        ):
+            raise ValueError("explicit SHA-256 calibration revision required")
         if not isinstance(self.club_model_id, str) or not self.club_model_id.strip():
             raise ValueError("explicit club model identity required")
         if self.club_geometry_revision is not None and (
