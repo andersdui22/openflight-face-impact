@@ -132,3 +132,14 @@ def test_wrong_image_dimensions_rejected(tmp_path):
     assert result["state"] == "mode_incompatible"
     assert not result["mode_compatible"]
     assert result["physical_validation"] is False
+
+
+def test_malformed_club_model_is_rejected_without_exception(tmp_path):
+    optics, binding = saved(tmp_path)
+    result = validate_stored_calibration_club(
+        optics, binding, club_model=None,
+        camera_mode_id=MODE, image_size=SIZE,
+    )
+    assert result["state"] == "binding_incompatible"
+    assert not result["club_geometry_compatible"]
+    assert result["physical_validation"] is False
