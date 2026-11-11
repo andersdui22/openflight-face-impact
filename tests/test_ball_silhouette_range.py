@@ -113,3 +113,31 @@ def test_gate20_malformed_residual_budget_fails_closed(angles, bad_budget):
     rays = tangent_rim([0, 0, 500], angles)
     with pytest.raises(ValueError, match="angular residual limit"):
         estimate_ball_position(rays, radius_mm=RADIUS, max_residual_rad=bad_budget)
+
+
+def test_gate20_ball_position_centre_is_immutable_and_not_aliased(angles):
+    rays = tangent_rim([0, 0, 500], angles)
+    result = estimate_ball_position(rays, radius_mm=RADIUS, max_residual_rad=1e-6)
+    original = result.center_camera_mm.copy()
+    with pytest.raises(ValueError):
+        result.center_camera_mm[0] = 900
+    np.testing.assert_array_equal(result.center_camera_mm, original)
+
+
+@pytest.mark.parametrize("invalid_center", [
+    [1, 2], [1, 2, float("nan")], ["x", "y", "z"],
+])
+def test_gate20_position_rejects_invalid_centre(invalid_center):
+    from openflight.camera.ball_silhouette_range import BallSilhouettePosition
+
+    with pytest.raises(ValueError, match="ball centre"):
+        BallSilhouettePosition(np.asarray(invalid_center), 1., 0.1, 0.001)
+
+
+def test_gate20_position_copies_external_centre_array():
+    from openflight.camera.ball_silhouette_range import BallSilhouettePosition
+
+    centre = np.array([1., 2., 500.])
+    result = BallSilhouettePosition(centre, 500., 0.1, 0.001)
+    centre[0] = 999.
+    assert result.center_camera_mm[0] == 1.
