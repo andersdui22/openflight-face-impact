@@ -1,3 +1,15 @@
+# PHASE 5 IMPLEMENTATION UPDATE — GATE 20 (2026-11-11)
+
+- Verified Phase 5 branch `mdp-v1.2/phase5-gates20-24-parallel` at prior handoff SHA `2d388f87537ab6216ece5b1b61b84043d9f48822`; no PR-triggered workflow runs were returned for that SHA (not a pass).
+- Read `src/openflight/camera/ball_silhouette_range.py` and `tests/test_ball_silhouette_range.py`. Reused the existing sphere/rim estimator; **did not** add a second camera owner or detector.
+- Gate 20 code commit `105e99ec15159e019c23e4aa35f89b11e95fc336`: fail-closed scalar type checking for radius and angular residual budget, avoiding exceptions or ambiguous NumPy array truth values.
+- Gate 20 test commit `ff801f0e7f1361013e137e7927d81a766b0f842e`: malformed scalar/radius/budget regression cases. These are synthetic hardware-free tests, not physical accuracy validation.
+- **CI for `ff801f0e` and this handoff's newer SHA has NOT been verified**. Next: check same-SHA CI; if absent because no Phase 5 PR exists, create a draft PR on the approved Phase 5 branch with the proper stacked base, then verify checks. Fix any introduced failures.
+- Continue Gates 20–24 within user-approved scope. All physical testing deferred until after development of 35 Gates; no merge/release/screenshot bypass.
+- Read the current full handoff and `MDP_V1_2_PHASE5_GATES20_24_PARALLEL_SCOPE.md` below before resuming.
+
+---
+
 # CURRENT HANDOFF — PHASE 5 GATES 20–24 (2026-11-11)
 
 **READ THIS FIRST.** This section supersedes earlier status snapshots below. GitHub is authoritative for current HEAD, CI, PRs and files. Re-audit before any code change; this handoff is a dated snapshot.
