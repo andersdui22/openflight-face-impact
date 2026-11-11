@@ -77,3 +77,50 @@ def extract_unlabelled_bright_markers(
         raise ValueError("marker observation ambiguous: unexpected blob count")
     points = np.asarray(sorted(centres, key=lambda p: (p[1], p[0])), dtype=np.float64)
     return UnlabelledFaceMarkers(points, image.shape)
+
+
+def associate_markers_with_reference(
+    observation: UnlabelledFaceMarkers,
+    reference_pixels_px: np.ndarray,
+    *,
+    max_distance_px: float,
+    min_assignment_margin_px: float = 2.0,
+) -> np.ndarray:
+    """Associate observed centres with trusted reference pixels, fail closed.
+
+    Reference coordinates must come from a separately established, labelled
+    calibration/previous observation, not a guessed spatial ordering. No
+    unmarked clubface recognition or physical validation is implied.
+    """
+    from itertools import permutations
+
+    if not isinstance(observation, UnlabelledFaceMarkers):
+        raise ValueError("marker association requires typed observation")
+    reference = np.asarray(reference_pixels_px)
+    observed = observation.centres_px
+    if (reference.ndim != 2 or reference.shape != observed.shape
+            or reference.dtype.kind not in "iuf"
+            or not np.all(np.isfinite(reference))):
+        raise ValueError("reference pixels must be finite and match observed markers")
+    if (not np.isfinite(max_distance_px) or max_distance_px <= 0
+            or not np.isfinite(min_assignment_margin_px)
+            or min_assignment_margin_px < 0):
+        raise ValueError("marker association tolerances invalid")
+    if len(observed) > 8:
+        raise ValueError("exhaustive marker association limited to eight points")
+    if len(observed) < 3:
+        raise ValueError("marker association needs at least three points")
+    costs = np.linalg.norm(reference[:, None, :] - observed[None, :, :], axis=2)
+    ranked = []
+    for assignment in permutations(range(len(observed))):
+        distances = costs[np.arange(len(observed)), assignment]
+        ranked.append((float(np.sum(distances ** 2)), assignment, float(np.max(distances))))
+    ranked.sort(key=lambda entry: entry[0])
+    best, runner_up = ranked[0], ranked[1]
+    if best[2] > max_distance_px:
+        raise ValueError("marker association exceeds reference distance budget")
+    if runner_up[0] - best[0] <= min_assignment_margin_px ** 2:
+        raise ValueError("marker association ambiguous")
+    matched = np.array(observed[list(best[1])], dtype=np.float64, copy=True)
+    matched.setflags(write=False)
+    return matched

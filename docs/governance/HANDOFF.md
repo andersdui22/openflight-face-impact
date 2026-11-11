@@ -1,3 +1,12 @@
+# BATCH A — LABELLED REFERENCE MARKER ASSOCIATION (2026-11-12)
+
+- Added fail-closed association from image-extracted **unlabelled** bright marker centres to separately trusted **labelled reference pixels**, with global one-to-one assignment, maximum per-point displacement and best-versus-runner-up ambiguity margin. Limited exhaustive matching to <=8 points; no guessed left-to-right label ordering.
+- Added positive permuted-reference and negative wrong-reference/ambiguous correspondence raster tests. Association returns immutable labelled image pixels for downstream pose only when constraints pass.
+- **Still missing** actual trusted reference acquisition, automated face geometry/pose integration, camera measurements and full browser E2E. This is a controlled offline preparatory component, not unmarked clubface detection.
+- Exact SHA CI pending. Gates 20–24 OPEN; physical tests deferred; no merge/release.
+
+---
+
 # BATCH A — EXPERIMENTAL IMAGE-DERIVED FIDUCIAL OBSERVATIONS (2026-11-12)
 
 - Added `experimental_face_markers.py`: controlled grayscale image -> thresholded, area/circularity/border-validated bright-marker centres, with exact count enforcement and immutable unlabelled pixel observations. Raster regression tests cover four observed points, missing/extra markers and unsupported images.

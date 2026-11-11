@@ -48,3 +48,34 @@ def test_extra_marker_fails_closed():
 def test_unsupported_images_rejected(image):
     with pytest.raises(ValueError):
         extract_unlabelled_bright_markers(image)
+
+
+def test_marker_association_uses_trusted_labelled_reference_not_image_sort_order():
+    from openflight.camera.experimental_face_markers import associate_markers_with_reference
+
+    observation = extract_unlabelled_bright_markers(_image())
+    reference = np.array([
+        [45., 190.], [40., 45.], [245., 185.], [250., 50.],
+    ])
+    matched = associate_markers_with_reference(
+        observation, reference, max_distance_px=6.,
+    )
+    np.testing.assert_allclose(matched, reference, atol=0.5)
+    assert matched.flags.writeable is False
+
+
+def test_marker_association_rejects_wrong_reference_and_ambiguous_identity():
+    from openflight.camera.experimental_face_markers import associate_markers_with_reference
+
+    observation = extract_unlabelled_bright_markers(_image())
+    with pytest.raises(ValueError, match="distance budget"):
+        associate_markers_with_reference(
+            observation, np.zeros((4, 2)), max_distance_px=6.,
+        )
+    reference = observation.centres_px.copy()
+    reference[0] = (reference[0] + reference[1]) / 2
+    reference[1] = reference[0]
+    with pytest.raises(ValueError, match="ambiguous"):
+        associate_markers_with_reference(
+            observation, reference, max_distance_px=200.,
+        )
