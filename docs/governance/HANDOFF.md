@@ -1,3 +1,13 @@
+# PHASE 5 GATE 20 IMAGE-DOMAIN CONTOUR QUALITY (2026-11-11)
+
+- Draft PR #45 audited at `9d57a2484e0d94543989c7c332f3bb10bf9e50d4`: Documentation passed; foundation and Pylint in progress; Tests, UI and PR Checks queued. Prior `6c741f57...` had Documentation, Pylint, foundation green; Tests/UI in progress; PR Checks failed. **Do not claim latest SHA CI green.**
+- Gate 20 new standalone offline contour-quality validator `src/openflight/camera/ball_contour_quality.py` at commit `cd1be109138974fe97f6f5bf773b7bf4e0233801`: checks image dimensions, explicit safe border margin, >=5 finite distinct pixel pairs, clipping; returns a defensive copy. This does **not** detect contours, infer ball identity or assert physical accuracy.
+- Gate 20 tests `tests/test_ball_contour_quality.py` at `82494302338c5fc2bf4d9728fe033947401fbc6d`: valid copy, bad shapes/nonfinite/duplicate samples, border clipping, invalid image/margin.
+- This is standalone; next step is to integrate into the synthetic observed-impact path with an explicit configurable margin, and verify existing call sites/tests before modifying signatures. Calibrated ray solver already checks ray coverage and consistency separately.
+- Gate 22 explicit frame-index and provenance checks, Gate 21 pose quality, Gates 23–24 impact result invariants remain in same branch; see previous handoff entries. Recheck exact-SHA CI and resolve technical failures. No physical tests, merges or releases.
+
+---
+
 # PHASE 5 GATE 22 CANDIDATE FRAME CHECKPOINT (2026-11-11)
 
 - PR #45 remains draft/unmerged. Last read-only audit of `6c741f579fba1bd8d2359687cb9b886368635be8`: Pylint and Documentation passed; foundation in progress; Tests, UI and PR Checks queued. A much older SHA `70093cfae191068f4eb7056f5b43e4c65e575e9b` had all technical workflows green, with PR Checks red (deferred screenshots). **No same-SHA green claim for latest changes.**
