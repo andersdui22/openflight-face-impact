@@ -19,7 +19,13 @@ def load_revision_bound_calibration_status(
 ) -> dict:
     """Return fail-closed optics revision state without physical camera access."""
     if profile_path is None or binding_path is None:
-        return load_calibration_status(profile_path)
+        result = load_calibration_status(profile_path)
+        result["binding_loaded"] = False
+        result["revision_compatible"] = False
+        result["club_geometry_compatible"] = False
+        if profile_path is None and binding_path is not None:
+            result["state"] = "profile_invalid"
+        return result
     try:
         profile = load_calibration_profile(profile_path)
     except (OSError, ValueError, TypeError, KeyError):
