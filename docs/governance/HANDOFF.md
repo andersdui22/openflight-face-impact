@@ -1,3 +1,11 @@
+# PHASE 5 GATES 20–24 POSITIVE RENDERED-IMAGE INTEGRATION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `81effe47bfe20c9111b5d65bfc9e101e1b536016`: Documentation SUCCESS; Tests, Pylint, Foundation, UI IN PROGRESS; PR Checks FAILURE.
+- Added a positive **unmocked** synthetic image-to-contact regression: render a 720-sample sphere silhouette to an actual uint8 frame; use OpenCV contour extraction, calibrated rays, sphere cone estimation, projected face landmark pose, contact geometry, quality assessment and batch audit. Verify known 12mm toe / 5mm high synthetic contact within 5mm tolerance; no physical accuracy claim.
+- The test is committed but **not yet confirmed passing**. If CI fails, diagnose exact test failure and correct within scope. No physical ELP camera or live shots until all 35 Gates are developed as far as possible. Gates 20–24 OPEN; no merge/release.
+
+---
+
 # PHASE 5 GATES 20–24 INTEGRATED OFFLINE BATCH ENTRY POINT (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `b32f84f0bb2100e8813e12a0b3880893001e2231`: Documentation SUCCESS; Tests, UI, Pylint, Foundation IN PROGRESS; PR Checks FAILURE.
