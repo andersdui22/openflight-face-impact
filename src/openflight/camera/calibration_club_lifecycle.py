@@ -39,6 +39,9 @@ def validate_stored_calibration_club(
         result["binding_loaded"] = True
     except (OSError, ValueError, TypeError, KeyError):
         return result
+    if not isinstance(club_model, ClubFaceModel):
+        result["state"] = "binding_incompatible"
+        return result
     if camera_mode_id is None or image_size is None:
         result["state"] = "mode_unknown"
         return result
