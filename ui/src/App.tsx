@@ -14,6 +14,7 @@ import { SyntheticFaceImpactDemo } from './components/SyntheticFaceImpactDemo';
 import { FaceImpactSessionDemo, type DemoShot } from './components/FaceImpactSessionDemo';
 import { FaceImpactControls } from './components/FaceImpactControls';
 import { SyntheticMotionDiagnostics } from './components/SyntheticMotionDiagnostics';
+import { useOfflineImpactStore } from './stores/useOfflineImpactStore';
 import { useSyntheticMotionStore } from './stores/useSyntheticMotionStore';
 import { FaceImpactCameraPreview } from './components/FaceImpactCameraPreview';
 import { DisplayMode } from './components/DisplayMode';
@@ -59,6 +60,9 @@ function FaceImpactDashboard({
   shotCount: number;
 }) {
   const syntheticMotion = useSyntheticMotionStore((state) => state.payload);
+  const offlineEntries = useOfflineImpactStore((state) => state.entries);
+  const latestOffline = offlineEntries[offlineEntries.length - 1];
+  const acceptedOffline = offlineEntries.filter((entry) => entry.accepted);
   const [demoEnabled, setDemoEnabled] = useState(false);
   const [demoShots, setDemoShots] = useState<DemoShot[]>([]);
   const demoAverage = (axis: 'x' | 'y') =>
@@ -208,6 +212,29 @@ function FaceImpactDashboard({
           shots={demoShots}
           setShots={setDemoShots}
         />
+        <section className="impact-controls" aria-label="Offline synthetic impact history">
+          <strong>OFFLINE SYNTHETIC RESULTS — NOT CAMERA MEASUREMENTS</strong>
+          <p>Results appear only when a Python service sends a validated offline_impact_evidence event.</p>
+          <p role="status">
+            OFFLINE RESULTS: {offlineEntries.length} · SYNTHETIC ACCEPTED: {acceptedOffline.length}
+          </p>
+          {latestOffline && (
+            <p>
+              Latest: {latestOffline.shot_id} · {latestOffline.accepted
+                ? `X ${latestOffline.x_mm} mm · Y ${latestOffline.y_mm} mm · ${latestOffline.horizontal_region} / ${latestOffline.vertical_region}`
+                : `REJECTED: ${latestOffline.reason}`}
+            </p>
+          )}
+          <ol aria-label="Offline synthetic shot history">
+            {offlineEntries.map((entry) => (
+              <li key={entry.shot_id}>
+                {entry.shot_id}: {entry.accepted
+                  ? `X ${entry.x_mm} mm, Y ${entry.y_mm} mm (synthetic only)`
+                  : `rejected — ${entry.reason}`}
+              </li>
+            ))}
+          </ol>
+        </section>
         <FaceImpactControls />
         <details className="impact-controls" aria-label="Advanced synthetic motion diagnostics">
           <summary>Advanced diagnostics · synthetic motion (developer tools)</summary>

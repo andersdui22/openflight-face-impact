@@ -1,4 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
+import { useOfflineImpactStore } from '../stores/useOfflineImpactStore';
 import { useSyntheticMotionStore } from '../stores/useSyntheticMotionStore';
 import { isSyntheticMotionPayload } from '../types/syntheticMotionPayload';
 import { isSyntheticFaceImpactResponse, type SyntheticFaceImpactResponse } from '../types/syntheticFaceImpact';
@@ -56,6 +57,10 @@ class SocketService {
       this.socket?.emit('get_radar_config');
       this.socket?.emit('get_camera_capture_settings');
       this.socket?.emit('get_profiles');
+    });
+
+    this.socket.on('offline_impact_evidence', (data: unknown) => {
+      useOfflineImpactStore.getState().ingest(data);
     });
 
     this.socket.on('synthetic_motion_diagnostics', (data: unknown) => {
@@ -173,6 +178,7 @@ class SocketService {
       } else {
         useShotStore.getState().setShots(remaining);
       }
+      useOfflineImpactStore.getState().clear();
       this.sessionClearedListeners.forEach((listener) => listener());
     });
 

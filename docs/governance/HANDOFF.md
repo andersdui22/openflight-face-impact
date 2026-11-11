@@ -1,3 +1,13 @@
+# BATCH B — FRONTEND OFFLINE EVIDENCE EVENT INGESTION (2026-11-12)
+
+- Added bounded Zustand store `useOfflineImpactStore` and tests for validated event ingestion, immutable shot deduplication, session rollover and rejected evidence. Source must be versioned `offline_synthetic_analysis` and explicitly physically unvalidated.
+- Socket.IO frontend now listens for `offline_impact_evidence` and clears offline history on server `session_cleared`. Disconnect does not falsely delete previously received offline history.
+- Dashboard includes a separate, clearly marked **OFFLINE SYNTHETIC RESULTS — NOT CAMERA MEASUREMENTS** section with accepted/rejected counts, latest result and shot history. This does not alter legacy shot count or fabricate camera measurements.
+- **Critical limitation:** Backend does not yet emit this event from an actual offline capture. It is an ingestion contract and display path, not a completed Python-to-UI end-to-end feature. Main clubface marker remains synthetic demo until linked to real offline evidence.
+- Exact SHA `39ba87e4` CI pending at review. Gates 20–24 OPEN; no physical tests, merges or releases.
+
+---
+
 # BATCH B — VERSIONED PYTHON / REACT OFFLINE RESULT CONTRACT (2026-11-12)
 
 - Introduced `serialize_offline_impact_evidence` with explicit schema v1, source `offline_synthetic_analysis`, shot/session/frame provenance, finite coordinate validation and strict `physically_validated=False`.
