@@ -5,6 +5,7 @@ import numpy as np
 
 from openflight.camera.checkerboard_calibration import CheckerboardCalibration
 from openflight.camera.offline_capture_batch import assess_offline_capture_batch
+from openflight.camera.offline_impact_handoff import prepare_offline_impact_handoff
 from openflight.camera.synthetic_face_polygon import SyntheticFacePolygon
 from openflight.camera.synthetic_frame_candidates import SyntheticFrameCandidate
 from openflight.camera.synthetic_impact_pipeline import SyntheticImpactStatus
@@ -81,3 +82,15 @@ def test_rendered_sphere_and_projected_face_complete_positive_image_pipeline():
     assert result.quality.position_uncertainty_mm is None
     assert report.audit.accepted_synthetic == 1
     assert report.audit.physical_contact_established is False
+    handoff = prepare_offline_impact_handoff(
+        capture, report, max_sensor_gap_ns=100, max_host_gap_ns=1000,
+    )
+    assert handoff.temporal.spacing.accepted is True
+    assert handoff.impact.accepted_for_offline_analysis is True
+    assert handoff.impact.frame_index == 2
+    assert handoff.impact.shot_id == "rendered-ball"
+    assert handoff.impact.session_id == "synthetic"
+    assert abs(handoff.impact.x_mm - local_center[0]) < 5.
+    assert abs(handoff.impact.y_mm - local_center[1]) < 5.
+    assert handoff.impact.physically_validated is False
+    assert handoff.impact.position_uncertainty_mm is None
