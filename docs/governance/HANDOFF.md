@@ -1,3 +1,12 @@
+# BATCH A — RASTER MARKERS THROUGH OFFLINE PIPELINE (2026-11-12)
+
+- Added `offline_marker_runner.py`, a bounded adapter from **controlled marker raster images** to extracted unlabelled fiducials, trusted-reference correspondence, typed `SyntheticFrameCandidate` entries and the existing complete offline analysis/Socket.IO publication runner.
+- Tests exercise raster marker observation through real offline pipeline with blank ball frames (must reject, no fabricated impact coordinates), missing marker and wrong-reference failure. No physical camera or unmarked clubface recognition.
+- This adapter intentionally requires externally trusted labelled reference pixels and separate marker images. It does not establish physical impact accuracy. CI for new SHA pending; Gates 20–24 OPEN.
+- Prior CI blocker repair at `0c3d6853` was still in progress at last check. PR Checks screenshot requirement outstanding.
+
+---
+
 # CI BLOCKER REPAIR — 2026-11-12
 
 - Inspected completed CI on `4291f823`: Python tests 7 failures due to invalid fixture construction outside expected exception context; UI test parser failed because JSX was in a `.ts` file; UI lint and format failed for same parse error. Fixed fixture assertions to cover constructor and serialization, added explicit type guards to capture identity validation, and moved JSX test to `.tsx`. Removed unused destructured variables in rejection test.
