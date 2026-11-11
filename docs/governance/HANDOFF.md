@@ -1,3 +1,11 @@
+# PHASE 5 GATE 22 OFFLINE CAPTURE IMAGE DOMAIN (2026-11-11)
+
+- Read-only audit of PR #45 head `ddf2b2abc585c669216dcff4927a35605ce2c661`: Pylint, foundation, Documentation SUCCESS; Tests and UI IN PROGRESS at audit; PR Checks FAILURE on metadata. No claim of completed CI.
+- New standalone `validate_capture_frame_image` verifies explicit candidate index, capture timing/identity, uint8 2D grayscale image and exact declared calibrated width/height; returns a defensive copy. Eleven hardware-free cases test valid copy, mismatched shape/dtype, invalid size, invalid provenance.
+- This is a **pure validator**, not automatic image extraction or proof that independently supplied ball/face pixels came from the image. It does not create a camera reader or alter existing synthetic impact API. No physical tests, merge or release. Gates 20–24 OPEN; exact-SHA CI pending.
+
+---
+
 # PHASE 5 GATE 22 OBSERVATION-FRAME METADATA BINDING (2026-11-11)
 
 - Startup audit: PR #45 at `1b5e7d55077350dca695eb7ea73e2c9f863bb42b`; CI was in progress for Tests/Pylint/Foundation/UI, Documentation SUCCESS and PR Checks FAILURE on metadata. No CI success inferred.
