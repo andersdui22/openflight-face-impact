@@ -1,3 +1,16 @@
+# USER-APPROVED TECHNICAL CLOSEOUT — GATE 14/15 INTEGRATION (2026-11-11)
+
+The user explicitly approved technical closeout of the Gate 14/15 integration after reviewing the exact-SHA automated CI evidence for code commit `1420b782aa742ee3ebeb531bcb19707b617da0a5`.
+
+- Integration branch: `mdp-v1.2/phase3-gate14-15-integration`; draft PR #42; base `mdp-v1.2/phase3-gate15-trigger-replay`.
+- On the approved code SHA, Windows USB camera, Tests, Pylint, UI and the latest PR Checks workflow succeeded. An earlier PR Checks failure was superseded by a successful rerun after the PR title/body were corrected.
+- Integration differs from Gate 15 by two commits affecting only `tests/test_windows_usb_camera.py`: Gate 14 restart/stale-frame/reset/waiter regressions are tested alongside Gate 15 shot/session and replay behavior. No production source change in the integration PR.
+- Technical closeout is **not** a merge, physical ELP OV9281 validation, calibrated impact measurement, packaging verification, release, or authorization for Gate 16.
+- PRs #40, #41 and #42 remain unmerged; existing screenshot deferrals on earlier PRs remain deferred, not waived.
+- This governance-only commit changes integration HEAD; its CI is separate from the approved code SHA and must be verified before making claims about the new HEAD.
+
+---
+
 # USER-APPROVED TECHNICAL CLOSEOUT — PHASE 3 GATES 14 AND 15 (2026-11-11)
 
 The user explicitly approved technical closeout of **both Gate 14 and Gate 15** in the current conversation after the assistant presented same-SHA CI results. This approval is for technical software acceptance only and is **not** permission to merge, release, perform physical camera tests, integrate the sibling branches, or start Gate 16.
