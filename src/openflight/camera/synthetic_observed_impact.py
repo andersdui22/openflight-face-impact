@@ -43,6 +43,8 @@ def calculate_synthetic_observed_impact(  # pylint: disable=too-many-arguments
     An optional capture/index pair checks provenance, not image-observation identity.
     """
     try:
+        if image_size != calibration.image_size:
+            raise ValueError("image dimensions must match the calibration")
         if capture is None and candidate_frame_index is not None:
             raise ValueError("candidate frame index requires a capture")
         if capture is not None:

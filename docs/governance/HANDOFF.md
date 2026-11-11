@@ -1,3 +1,12 @@
+# PHASE 5 BATCH CI FAILURE AND FIX (2026-11-11)
+
+- Read-only audit of draft PR #45 at `d6b701f853a6ee35710c30ced2829712458c7109`: Documentation, Pylint and Face Impact foundation passed; Tests FAILED on Python 3.11 (2627 passed, 1 failed, 7 skipped); UI still in progress at audit. PR Checks failed on nonconventional PR title and missing required PR description sections, NOT on screenshot check according to job list.
+- Exact failure: `test_mismatched_calibration_size_is_rejected` expected `dimensions`, but newly inserted Gate 20 contour border validation rejected the observation first. This batch fixes fail-closed validation ordering: `calculate_synthetic_observed_impact` now rejects `image_size != calibration.image_size` before contour inspection, with explicit dimensions message. Regression test also supplies a clipped contour and mismatched dimensions to lock precedence.
+- PR metadata must be updated separately (title conventional, description headings `Why was this required?`, `Automated tests`, `Manual (human) testing`), without claiming manual testing. GitHub tool surface currently has no PR edit action; do not bypass governance or invent screenshots.
+- Source, regression test and handoff committed together in one Git tree/ref update to minimize CI. Recheck CI on resulting HEAD. Gates 20–24 OPEN; no physical testing, merge or release.
+
+---
+
 # PHASE 5 BATCH DEVELOPMENT CHECKPOINT (2026-11-11)
 
 - User approved batching changes to reduce GitHub Actions cost. This checkpoint is included in the **same Git tree commit** as source and tests, rather than a separate handoff push.

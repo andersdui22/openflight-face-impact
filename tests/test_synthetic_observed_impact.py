@@ -233,3 +233,18 @@ def test_gate22_timing_provenance_allows_explicit_synthetic_candidate(calibratio
         candidate_frame_index=2, **options,
     )
     assert missing.status is SyntheticImpactStatus.INVALID_GEOMETRY
+
+
+def test_gate20_calibration_size_precedes_contour_border_rejection(calibration):
+    ball_pixels, face_pixels = synthetic_pixels(calibration, [10., 0., RADIUS_MM])
+    ball_pixels[0] = [0., 50.]
+    result = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        image_size=(320, 200), ball_radius_mm=RADIUS_MM,
+        max_ball_residual_rad=1e-6, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+        ball_border_margin_px=2.,
+    )
+    assert result.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert "dimensions" in result.rejection_reason
+    assert result.x_mm is None and result.y_mm is None
