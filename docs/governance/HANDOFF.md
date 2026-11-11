@@ -1,3 +1,18 @@
+# PHASE 5 SYNTHETIC MOTION DASHBOARD AND SOCKET HANDOFF (2026-11-11)
+
+- Active repository: `andersdui22/openflight-face-impact`; branch `mdp-v1.2/phase5-gates20-24-parallel`; draft PR #45. Latest reviewed implementation SHA before this handoff update: `c9ddf590b4be1d5dc68bbc5827c9e4ead4b1d73a`.
+- Gates 20–24 remain **OPEN**. All 35 Gates should be developed software-first, deferring ELP OV9281 physical tests until no further meaningful software-only progress is possible. No upstream OpenFlight or ConnectorNext changes; no merge or release without separate authorization.
+- Added real synthetic image sequence → dual-object observation → image-space proximity → temporal trend → safe JSON UI payload in `offline_motion_analysis_pipeline.py`. This never confirms physical contact, real impact coordinates, or calibrated uncertainty.
+- Corrected three synthetic motion test fixtures so the moving ball and static face share the same vertical image region (`dfac4316`). The synthetic scene remains only a fixture; CI must establish test pass.
+- Added `SyntheticMotionDiagnostics` panel to existing React/Electron dashboard (`44c6ea0f`), with distance plot and explicit non-measurement labels. The design illustration shown in conversation is **not** a screenshot of the actual UI and includes features not yet implemented.
+- Added React Socket.IO listener, strict synthetic payload validation, Zustand state, and disconnect clearing (`c092e47c`). Do not render invalid or physical-contact-claiming data.
+- Added explicit, user-triggered `request_synthetic_motion_demo` Flask-SocketIO handler and Python-generated grayscale fixture through the real analysis pipeline, emitting `synthetic_motion_diagnostics` to the requesting client only (`c41cc211`). UI has Load/Reload synthetic motion demo buttons. This is **not** automatic ELP camera analysis.
+- Added Flask-SocketIO integration tests for event payload, session isolation and no unsolicited emission, plus a technical handoff document at `docs/governance/PHASE5_SYNTHETIC_SOCKET_HANDOFF.md` (`c9ddf590`).
+- **CI status:** Recent exact-SHA workflows were queued/in progress when checked. No all-green claim is made for `c9ddf590` or this handoff commit. Check exact-SHA Tests, UI, Pylint, Foundation, Documentation, PR Checks and Windows USB camera workflow where applicable. Fix failures before proposing Gate closeout.
+- **Next work:** run and inspect actual CI failures; correct any synthetic pipeline/Socket.IO regression; verify React build and complete end-to-end request→Python→Socket.IO→React test; then implement image replay within existing dashboard without falsely implying physical measurements. Reconcile canonical approved MDP V1.2 acceptance criteria before Gate closure.
+
+---
+
 # PHASE 5 SOFTWARE-ONLY ACCEPTANCE GAP AUDIT (2026-11-11)
 
 - Added `docs/governance/MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md` with explicit Gate 20–24 evidence, remaining P0/P1 software gaps and hardware-deferred acceptance.
