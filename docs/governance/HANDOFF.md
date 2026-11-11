@@ -1,3 +1,11 @@
+# BATCH B — IN-PROCESS REAL FLASK-SOCKETIO DELIVERY (2026-11-12)
+
+- Extended positive unmocked synthetic raster integration to instantiate a real Flask-SocketIO test client, send the completed typed offline handoff through `server.publish_completed_offline_impact`, and assert the delivered `offline_impact_evidence` payload matches the independently asserted runner payload.
+- This tests the real Python server transport and targeted socket delivery in-process. It does **not** launch the React browser, automatically process ELP frames, or establish physical accuracy.
+- Exact SHA `dd4ed35a` workflows queued at review; new commit CI pending. Gates 20–24 OPEN; physical tests deferred; no merges/releases.
+
+---
+
 # BATCH B — POSITIVE UNMOCKED RASTER TO SOCKET EMISSION REGRESSION (2026-11-12)
 
 - Extended previously proven positive synthetic raster geometry fixture to invoke `analyze_and_publish_offline_capture` directly, repeating real image extraction, batch assessment, temporal selection, safe export and recipient-targeted event publication.

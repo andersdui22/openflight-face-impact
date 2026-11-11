@@ -143,3 +143,26 @@ def test_rasterized_synthetic_contact_reaches_offline_export_without_mocks():
     assert events == [
         ("offline_impact_evidence", payload, {"to": "synthetic-test-client"})
     ]
+
+
+    # Exercise the actual Flask-SocketIO in-process transport, not only an
+    # injected event callback. The synthetic handoff was calculated above.
+    from openflight import server
+
+    client = server.socketio.test_client(server.app)
+    try:
+        assert client.is_connected()
+        rooms = server.socketio.server.manager.rooms["/"][None]
+        recipients = [sid for sid in rooms if sid != "None"]
+        assert len(recipients) == 1
+        server.publish_completed_offline_impact(
+            handoff, recipient=recipients[0],
+        )
+        delivered = [
+            event for event in client.get_received()
+            if event["name"] == "offline_impact_evidence"
+        ]
+        assert len(delivered) == 1
+        assert delivered[0]["args"][0] == payload
+    finally:
+        client.disconnect()
