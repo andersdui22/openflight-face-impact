@@ -1,6 +1,6 @@
 # Phase 4 Gates 17–19 — parallel startup audit and implementation boundary
 
-Status: **USER-APPROVED PARALLEL DEVELOPMENT; READ-ONLY AUDIT IN PROGRESS** (2026-11-11). This document is a scope record, not acceptance evidence or a claim of completed gates.
+Status: **USER-APPROVED PARALLEL DEVELOPMENT; IMPLEMENTATION AND CI IN PROGRESS** (2026-11-11). This document is a scope record, not acceptance evidence or a claim of completed gates.
 
 ## Authorization and baseline
 
@@ -51,3 +51,28 @@ Acceptance proposal: fail-closed mismatch/staleness tests, no extra camera reade
 - No physical camera capture, claimed millimetre impact precision, second USB acquisition owner, ConnectorNext/MLM2PRO/radar/GSPro work, destructive Git operations, merge, release or EXE validation.
 - No fabricated screenshot or bypass of the previously deferred screenshot PR requirement.
 - Unknown camera/lens/crop/mode, club geometry, pose and depth must remain UNKNOWN pending evidence.
+
+
+## Implementation evidence and remaining acceptance (2026-11-11)
+
+This is a progress inventory, **not** a gate closeout. The three workstreams share draft PR #44, based on Gate 16 closeout. A prior integrated commit `355fe47045f4b6a354c8623abf79bc741d4b03a0` passed all six CI workflows. Later commits require independent same-SHA verification before acceptance.
+
+| Gate | Implemented offline evidence | Not yet established |
+| --- | --- | --- |
+| 17 | `rigid_frame.py`, `face_reference_points.py`, `planar_face_reference.py`; synthetic inverse/compose, proper rotation and reference-point tests | Real camera-to-face pose, actual club orientation, pixel-to-face intersection/depth, physical impact point |
+| 18 | `club_face_model.py`; driver/wood/iron/wedge families, optional provenance-tagged dimensions, planar versus curved metadata, synthetic tests | Real measured club geometries, actual curved-surface solver, sourced model assets/licensing, physical geometry verification |
+| 19 | `calibration_revision.py`, `calibration_revision_status.py`, `calibration_club_binding.py`; offline revision/mode/model identity guards and tests | Persisted independent revision binding integrated into active workflow, reliable camera mode identity, physically measured calibration, user-facing lifecycle UI |
+
+### Coordinate and provenance contract
+
+- The camera optical rays already use +X right, +Y down, +Z forward; **do not** assume that convention is interchangeable with the face-local coordinate frame.
+- Synthetic face-local model: +X toward toe, +Y toward crown/topline, +Z outward from the striking face, in millimeters. This is an explicitly *declared* model convention, not a detected orientation or handedness correction.
+- `RigidFrameTransform` only applies a caller-supplied proper rotation and XYZ-mm translation. A camera-from-face transform must be established independently; this implementation does not estimate one.
+- The planar model treats a dimensioned face as a centered rectangular reference **for synthetic tests only**. Actual striking-face boundaries may not be rectangular, and curved faces are rejected rather than flattened.
+- The Gate 18 `evidence_source` string is provenance metadata, **not verification** that a measurement or source is trustworthy. Synthetic fixtures must never be represented as real club specifications.
+- A SHA-256 revision is a byte-level offline profile identity, **not** calibration expiry, physical mode verification or calibration accuracy. A caller must persist the expected revision independently; deriving it from the candidate profile at check time defeats stale detection.
+- `CalibrationClubBinding` binds a revision to a model identifier, **not** the geometry contents. Changing dimensions under the same model identifier is not detected by that binding; model geometry versioning or a content digest is required before production use.
+
+### Review and stop decision
+
+No individual Gate 17, 18 or 19 is accepted yet. Continue with focused tests, same-SHA CI, provenance-aware geometry revision validation and integration design. Do not merge, release, perform physical ELP testing or claim millimeter impact precision.
