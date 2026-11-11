@@ -1,3 +1,11 @@
+# PHASE 5 GATES 20/22/23 CAPTURE-CONTOUR SYNTHETIC IMPACT COMPOSITION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `719faa9a445cbb3ee84381f0ffb546a5b9b282a8`: Tests, Pylint, Foundation, Documentation SUCCESS; UI IN PROGRESS; PR Checks FAILURE.
+- Added `calculate_capture_ball_synthetic_impact`, composing selected-frame image validation, image-derived contour, and existing synthetic observed-impact geometry with explicit matching frame identity. Offline negative integration tests reject absent contours and invalid frame indices without coordinates.
+- Face landmark pixels remain caller-supplied and **are not independently proven to come from the same frame**. No physical impact timing, classification or accuracy established. Gates 20–24 OPEN; no hardware tests, merges or releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATES 20/22 SELECTED-FRAME CONTOUR PROVENANCE (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `8ca95cd1c817102a6ddebfdb7037f7f093dca3dc`: Tests, Pylint, Foundation and Documentation SUCCESS; UI IN PROGRESS; PR Checks FAILURE.
