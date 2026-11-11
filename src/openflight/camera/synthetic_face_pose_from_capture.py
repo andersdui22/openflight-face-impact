@@ -11,6 +11,7 @@ import numpy as np
 
 from .checkerboard_calibration import CheckerboardCalibration
 from .synthetic_face_landmark_pose import FaceLandmarkPose, estimate_synthetic_face_pose
+from .synthetic_face_quadrilateral import extract_synthetic_quadrilateral_corners
 from .synthetic_face_pixel_observation import (
     SyntheticFacePixelObservation, extract_synthetic_face_corners,
 )
@@ -35,13 +36,20 @@ def estimate_capture_synthetic_face_pose(  # pylint: disable=too-many-arguments
     max_rms_px: float,
     min_margin_px: float,
     landmark_border_margin_px: float = 0.0,
+    observation_mode: str = "rectangle",
 ) -> SyntheticObservedFacePose:
-    """Extract synthetic rectangular corners and reuse the existing pose solver.
+    """Extract synthetic fixture corners and reuse the existing pose solver.
 
     Fails closed for unobservable planar pose or ambiguous image fixture.
     No output is emitted when pose acceptance fails.
     """
-    observation = extract_synthetic_face_corners(
+    if observation_mode == "rectangle":
+        extractor = extract_synthetic_face_corners
+    elif observation_mode == "quadrilateral":
+        extractor = extract_synthetic_quadrilateral_corners
+    else:
+        raise ValueError("unsupported synthetic face observation mode")
+    observation = extractor(
         capture, frame_index, image_size=calibration.image_size,
         threshold=threshold,
     )

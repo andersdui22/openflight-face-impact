@@ -1,3 +1,12 @@
+# PHASE 5 GATE 21 QUADRILATERAL-TO-EXISTING-POSE BRIDGE (2026-11-11)
+
+- Verified exact-SHA `d410c78b` and `c3652a5e` CI: all six workflows SUCCESS for both.
+- Added explicit `observation_mode=\"quadrilateral\"` to existing `estimate_capture_synthetic_face_pose`, retaining `rectangle` default and rejecting unsupported modes. Reuses the existing quadrilateral image extractor and planar PnP solver, no duplicate solver or camera owner.
+- Added isolated synthetic wiring test (spy solver) and unsupported-mode rejection. No claim of unmocked positive perspective pose accuracy or physical clubface identity. Gates 20–24 OPEN. Hardware tests deferred; no merge/release.
+- New SHA CI must be verified independently.
+
+---
+
 # PHASE 5 GATE 21 SYNTHETIC PERSPECTIVE QUADRILATERAL (2026-11-11)
 
 - Preserved existing strict axis-aligned rectangular fixture proposal and pose solver unchanged. Added **optional** `synthetic_face_quadrilateral.py` to extract four ordered image corners from a single isolated convex bright perspective quadrilateral in an offline captured frame.
