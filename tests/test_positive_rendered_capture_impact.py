@@ -94,3 +94,14 @@ def test_rendered_sphere_and_projected_face_complete_positive_image_pipeline():
     assert abs(handoff.impact.y_mm - local_center[1]) < 5.
     assert handoff.impact.physically_validated is False
     assert handoff.impact.position_uncertainty_mm is None
+
+    # The same valid synthetic geometry must never bypass a timing failure.
+    bad_timing = prepare_offline_impact_handoff(
+        capture, report, max_sensor_gap_ns=99, max_host_gap_ns=1000,
+    )
+    assert bad_timing.temporal.spacing.accepted is False
+    assert bad_timing.impact.accepted_for_offline_analysis is False
+    assert bad_timing.impact.frame_index is None
+    assert bad_timing.impact.x_mm is None
+    assert bad_timing.impact.y_mm is None
+    assert bad_timing.impact.physically_validated is False
