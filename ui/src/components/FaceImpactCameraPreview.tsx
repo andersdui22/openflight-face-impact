@@ -4,7 +4,14 @@ import { getServerOrigin } from '../utils/serverOrigin';
 type CameraState = 'checking' | 'disabled' | 'starting' | 'running' | 'stopped' | 'error' | 'offline';
 
 type CalibrationState =
-  'not_calibrated' | 'mode_unknown' | 'mode_incompatible' | 'profile_invalid' | 'revision_invalid' | 'binding_incompatible' | 'evidence_invalid' | 'offline_profile_compatible';
+  | 'not_calibrated'
+  | 'mode_unknown'
+  | 'mode_incompatible'
+  | 'profile_invalid'
+  | 'revision_invalid'
+  | 'binding_incompatible'
+  | 'evidence_invalid'
+  | 'offline_profile_compatible';
 
 interface CalibrationStatus {
   state: CalibrationState;
