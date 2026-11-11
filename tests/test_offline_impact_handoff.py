@@ -113,6 +113,33 @@ def test_modified_capture_timing_rejected():
         )
 
 
+def test_duplicate_frame_assessments_rejected_before_export():
+    capture, batch = fixture()
+    duplicated = replace(batch, frames=(batch.frames[0], batch.frames[0]))
+    with pytest.raises(ValueError, match="unique and in capture"):
+        prepare_offline_impact_handoff(
+            capture, duplicated, max_sensor_gap_ns=100, max_host_gap_ns=1000,
+        )
+
+
+def test_out_of_range_frame_assessment_rejected_before_export():
+    capture, batch = fixture()
+    invalid = replace(batch, frames=(replace(batch.frames[0], frame_index=99),))
+    with pytest.raises(ValueError, match="unique and in capture"):
+        prepare_offline_impact_handoff(
+            capture, invalid, max_sensor_gap_ns=100, max_host_gap_ns=1000,
+        )
+
+
+def test_empty_frame_assessments_rejected_before_export():
+    capture, batch = fixture()
+    invalid = replace(batch, frames=())
+    with pytest.raises(ValueError, match="nonempty bounded"):
+        prepare_offline_impact_handoff(
+            capture, invalid, max_sensor_gap_ns=100, max_host_gap_ns=1000,
+        )
+
+
 def test_wrong_batch_type_rejected():
     capture, _ = fixture()
     with pytest.raises(ValueError, match="typed offline"):

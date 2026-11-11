@@ -1,3 +1,12 @@
+# PHASE 5 OFFLINE HANDOFF FRAME IDENTITY INTEGRITY (2026-11-11)
+
+- Audited the genuine `prepare_offline_impact_handoff` chain against the Phase 5 acceptance gap document. Added early rejection of empty/oversized assessed frame batches, duplicated frame identities and out-of-capture indices before audit/timing/export. This prevents ambiguous or fabricated frame identities from reaching evidence export.
+- Added unmocked integration regressions for duplicated, out-of-range and empty assessed frame tuples using the existing real synthetic-image capture fixture. They exercise rejection, not a positive accepted synthetic impact.
+- Positive unmocked image-to-export accepted impact remains a P0 acceptance gap; do not claim it is completed. The earlier exact SHA `1d29bc67` passed Tests, Face Impact foundation, Pylint, Documentation and Windows USB camera checks. Later SHA `394717a1` still had pending workflows at last review, PR Checks failed on missing genuine screenshot. New SHA CI must be checked.
+- Gates 20–24 OPEN, hardware testing deferred, no merges/releases.
+
+---
+
 # PHASE 5 SYNTHETIC RESPONSE CONTRACT HARDENING (2026-11-11)
 
 - Extended React synthetic Socket.IO response contract to require nonempty case/label identifiers, nonempty error text, and to forbid impact data attached to a failed response.

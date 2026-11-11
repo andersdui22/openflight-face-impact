@@ -39,6 +39,12 @@ def prepare_offline_impact_handoff(
     if (not batch.source_capture_fingerprint
             or batch.source_capture_fingerprint != capture_fingerprint(capture)):
         raise ValueError("offline batch does not belong to this capture")
+    if not batch.frames or len(batch.frames) > max_frames:
+        raise ValueError("offline handoff requires nonempty bounded frame assessments")
+    indices = tuple(item.frame_index for item in batch.frames)
+    if (len(indices) != len(set(indices))
+            or any(index < 0 or index >= len(capture.frames) for index in indices)):
+        raise ValueError("offline handoff frame indices must be unique and in capture")
     audit = audit_synthetic_candidate_batch(batch.frames)
     if audit != batch.audit:
         raise ValueError("offline batch audit does not match frame assessments")
