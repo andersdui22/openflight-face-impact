@@ -1,3 +1,11 @@
+# PHASE 5 GATES 22/24 COMBINED OFFLINE TEMPORAL EVIDENCE (2026-11-11)
+
+- Added `offline_temporal_evidence.py` to compose existing strict frame-spacing validation with existing unique synthetic geometry frame selector. Only an unambiguous synthetic candidate **and** valid bounded timing can pass the offline analysis gate; no physical contact claim.
+- Tests cover positive synthetic candidate, invalid timing despite unique geometry, ambiguous candidates, out-of-capture indices, and impossible evidence mutations.
+- Previous `9e270c40` CI was running when inspected; previous UI E2E rerun also running. New SHA CI must be checked. No merge/release or physical tests; Gates 20–24 remain OPEN.
+
+---
+
 # PHASE 5 GATE 22 OFFLINE FRAME SPACING QUALITY (2026-11-11)
 
 - Verified `7949276b` Python Tests, Pylint, Foundation, Documentation and PR Checks SUCCESS; UI E2E failed before execution because runner could not resolve Ubuntu apt mirror; rerun requested, E2E pending.
