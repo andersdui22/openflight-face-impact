@@ -1,3 +1,11 @@
+# PHASE 5 GATE 24 SYNTHETIC QUALITY CONTRACT (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `60f558feab6425b9ec57890f13ba7f6f6c986ec4`: Documentation and Pylint SUCCESS; Tests, UI, Foundation IN PROGRESS; PR Checks FAILURE.
+- Added pure `assess_synthetic_impact_quality` summary for accepted and rejected synthetic results. Accepted geometry is explicitly **not** physically validated; uncertainty in millimetres is `None`, never invented. Rejected results retain their explicit reason. Added offline tests for accepted, each rejection status, and invalid input.
+- This is a reporting contract, not a validated statistical uncertainty estimator. Gates 20–24 OPEN; no hardware tests, merges or releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATES 20/22/23 CAPTURE-CONTOUR SYNTHETIC IMPACT COMPOSITION (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `719faa9a445cbb3ee84381f0ffb546a5b9b282a8`: Tests, Pylint, Foundation, Documentation SUCCESS; UI IN PROGRESS; PR Checks FAILURE.
