@@ -1,3 +1,10 @@
+# CI REPAIR — FRAME DIMENSION VALIDATION ORDER (2026-11-12)
+
+- Verified CI for `f83542c2`: 2940 Python tests passed, one failed because malformed marker-image dimensions were rejected by blob-count validation before the explicit dimension guard. Moved dimension guard ahead of marker extraction so malformed input fails with correct reason. Pylint, Face Impact foundation, Windows USB and Documentation were green; UI was still running; PR Checks screenshot still missing.
+- No Gate closure or physical accuracy claim. Exact new SHA CI pending.
+
+---
+
 # BATCH A — FRAME PROVENANCE AND FAIL-CLOSED MARKER INPUT (2026-11-12)
 
 - Marker-image adapter now fingerprints the typed capture before and after marker extraction/association and aborts if frame bytes, timing or identity changed. Explicit recipient is required before expensive analysis; no silent fallback publication.
