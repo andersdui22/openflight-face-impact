@@ -34,7 +34,12 @@ const reasons: Record<Exclude<FaceImpactDisplayResult['status'], 'ok'>, string> 
 };
 
 export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
-  const validPolygon = polygon.length >= 3 && polygon.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
+  const validPolygon = polygon.length >= 3 && polygon.length <= 128 &&
+    polygon.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y)) &&
+    Math.abs(polygon.reduce((sum, [x, y], i) => {
+      const [nextX, nextY] = polygon[(i + 1) % polygon.length];
+      return sum + x * nextY - y * nextX;
+    }, 0)) > 1e-8;
   const finiteImpact = result.status === 'ok' && Number.isFinite(result.x_mm) && Number.isFinite(result.y_mm);
   const xs = polygon.map(([x]) => x);
   const ys = polygon.map(([, y]) => y);
@@ -65,7 +70,8 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
     }
     return inside;
   };
-  const validImpact = validPolygon && finiteImpact && pointInside(result.x_mm, result.y_mm);
+  const validImpact = validPolygon && result.status === 'ok' && finiteImpact &&
+    pointInside(result.x_mm, result.y_mm);
   const impactPoint = validImpact && result.status === 'ok' ? toScreen([result.x_mm, result.y_mm]) : null;
   const rejection = result.status !== 'ok' ? reasons[result.status] :
     !validPolygon ? 'Invalid clubface outline' :

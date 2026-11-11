@@ -85,6 +85,16 @@ describe('FaceImpactView', () => {
     expect(html).not.toContain('synthetic-impact-marker');
   });
 
+  it('rejects a zero-area clubface outline without drawing a marker', () => {
+    const html = renderToString(
+      <FaceImpactView polygon={[[0, 0], [1, 1], [2, 2]]} result={{
+        status: 'ok', x_mm: 1, y_mm: 1, horizontal_region: 'center', vertical_region: 'center',
+      }} />
+    );
+    expect(html).toContain('Invalid clubface outline');
+    expect(html).not.toContain('synthetic-impact-marker');
+  });
+
   it('supports a nonrectangular face outline', () => {
     const html = renderToString(
       <FaceImpactView

@@ -1,3 +1,12 @@
+# PHASE 5 FACE VIEW TYPE SAFETY AND DEGENERATE OUTLINE GUARD (2026-11-11)
+
+- Reviewed `FaceImpactView` after prior commit `f5feff11`. Corrected discriminated-union narrowing before accessing `x_mm`/`y_mm` for rejected statuses, preventing a TypeScript compile regression.
+- Strengthened synthetic face outline validity with a bounded vertex count and nonzero shoelace area. Added zero-area outline regression; invalid outlines cannot display an impact marker. This is a frontend guard, not proof of physical accuracy.
+- Exact-SHA CI on `f5feff11` was still running when checked; Documentation succeeded and PR Checks failed because real UI screenshot evidence is outstanding. New commit CI must be verified.
+- Gates 20–24 remain OPEN. No hardware tests, merge, or release.
+
+---
+
 # PHASE 5 IMPACT-FIRST FACE VISUALIZATION HARDENING (2026-11-11)
 
 - Updated the existing `FaceImpactView` (not a competing UI) to draw subtle face-center guides for synthetic impact interpretation.
