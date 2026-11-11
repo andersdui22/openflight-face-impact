@@ -1,3 +1,35 @@
+# CURRENT HANDOFF — PHASE 5 GATES 20–24 (2026-11-11)
+
+**READ THIS FIRST.** This section supersedes earlier status snapshots below. GitHub is authoritative for current HEAD, CI, PRs and files. Re-audit before any code change; this handoff is a dated snapshot.
+
+## Mission and authorization
+- Project: standalone Windows **OpenFlight Face Impact** using one **ELP OV9281 USB camera**; reuse existing Python/OpenCV and React/Electron code. No ConnectorNext, MLM2PRO, Bluetooth, radar, GSPro or upstream OpenFlight edits.
+- Law: `docs/governance/PROJECT_LAW.md` **Project Law V1**. The user explicitly approved **parallel development of Phase 5 Gates 20–24**, starting with read-only audit, then hardware-free tests and CI. Physical testing is postponed until development of **all 35 Gates**. **No merge, release or physical testing** without separate authorization. UI screenshots are deferred, **not waived**; never fake or bypass PR Checks.
+- Working repository: `andersdui22/openflight-face-impact`. Current Phase 5 branch: `mdp-v1.2/phase5-gates20-24-parallel`, branched from Phase 4 integration SHA `fcda0ff666eb6c39f90777947d8b70a55a172492`. Phase 5 scope/audit commit `659d51988ce0dd2540a683469907208dd0947894`. **This handoff edit creates a newer HEAD: verify it remotely before claiming same-SHA CI.**
+- Phase 4 integration: branch `mdp-v1.2/phase4-gates17-19-parallel`, draft PR **#44** (unmerged). Six technical workflows passed on code SHA `8e44a8584d95dfa6ea5229e9af5072c862fcfb60`; subsequent Phase 4 documentation SHA `fcda0ff6` had mixed completed/in-progress checks at the last audit. PR Checks failed due deferred screenshot requirement. Gates 17–19 remain OPEN; do not claim physical acceptance.
+- Earlier draft PRs #40–43 were not merged at Phase 5 startup. Check their current status independently. No physical Golden baselines exist.
+
+## Phase 5 read-only startup audit and next work
+- Scope and acceptance directions: `docs/governance/MDP_V1_2_PHASE5_GATES20_24_PARALLEL_SCOPE.md`. Read that file, `PROJECT_LAW.md`, `ACTIVE_CHANGE_GATE.md`, `BASELINES.md`, `CANDIDATES.md` and this handoff before resuming. The older `ACTIVE_CHANGE_GATE.md` contains historical Gate 14/15 text and is not the latest Phase 5 authorization; the user's current approval plus Phase 5 scope govern the new work.
+- Gate 20: ball detection/silhouette/observation quality. Existing `src/openflight/camera/ball_silhouette_range.py` estimates a sphere centre from explicit calibrated silhouette rays, known radius and angular residual; `calibrated_rays.py` provides rays. Neither physically detects ball pixels or proves accuracy. Next: audit existing tests and add minimal **pure fail-closed observation-quality validation** with focused tests; no second camera reader.
+- Gate 21: clubface detection and 3D pose. Reuse `synthetic_face_landmark_pose.py`, `synthetic_pose_observability.py`, `synthetic_mesh_pose.py`. Reject ambiguous/nonobservable poses and unsupported physical inference.
+- Gate 22: contact instant and temporal reconstruction. Inspect single acquisition owner, buffered frame metadata, shot/session identity and timing source. Do not equate host-arrival with exposure timestamp or fabricate subframe contact.
+- Gate 23: face-local impact coordinates, centre distance and face boundaries. Reuse `synthetic_observed_impact.py`, `synthetic_impact_pipeline.py`, `synthetic_face_polygon.py` and Phase 4 planar reference contracts; rejected impacts have no coordinates.
+- Gate 24: uncertainty, quality controls and explicit rejection. Keep offline residuals separate from physical accuracy and carry provenance into results.
+- The canonical Master Development Plan V1.2 file was **not found in the inspected GitHub tree**; Gate names were recovered from prior user-approved conversation. Reconcile before individual closeout; do not invent unverified acceptance criteria.
+- The existing `get_synthetic_face_impact` SocketIO endpoint is a synthetic demonstration, **not** a physical ELP measurement publication boundary. Do not gate it on physical calibration or modify unrelated radar processing. Physical mode, lens/crop identity, face pose, real club geometry and physical impact accuracy remain UNKNOWN.
+- Candidate registry includes restricted 690CB assets. Do not import restricted models or assume licensing.
+- No Phase 5 production code or tests have yet been changed as of this handoff. Phase 5 CI for `659d5198` was not returned by the PR-triggered workflow query (no Phase 5 PR yet); **do not interpret absence of runs as a pass**.
+
+## Resume procedure / evidence discipline
+1. Fetch current branch SHA and any PRs from GitHub. Reconcile drift against this snapshot; inspect exact-SHA CI. Do not assume a clean local checkout from remote contents alone.
+2. Read Project Law, active scope, baseline/candidate registers, handoff and relevant source/tests. Confirm approved change boundaries before editing.
+3. Continue Gate 20 read-only code/test audit, then minimal hardware-free implementation with tests; work Gates 21–24 in parallel only where dependencies allow.
+4. Record each new commit SHA, same-SHA CI, changed files, failures and unknowns. Maintain this **top-of-file current handoff** after meaningful milestones and before handing off; keep earlier snapshots below for history.
+5. No merges, releases, physical tests, destructive Git operations, screenshot bypass or unsupported physical accuracy claims. Draft PR and exact-SHA CI are separate from Gate acceptance.
+
+---
+
 # GATE 13 USER-APPROVED TECHNICAL CLOSEOUT — 2026-11-10
 
 The user explicitly approved technical closeout of Phase 3 Gate 13 after all technical CI checks passed on exact SHA `b4843c71b326a0c6adb02127d974756bdfec70b7`. This approval **closes Gate 13 technically**, not physically. The previously deferred screenshot-in-PR-description requirement remains **deferred, not waived**, and the PR description completeness check remains failed. Physical ELP camera testing, calibrated measurement validation and end-to-end Electron/Python backend integration remain unverified.
