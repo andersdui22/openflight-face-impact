@@ -39,6 +39,7 @@ def assess_capture_ball_synthetic_impact(  # pylint: disable=too-many-arguments
     min_area_px: float,
     ball_border_margin_px: float,
     min_circularity: float = 0.0,
+    face_observation_frame_index: int | None = None,
 ) -> AssessedSyntheticCaptureImpact:
     """Compose selected-frame contour, synthetic impact and quality reporting."""
     impact = calculate_capture_ball_synthetic_impact(
@@ -53,6 +54,7 @@ def assess_capture_ball_synthetic_impact(  # pylint: disable=too-many-arguments
         min_area_px=min_area_px,
         ball_border_margin_px=ball_border_margin_px,
         min_circularity=min_circularity,
+        face_observation_frame_index=face_observation_frame_index,
     )
     return AssessedSyntheticCaptureImpact(
         impact=impact,

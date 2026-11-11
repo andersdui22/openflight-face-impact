@@ -1,3 +1,11 @@
+# PHASE 5 GATE 24 FACE-FRAME IDENTITY QUALITY PROPAGATION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `99a7fc0b4ddeb4d3940274af1e48de42068c44b0`: Documentation SUCCESS; Foundation, Tests, Pylint, UI IN PROGRESS; PR Checks FAILURE.
+- Propagated optional `face_observation_frame_index` through the public quality wrapper to the underlying capture-impact function. Regression verifies mismatched face-frame metadata fails closed and quality carries the same rejection reason without coordinates or invented uncertainty.
+- Metadata does not prove pixel origin. Physical contact and successful image-to-impact positive test still open. Gates 20–24 OPEN; no hardware tests, merges, releases. New SHA CI pending.
+
+---
+
 # PHASE 5 GATE 21/23 OPTIONAL FACE-FRAME IDENTITY GUARD (2026-11-11)
 
 - Read-only audit PR #45 exact SHA `bdf5580dd05ecde77c88c92ee9d903e511ca3a4f`: Tests, Pylint, Foundation, Documentation SUCCESS; UI IN PROGRESS; PR Checks FAILURE.
