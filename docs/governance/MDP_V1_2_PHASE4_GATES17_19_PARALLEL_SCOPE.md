@@ -103,3 +103,10 @@ No individual Gate 17, 18 or 19 is accepted yet. Continue with focused tests, sa
 - The component exposes **no impact measurement action or impact-result publication path**. Adding a measurement blocker to this preview would be misleading: it would not protect a measurement operation.
 - `calibration_status.py` and `calibration_revision_status.py` return status dictionaries and do not acquire camera frames or enforce measurement access. `offline_profile_compatible` remains an offline metadata state; physical validation remains false.
 - **Next Gate 19 design dependency:** locate and audit a genuine Face Impact result producer/consumer before designing any runtime guard. Until then, do not connect Gate 19 to unrelated radar/ballistics paths or claim measurement enforcement exists.
+
+### Identified synthetic result boundary (2026-11-11)
+
+- `src/openflight/server.py` defines the SocketIO handler `get_synthetic_face_impact`, which delegates to `src/openflight/camera/synthetic_impact_socket.py:synthetic_face_impact_response`. That function calls `calculate_synthetic_face_impact` in `synthetic_impact_pipeline.py` and returns versioned `source=synthetic_python_pipeline` results.
+- This **is a real result-publication boundary for the synthetic demonstration only**. Its coordinates are synthetic millimetres; it is not a physical ELP observation, verified camera pose or live impact result.
+- The existing synthetic pipeline rejects outside-face, no-tangency and invalid geometry without returning partial impact coordinates. This is distinct from the Gate 19 optics/club binding guard, which has not been integrated into this synthetic-only endpoint.
+- Do **not** make the synthetic demo require physical camera calibration; that would break its deliberate hardware-free test role. A future physical Face Impact result endpoint should enforce the validated optics/mode/club/pose prerequisites before publishing measured impact coordinates, once that endpoint and its ownership are independently established.
