@@ -1,3 +1,12 @@
+# PHASE 5 GATE 21 IMAGE-DERIVED SYNTHETIC LANDMARK PROVENANCE (2026-11-11)
+
+- Audited existing Gate 08/10 synthetic IR face-region proposal, Gate 22 selected-frame image validator and Gate 21 supplied-landmark pose solver. Reused the strict rectangular detector rather than creating a competing clubface detector or camera owner.
+- New `synthetic_face_pixel_observation.py` extracts four ordered corner pixels from the **selected buffered image** and binds shot/session/frame identity, with defensive immutable pixel copy. Tests cover valid rectangle, no/ambiguous rectangles, frame/dimension mismatch and invalid provenance.
+- This is a synthetic axis-aligned rectangle fixture ONLY; the pixel corner order is not proof of real clubface identity, handedness, perspective shape, physical face geometry or contact. The existing pose solver remains unchanged; end-to-end real-world observation still OPEN.
+- All 35 Gates software-first, physical testing and user screenshots deferred; no merge/release. CI must be checked at the new exact SHA.
+
+---
+
 # PHASE 5 GATE 22/24 OFFLINE FRAME EVIDENCE SELECTION (2026-11-11)
 
 - Audited Phase 5 HANDOFF, current scope matrix, existing `synthetic_frame_candidates.py`, `offline_capture_batch.py`, `synthetic_impact_quality.py`, and tests before implementation. The previous batch already assesses explicit frames; do not duplicate capture, geometry or pose solvers.
