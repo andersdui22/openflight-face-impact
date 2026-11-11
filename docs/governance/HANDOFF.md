@@ -1,3 +1,13 @@
+# PHASE 5 IMPACT-FIRST FACE VISUALIZATION HARDENING (2026-11-11)
+
+- Updated the existing `FaceImpactView` (not a competing UI) to draw subtle face-center guides for synthetic impact interpretation.
+- Added fail-closed UI checks: a synthetic impact marker is not drawn if its coordinates are non-finite, the supplied polygon is malformed (fewer than 3 points or non-finite), or the impact lies outside the polygon boundary. Boundary points are accepted. This is a display safety check, not a replacement for backend geometry validation or physical clubface recognition.
+- Added React SSR regression tests for center guides, outside-face point and invalid polygon. CI on the new exact SHA is required before any acceptance claim.
+- Prior exact SHA `5eb1e7cb`: Documentation and Windows USB camera workflows succeeded; other workflows were still running at review. PR Checks remained red because actual UI screenshots are not yet supplied; PR #45 description was updated accurately without bypassing that requirement.
+- Gates 20–24 remain OPEN; all hardware tests deferred, no merge/release.
+
+---
+
 # PHASE 5 IMPACT-FIRST DASHBOARD AND UI CI REPAIR (2026-11-11)
 
 - User confirmed image-space ball/face separation is a developer diagnostic, **not** a primary user-facing feature. Moved `SyntheticMotionDiagnostics` behind a collapsed **Advanced diagnostics** disclosure in the existing dashboard. The main impact face visualization and existing demo controls remain visible and unchanged; do not pretend the current synthetic demo is a measured impact.

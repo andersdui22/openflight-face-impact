@@ -35,7 +35,7 @@ const reasons: Record<Exclude<FaceImpactDisplayResult['status'], 'ok'>, string> 
 
 export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
   const validPolygon = polygon.length >= 3 && polygon.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
-  const validImpact = result.status === 'ok' && Number.isFinite(result.x_mm) && Number.isFinite(result.y_mm);
+  const finiteImpact = result.status === 'ok' && Number.isFinite(result.x_mm) && Number.isFinite(result.y_mm);
   const xs = polygon.map(([x]) => x);
   const ys = polygon.map(([, y]) => y);
   const minX = validPolygon ? Math.min(...xs) : -50;
@@ -50,8 +50,27 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
     85 - (y - (minY + maxY) / 2) * scale,
   ];
   const outline = validPolygon ? polygon.map((point) => toScreen(point).join(',')).join(' ') : '';
-  const impactPoint = validImpact ? toScreen([result.x_mm, result.y_mm]) : null;
-  const rejection = result.status !== 'ok' ? reasons[result.status] : validImpact ? null : 'Invalid impact coordinates';
+  // A synthetic point outside the provided polygon must not be rendered as a valid hit.
+  const pointInside = (x: number, y: number): boolean => {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const [xi, yi] = polygon[i];
+      const [xj, yj] = polygon[j];
+      const cross = (x - xi) * (yj - yi) - (y - yi) * (xj - xi);
+      const onEdge = Math.abs(cross) < 1e-8 &&
+        x >= Math.min(xi, xj) && x <= Math.max(xi, xj) &&
+        y >= Math.min(yi, yj) && y <= Math.max(yi, yj);
+      if (onEdge) return true;
+      if ((yi > y) !== (yj > y) && x < xi + ((y - yi) * (xj - xi)) / (yj - yi)) inside = !inside;
+    }
+    return inside;
+  };
+  const validImpact = validPolygon && finiteImpact && pointInside(result.x_mm, result.y_mm);
+  const impactPoint = validImpact && result.status === 'ok' ? toScreen([result.x_mm, result.y_mm]) : null;
+  const rejection = result.status !== 'ok' ? reasons[result.status] :
+    !validPolygon ? 'Invalid clubface outline' :
+    !finiteImpact ? 'Invalid impact coordinates' :
+    !validImpact ? 'Impact point outside clubface outline' : null;
 
   return (
     <section style={surface} aria-label="Synthetic Face Impact">
@@ -68,6 +87,16 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
         <rect x="0" y="0" width="320" height="170" rx="4" fill="var(--color-bg)" />
         {validPolygon && (
           <polygon points={outline} fill="var(--color-surface)" stroke="var(--color-text-muted)" strokeWidth="2" />
+        )}
+        {validPolygon && (
+          <>
+            <line x1={toScreen([(minX + maxX) / 2, minY])[0]} y1={toScreen([(minX + maxX) / 2, minY])[1]}
+              x2={toScreen([(minX + maxX) / 2, maxY])[0]} y2={toScreen([(minX + maxX) / 2, maxY])[1]}
+              stroke="var(--color-text-muted)" strokeDasharray="4 5" opacity="0.6" />
+            <line x1={toScreen([minX, (minY + maxY) / 2])[0]} y1={toScreen([minX, (minY + maxY) / 2])[1]}
+              x2={toScreen([maxX, (minY + maxY) / 2])[0]} y2={toScreen([maxX, (minY + maxY) / 2])[1]}
+              stroke="var(--color-text-muted)" strokeDasharray="4 5" opacity="0.6" />
+          </>
         )}
         {impactPoint && (
           <circle

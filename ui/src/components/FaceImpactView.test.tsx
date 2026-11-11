@@ -29,6 +29,7 @@ describe('FaceImpactView', () => {
     expect(html.replace(/<!-- -->/g, '')).toContain('toe / high');
     expect(html).toContain('synthetic-impact-marker');
     expect(html).toContain('<polygon');
+    expect(html).toContain('stroke-dasharray="4 5"');
   });
 
   it('shows a rejection without a misleading impact marker', () => {
@@ -60,6 +61,27 @@ describe('FaceImpactView', () => {
       />
     );
     expect(html).toContain('Invalid impact coordinates');
+    expect(html).not.toContain('synthetic-impact-marker');
+  });
+
+  it('never displays a point outside the supplied face outline', () => {
+    const html = renderToString(
+      <FaceImpactView polygon={polygon} result={{
+        status: 'ok', x_mm: 90, y_mm: 0, horizontal_region: 'toe', vertical_region: 'center',
+      }} />
+    );
+    expect(html).toContain('Impact point outside clubface outline');
+    expect(html).not.toContain('synthetic-impact-marker');
+    expect(html).not.toContain('X:');
+  });
+
+  it('never displays a point when the supplied face outline is invalid', () => {
+    const html = renderToString(
+      <FaceImpactView polygon={[[0, 0], [1, 0]]} result={{
+        status: 'ok', x_mm: 0.5, y_mm: 0, horizontal_region: 'center', vertical_region: 'center',
+      }} />
+    );
+    expect(html).toContain('Invalid clubface outline');
     expect(html).not.toContain('synthetic-impact-marker');
   });
 
