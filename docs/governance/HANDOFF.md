@@ -1,3 +1,12 @@
+# PHASE 5 IMPACT-FIRST DASHBOARD AND UI CI REPAIR (2026-11-11)
+
+- User confirmed image-space ball/face separation is a developer diagnostic, **not** a primary user-facing feature. Moved `SyntheticMotionDiagnostics` behind a collapsed **Advanced diagnostics** disclosure in the existing dashboard. The main impact face visualization and existing demo controls remain visible and unchanged; do not pretend the current synthetic demo is a measured impact.
+- Audited exact SHA `d4be4e4c` CI: Foundation `ui-unit-linux` failed in `SyntheticMotionDiagnostics.test.tsx` because React server rendering inserts `<!-- -->` between adjacent text and numeric values; test asserted a literal continuous string. Repaired assertions to accept React's SSR separator without weakening runtime validation.
+- PR Checks failure at `d4be4e4c` is PR-description completeness, not an application test failure; requires separate PR metadata remediation. Other CI workflows may still be pending. Verify all checks for this new SHA.
+- No physical ELP tests, upstream modifications, merges, releases, or Gate closure. Gates 20–24 OPEN; continue impact-first development and software-only tests.
+
+---
+
 # PHASE 5 SYNTHETIC MOTION FRAME INSPECTION (2026-11-11)
 
 - Added selectable observed-frame controls and explicit per-frame pixel separation/sensor timestamp to the existing React diagnostics panel. This is **metadata inspection**, not photographic frame replay or measured impact.

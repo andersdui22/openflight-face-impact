@@ -209,7 +209,10 @@ function FaceImpactDashboard({
           setShots={setDemoShots}
         />
         <FaceImpactControls />
-        <SyntheticMotionDiagnostics payload={syntheticMotion} />
+        <details className="impact-controls" aria-label="Advanced synthetic motion diagnostics">
+          <summary>Advanced diagnostics · synthetic motion (developer tools)</summary>
+          <SyntheticMotionDiagnostics payload={syntheticMotion} />
+        </details>
         {demoEnabled && (
           <section className="impact-controls" aria-label="Simulated Face Impact metrics">
             <strong>DEMO METRICS — SIMULATED, NOT MEASURED</strong>
