@@ -9,6 +9,8 @@ from .checkerboard_calibration import CheckerboardCalibration
 from .synthetic_face_frame import SyntheticFaceFrame
 from .synthetic_face_landmark_pose import estimate_synthetic_face_pose
 from .synthetic_face_polygon import SyntheticFacePolygon
+from .trigger_timing_quality import validate_candidate_frame_index
+from .triggered_buffer import TriggeredCapture
 from .synthetic_impact_pipeline import (
     SyntheticImpactResult,
     SyntheticImpactStatus,
@@ -30,14 +32,21 @@ def calculate_synthetic_observed_impact(  # pylint: disable=too-many-arguments
     min_face_margin_px: float,
     contact_tolerance_mm: float,
     ball_border_margin_px: float = 0.0,
+    capture: TriggeredCapture | None = None,
+    candidate_frame_index: int | None = None,
 ) -> SyntheticImpactResult:
     """Evaluate one supplied synthetic candidate frame in camera millimetres.
 
     Both pixel sets share a calibrated image and instant. Landmark and polygon
     coordinates share a face-local origin and axes. The caller must supply
     all thresholds; this function does not determine the contact instant.
+    An optional capture/index pair checks provenance, not image-observation identity.
     """
     try:
+        if capture is None and candidate_frame_index is not None:
+            raise ValueError("candidate frame index requires a capture")
+        if capture is not None:
+            validate_candidate_frame_index(capture, candidate_frame_index)
         contour = validate_ball_contour_pixels(
             ball_edge_pixels_px,
             image_size=image_size,

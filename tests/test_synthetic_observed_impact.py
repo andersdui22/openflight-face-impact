@@ -199,3 +199,37 @@ def test_gate20_valid_contour_integrates_with_observed_impact(calibration):
     )
     assert result.status is SyntheticImpactStatus.OK
     assert result.x_mm == pytest.approx(12., abs=0.01)
+
+
+def test_gate22_timing_provenance_allows_explicit_synthetic_candidate(calibration):
+    from openflight.camera.triggered_buffer import CameraFrame, TriggeredCapture
+
+    ball_pixels, face_pixels = synthetic_pixels(calibration, [12., 5., RADIUS_MM])
+    frame = lambda sensor, host: CameraFrame(np.zeros((2, 2), dtype=np.uint8), sensor, host, 100, 1.)
+    capture = TriggeredCapture(
+        frames=(frame(100, 1000), frame(200, 2000), frame(300, 3000)),
+        pre_trigger_count=2, trigger_host_timestamp_ns=2500,
+        shot_id="shot-1", session_id="session-1",
+    )
+    options = dict(
+        image_size=SIZE, ball_radius_mm=RADIUS_MM,
+        max_ball_residual_rad=1e-6, max_face_rms_px=0.5,
+        min_face_margin_px=0.1, contact_tolerance_mm=0.01,
+    )
+    accepted = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        capture=capture, candidate_frame_index=2, **options,
+    )
+    assert accepted.status is SyntheticImpactStatus.OK
+    rejected = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        capture=capture, candidate_frame_index=3, **options,
+    )
+    assert rejected.status is SyntheticImpactStatus.INVALID_GEOMETRY
+    assert rejected.x_mm is None and rejected.y_mm is None
+    assert "candidate frame index" in rejected.rejection_reason
+    missing = calculate_synthetic_observed_impact(
+        calibration, ball_pixels, LANDMARKS, face_pixels, POLYGON,
+        candidate_frame_index=2, **options,
+    )
+    assert missing.status is SyntheticImpactStatus.INVALID_GEOMETRY

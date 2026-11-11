@@ -1,3 +1,13 @@
+# PHASE 5 BATCH DEVELOPMENT CHECKPOINT (2026-11-11)
+
+- User approved batching changes to reduce GitHub Actions cost. This checkpoint is included in the **same Git tree commit** as source and tests, rather than a separate handoff push.
+- Batch integrates optional Gate 22 timing provenance into `calculate_synthetic_observed_impact`: caller can supply a `TriggeredCapture` and explicit `candidate_frame_index`; invalid timing/identity/index rejects with `INVALID_GEOMETRY` and no impact coordinates. Existing synthetic-only callers remain supported. This is **NOT** frame-image correspondence verification, a physical contact detector, or a claim that the trigger equals impact time. No second camera acquisition owner.
+- Synthetic integration tests cover accepted explicit candidate, out-of-range candidate, and missing capture. Source/test/handoff committed together. CI must be checked at resulting HEAD; do not claim green until verified.
+- Gates 20–24 remain OPEN. No physical testing until 35 Gates, no merge or release without separate approval.
+- Next: same-SHA CI, correct failures as one batch, then continue quality/uncertainty integration. Prefer single Git tree/commit/ref update per coherent batch.
+
+---
+
 # PHASE 5 GATE 20 OBSERVED IMPACT INTEGRATION (2026-11-11)
 
 - Read-only audit of PR #45 at `64e1a674f685898b4331a4301ac84f8d5213ec0c`: draft, technical workflows queued at time of check; no latest-SHA CI success claimed.
