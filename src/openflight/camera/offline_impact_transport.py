@@ -44,3 +44,20 @@ def serialize_offline_impact_evidence(evidence: OfflineImpactEvidence) -> dict:
             "vertical_region": evidence.vertical_region,
         })
     return payload
+
+
+def publish_offline_impact_handoff(handoff, emit, *, recipient: str) -> dict:
+    """Emit a completed *actual offline handoff* to one subscribed UI client.
+
+    The caller must run the real capture/batch/timing pipeline first. Never
+    broadcast evidence from an untrusted client-supplied payload.
+    """
+    from .offline_impact_handoff import OfflineImpactHandoff
+
+    if not isinstance(handoff, OfflineImpactHandoff):
+        raise ValueError("offline publication requires completed typed handoff")
+    if not isinstance(recipient, str) or not recipient.strip():
+        raise ValueError("offline publication requires an explicit recipient")
+    payload = serialize_offline_impact_evidence(handoff.impact)
+    emit("offline_impact_evidence", payload, to=recipient)
+    return payload

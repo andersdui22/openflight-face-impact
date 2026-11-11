@@ -1,3 +1,11 @@
+# BATCH B — SERVER-SIDE OFFLINE RESULT PUBLICATION SEAM (2026-11-12)
+
+- Added `publish_offline_impact_handoff`: accepts only a typed `OfflineImpactHandoff`, serializes via schema-v1 offline evidence, and emits `offline_impact_evidence` to one explicit Socket.IO recipient. Added server adapter `publish_completed_offline_impact` and publisher contract tests.
+- **Not yet automatic:** the offline capture/assessment producer still must call this server-side adapter when a capture is completed. No client-originated socket handler was added; clients cannot claim a physical measurement through this path.
+- This is a genuine backend emission seam compatible with the React listener, but it is not proof of a fully integrated shot capture-to-dashboard run. CI for this commit pending; Gates 20–24 OPEN, no physical tests, merge or release.
+
+---
+
 # BATCH B — OFFLINE IMPACT VISUAL REVIEW (2026-11-12)
 
 - Replaced text-only offline synthetic history with `OfflineImpactReview`, using `FaceImpactView` for accepted evidence, selectable shot history, and clear rejection messages. New component tests cover accepted marker, rejected no-marker, and accepted point outside illustrative outline.

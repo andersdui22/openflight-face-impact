@@ -48,3 +48,29 @@ def test_nonfinite_accepted_coordinates_are_rejected(coordinate):
 def test_wrong_evidence_type_is_rejected():
     with pytest.raises(ValueError, match="typed impact evidence"):
         serialize_offline_impact_evidence(None)
+
+
+def test_completed_handoff_publishes_only_to_explicit_recipient():
+    from openflight.camera.offline_impact_handoff import OfflineImpactHandoff
+    from openflight.camera.offline_impact_transport import publish_offline_impact_handoff
+
+    # Temporal evidence is not used for serialization; it must be part of the
+    # completed typed handoff, not a forged client dictionary.
+    evidence = OfflineImpactEvidence(
+        "shot-42", "session-7", 2, True, 12., 5., "toe", "high",
+        "synthetic geometry only",
+    )
+    messages = []
+    handoff = OfflineImpactHandoff(temporal=None, impact=evidence)
+    payload = publish_offline_impact_handoff(
+        handoff, lambda event, body, **kwargs: messages.append((event, body, kwargs)),
+        recipient="client-1",
+    )
+    assert messages == [("offline_impact_evidence", payload, {"to": "client-1"})]
+
+
+def test_publication_rejects_untyped_or_unaddressed_evidence():
+    from openflight.camera.offline_impact_transport import publish_offline_impact_handoff
+
+    with pytest.raises(ValueError, match="completed typed handoff"):
+        publish_offline_impact_handoff({}, lambda *_args, **_kwargs: None, recipient="client")

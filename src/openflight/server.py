@@ -1847,6 +1847,13 @@ def handle_request_synthetic_motion_demo():
     return {"ok": True, "kind": "synthetic_image_space_motion"}
 
 
+def publish_completed_offline_impact(handoff, *, recipient: str):
+    """Server-side only: deliver a completed offline synthetic analysis to a UI."""
+    from .camera.offline_impact_transport import publish_offline_impact_handoff
+
+    return publish_offline_impact_handoff(handoff, socketio.emit, recipient=recipient)
+
+
 @socketio.on("get_camera_capture_settings")
 def handle_get_camera_capture_settings():
     """Send current high-speed capture settings to the requesting UI."""
