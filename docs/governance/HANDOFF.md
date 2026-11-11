@@ -1,3 +1,11 @@
+# PHASE 5 GATE 20 SYNTHETIC BRIGHT CONTOUR EXTRACTION (2026-11-11)
+
+- Read-only startup audit of PR #45 exact HEAD `3be171b1aa2b870f6631f9ae97f0bd6c178d7b87`: Tests, Pylint, Foundation, UI, Documentation SUCCESS; PR Checks FAILURE on PR metadata.
+- Added a pure offline OpenCV bright-foreground contour extraction helper with caller-specified intensity threshold, minimum contour area and border margin. Rejects zero/multiple eligible components, invalid image type/size, invalid thresholds and clipped contours. Reuses existing Gate 20 contour quality validator; does not add a camera reader.
+- Synthetic regression tests included. A bright connected component is **not** proof of ball identity, roundness, contact timing or physical accuracy. Not wired to physical measurement publication. Gate 20–24 OPEN; no physical tests, merge or release. New SHA CI pending.
+
+---
+
 # PHASE 5 GATE 22 OPTIONAL IMAGE-DOMAIN INTEGRATION (2026-11-11)
 
 - Startup audit PR #45 head `57da15f6ac977a263561761844622fe96aa267a0`: Documentation, Pylint, foundation SUCCESS; Tests and UI IN PROGRESS; PR Checks FAILURE on metadata.
