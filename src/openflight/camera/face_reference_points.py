@@ -24,6 +24,20 @@ class PlanarFaceReferences:
     bottom_mm: np.ndarray
     top_mm: np.ndarray
 
+    def __post_init__(self) -> None:
+        """Own immutable finite XYZ coordinates, not caller-owned arrays."""
+        for name in ("center_mm", "heel_mm", "toe_mm", "bottom_mm", "top_mm"):
+            point = np.asarray(getattr(self, name))
+            if (
+                point.shape != (3,)
+                or point.dtype.kind not in "iuf"
+                or not np.isfinite(point).all()
+            ):
+                raise ValueError("face reference points must be finite XYZ-mm triples")
+            frozen = np.array(point, dtype=np.float64, copy=True)
+            frozen.setflags(write=False)
+            object.__setattr__(self, name, frozen)
+
 
 def planar_face_references(model: ClubFaceModel) -> PlanarFaceReferences:
     """Construct planar center and edge midpoints from evidenced dimensions."""
