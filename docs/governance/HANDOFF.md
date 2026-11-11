@@ -1,3 +1,11 @@
+# PHASE 5 UI REGRESSION TEST FIX (2026-11-11)
+
+- Investigated failed `Face Impact foundation` job for SHA `f5feff11` using the actual GitHub Actions log. `SyntheticMotionDiagnostics.test.tsx` still failed: regex omitted the literal space between 'frame' and React's `<!-- -->` SSR separator. Updated both assertions to normalize React SSR comment separators before asserting exact user-visible text. This is a test-only correction; no application runtime behavior changed.
+- CI for `05880cf0` was still in progress at review. PR Checks still fail on the genuine missing running-UI screenshot requirement, not something to bypass.
+- Gates 20–24 OPEN; physical testing deferred; no merges/releases.
+
+---
+
 # PHASE 5 FACE VIEW TYPE SAFETY AND DEGENERATE OUTLINE GUARD (2026-11-11)
 
 - Reviewed `FaceImpactView` after prior commit `f5feff11`. Corrected discriminated-union narrowing before accessing `x_mm`/`y_mm` for rejected statuses, preventing a TypeScript compile regression.
