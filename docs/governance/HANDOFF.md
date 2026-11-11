@@ -1,3 +1,12 @@
+# PHASE 5 GATE 22 OFFLINE FRAME SPACING QUALITY (2026-11-11)
+
+- Verified `7949276b` Python Tests, Pylint, Foundation, Documentation and PR Checks SUCCESS; UI E2E failed before execution because runner could not resolve Ubuntu apt mirror; rerun requested, E2E pending.
+- Added `offline_frame_spacing.py`: bounded offline diagnostic for sensor-clock and host-clock inter-frame gaps, using existing strict trigger timing validator. Both clocks remain separate. Rejection preserves explicit reasons; no frame ranking, physical FPS certification, exposure synchronization or contact inference.
+- Tests cover positive synthetic clock intervals, independent gap limits, invalid trigger timing, invalid limits, and forbidden physical-contact claims.
+- No camera ownership changes, no physical tests, no merge/release. Gates 20–24 OPEN. Verify CI at new SHA.
+
+---
+
 # PHASE 5 GATE 21 ROBUSTNESS: HOLES AND MALFORMED THRESHOLDS (2026-11-11)
 
 - Verified `48c0c3b5` exact-SHA CI: all six workflows SUCCESS, including the unmocked synthetic image-to-pose regression.
