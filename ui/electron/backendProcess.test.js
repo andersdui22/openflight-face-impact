@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { resolveBackendExecutable, stopBackend } from './backendProcess.js';
+import { resolveBackendExecutable, stopBackend, waitForBackendReady, probeBackendHealth } from './backendProcess.js';
 
 test('backend disabled by default', () => {
   assert.equal(resolveBackendExecutable({}), null);
@@ -20,4 +20,35 @@ test('missing absolute executable rejected', () => {
 });
 test('shutdown is safe when no backend started', () => {
   assert.doesNotThrow(() => stopBackend(null));
+});
+
+
+test('readiness retries until backend is reachable', async () => {
+  let calls = 0;
+  const ready = await waitForBackendReady({
+    probe: async () => ++calls === 3,
+    attempts: 4,
+    delayMs: 0,
+  });
+  assert.equal(ready, true);
+  assert.equal(calls, 3);
+});
+
+test('readiness stops when backend child has exited', async () => {
+  let calls = 0;
+  const ready = await waitForBackendReady({
+    probe: async () => { calls += 1; return false; },
+    isRunning: () => calls === 0,
+    attempts: 4,
+    delayMs: 0,
+  });
+  assert.equal(ready, false);
+  assert.equal(calls, 1);
+});
+
+test('health probe rejects non-loopback targets', async () => {
+  await assert.rejects(
+    probeBackendHealth({ host: 'example.com' }),
+    /loopback host/,
+  );
 });

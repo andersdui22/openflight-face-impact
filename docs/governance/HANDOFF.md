@@ -1,3 +1,11 @@
+# BATCH B — WINDOWS BACKEND READINESS PRIMITIVE (2026-11-12)
+
+- Added loopback-only HTTP health probe with bounded timeout and bounded retry readiness helper, plus Node tests for eventual readiness, early child exit and non-loopback refusal.
+- This is a **readiness primitive**, not yet wired into UI startup gating. A 2xx–4xx HTTP response is considered transport-reachable, not proof of the correct OpenFlight backend identity. Must add backend-specific health contract before enabling production gating.
+- No packaged backend executable yet. Exact SHA CI pending; PR screenshot and UI Prettier outstanding; physical tests deferred.
+
+---
+
 # BATCH B — OPT-IN WINDOWS BACKEND PROCESS LIFECYCLE (2026-11-12)
 
 - Added `ui/electron/backendProcess.js` with explicit absolute-path executable opt-in via `OPENFLIGHT_BACKEND_EXECUTABLE`, shell-free spawn, loopback mock server arguments, error callback and controlled child termination on Electron shutdown. Added Node unit tests for disabled/default, unsafe relative and missing paths, and null shutdown.
