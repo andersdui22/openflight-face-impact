@@ -1,3 +1,10 @@
+# WINDOWS PACKAGING REPAIR — MISSING IMPORTED MODULE (2026-11-12)
+
+- Found a critical packaging defect: Electron main now imports `backendProcess.js`, but Gate 10 portable builder copied only `main.js` and `resolveTargetUrl.js`. This would prevent packaged EXE from loading at all. Builder now copies backendProcess.js, asserts it exists; Windows CI asserts module presence and runs Node backend lifecycle unit tests before packaging.
+- Gate 10 CI path triggers extended to backend process source/tests. This is a packaging repair, **not** a bundled Python backend or a validated release. CI exact SHA pending; physical tests deferred; Gates OPEN.
+
+---
+
 # BATCH B — ELECTRON STARTUP READINESS GATE (2026-11-12)
 
 - Electron now awaits opt-in backend readiness before creating its window; readiness verifies Face Impact identity through `/api/face-impact/health`, with bounded retry and early child-exit checks. If no backend executable is configured, the standalone UI opens normally; if configured but not ready, it logs failure and opens UI in degraded mode rather than hanging indefinitely.

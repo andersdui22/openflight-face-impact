@@ -30,6 +30,7 @@ $appDir = Join-Path $output 'resources/app'
 New-Item -ItemType Directory -Force -Path (Join-Path $appDir 'electron') | Out-Null
 Copy-Item (Join-Path $ui 'electron/main.js') (Join-Path $appDir 'electron/main.js')
 Copy-Item (Join-Path $ui 'electron/resolveTargetUrl.js') (Join-Path $appDir 'electron/resolveTargetUrl.js')
+Copy-Item (Join-Path $ui 'electron/backendProcess.js') (Join-Path $appDir 'electron/backendProcess.js')
 Copy-Item (Join-Path $ui 'dist') (Join-Path $appDir 'dist') -Recurse
 @'
 {"name":"openflight-face-impact-portable","version":"0.0.0-gate10","private":true,"type":"module","main":"electron/main.js"}
@@ -42,4 +43,5 @@ capture, measurement validation, or an installer. Keep all files in this folder.
 Do not distribute as a validated release.
 '@ | Set-Content -Path (Join-Path $output 'README.txt') -Encoding utf8
 if (!(Test-Path (Join-Path $appDir 'dist/index.html'))) { throw 'Bundled UI missing' }
+if (!(Test-Path (Join-Path $appDir 'electron/backendProcess.js'))) { throw 'Bundled backend process module missing' }
 Write-Host "Portable EXE staged: $output"

@@ -6,6 +6,8 @@ on:
     paths:
       - scripts/build-face-impact-windows.ps1
       - ui/electron/main.js
+      - ui/electron/backendProcess.js
+      - ui/electron/backendProcess.test.js
       - ui/vite.config.ts
       - .github/workflows/gate10-windows-portable.yml
 
@@ -21,6 +23,9 @@ jobs:
           node-version-file: '.node-version'
           cache: npm
           cache-dependency-path: ui/package-lock.json
+      - name: Test Electron backend lifecycle helpers
+        shell: pwsh
+        run: node --test ui/electron/backendProcess.test.js
       - name: Build portable EXE
         shell: pwsh
         run: ./scripts/build-face-impact-windows.ps1
@@ -31,6 +36,7 @@ jobs:
           if (!(Test-Path "$bundle/OpenFlight Face Impact.exe")) { throw 'Missing EXE' }
           if (!(Test-Path "$bundle/resources/app/dist/index.html")) { throw 'Missing UI' }
           if (!(Test-Path "$bundle/resources/app/electron/main.js")) { throw 'Missing Electron main' }
+          if (!(Test-Path "$bundle/resources/app/electron/backendProcess.js")) { throw 'Missing backend process module' }
           Write-Host 'Bundle file structure verified (not a GUI runtime or hardware test).'
       - name: Gate 11 packaged EXE renderer smoke
         shell: pwsh
