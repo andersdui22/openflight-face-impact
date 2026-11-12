@@ -1,3 +1,10 @@
+# BATCH B — OPTIONAL BACKEND STAGING FOR PORTABLE WINDOWS BUNDLE (2026-11-12)
+
+- Portable Windows builder now accepts an explicit `OPENFLIGHT_BACKEND_BUILD_EXE` path to a separately produced Windows backend binary, validates it is an existing .exe and copies it to `resources/backend/OpenFlightFaceImpactBackend.exe`, matching Electron's packaged discovery convention. Default build stays UI-only; invalid input fails closed.
+- This is **staging only**: no PyInstaller build, no Python runtime/dependency bundling, no backend execution verification or hardware validation. The CI workflow does not set the opt-in variable. CI exact SHA pending; Gates OPEN, no merges/releases.
+
+---
+
 # BATCH B — OPTIONAL BUNDLED BACKEND DISCOVERY (2026-11-12)
 
 - Electron now checks `process.resourcesPath/backend/OpenFlightFaceImpactBackend.exe` for packaged Windows deployments, falling back to no backend if absent. Explicit `OPENFLIGHT_BACKEND_EXECUTABLE` takes priority and still must be an existing absolute path. Added temporary-directory Node tests for bundled discovery and override.

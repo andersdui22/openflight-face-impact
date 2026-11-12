@@ -27,6 +27,22 @@ New-Item -ItemType Directory -Force -Path $output | Out-Null
 Copy-Item (Join-Path $electron '*') $output -Recurse -Force
 Rename-Item (Join-Path $output 'electron.exe') 'OpenFlight Face Impact.exe'
 $appDir = Join-Path $output 'resources/app'
+# A separately built Python backend can be staged for a development-only bundle.
+# Never claim hardware validation or silently include an arbitrary executable.
+$backendSource = $env:OPENFLIGHT_BACKEND_BUILD_EXE
+if ($backendSource) {
+  if (!(Test-Path -LiteralPath $backendSource -PathType Leaf)) {
+    throw 'OPENFLIGHT_BACKEND_BUILD_EXE must point to an existing backend executable'
+  }
+  $backendSource = (Resolve-Path -LiteralPath $backendSource).Path
+  if ([System.IO.Path]::GetExtension($backendSource).ToLowerInvariant() -ne '.exe') {
+    throw 'Backend staging requires an .exe file'
+  }
+  $backendDir = Join-Path $output 'resources/backend'
+  New-Item -ItemType Directory -Force -Path $backendDir | Out-Null
+  Copy-Item -LiteralPath $backendSource -Destination (Join-Path $backendDir 'OpenFlightFaceImpactBackend.exe')
+}
+
 New-Item -ItemType Directory -Force -Path (Join-Path $appDir 'electron') | Out-Null
 Copy-Item (Join-Path $ui 'electron/main.js') (Join-Path $appDir 'electron/main.js')
 Copy-Item (Join-Path $ui 'electron/resolveTargetUrl.js') (Join-Path $appDir 'electron/resolveTargetUrl.js')
@@ -38,7 +54,9 @@ Copy-Item (Join-Path $ui 'dist') (Join-Path $appDir 'dist') -Recurse
 @'
 Gate 10 development-only Windows portable bundle.
 Double-click OpenFlight Face Impact.exe.
-The UI runs locally; this does NOT include a Python backend, real ELP camera
+The UI runs locally. An optional separately-built backend may be staged via
+OPENFLIGHT_BACKEND_BUILD_EXE; no Python backend is included by default.
+This bundle does NOT validate real ELP camera
 capture, measurement validation, or an installer. Keep all files in this folder.
 Do not distribute as a validated release.
 '@ | Set-Content -Path (Join-Path $output 'README.txt') -Encoding utf8
