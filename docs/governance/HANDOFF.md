@@ -1,3 +1,10 @@
+# BATCH B — ELECTRON STARTUP READINESS GATE (2026-11-12)
+
+- Electron now awaits opt-in backend readiness before creating its window; readiness verifies Face Impact identity through `/api/face-impact/health`, with bounded retry and early child-exit checks. If no backend executable is configured, the standalone UI opens normally; if configured but not ready, it logs failure and opens UI in degraded mode rather than hanging indefinitely.
+- This does **not** yet bundle a Python executable, display a user-facing backend failure notice, or validate real camera operation. Health probe currently assumes loopback port 8080. CI for this exact SHA pending; PR screenshot/Prettier unresolved. Gates OPEN, no merge/release.
+
+---
+
 # BATCH B — BACKEND IDENTITY HEALTH CONTRACT (2026-11-12)
 
 - Added `GET /api/face-impact/health` to Python Flask server with fixed service identity, protocol version, ready state and explicit `camera_validated: false`; no hardware probe or physical claims.

@@ -8,7 +8,7 @@ import { app, BrowserWindow, Menu } from 'electron';
 import { fileURLToPath } from 'node:url';
 import { existsSync, writeFileSync } from 'node:fs';
 import { resolveTargetUrl } from './resolveTargetUrl.js';
-import { resolveBackendExecutable, startBackend, stopBackend } from './backendProcess.js';
+import { resolveBackendExecutable, startBackend, stopBackend, waitForBackendReady } from './backendProcess.js';
 
 const targetUrl = resolveTargetUrl(process.env, process.argv);
 
@@ -16,13 +16,20 @@ Menu.setApplicationMenu(null);
 
 let backendChild = null;
 let backendStartupError = null;
+let backendReady = false;
 
-function launchOptInBackend() {
+async function launchOptInBackend() {
   try {
     const executable = resolveBackendExecutable();
     backendChild = startBackend(executable, {
       onError: (error) => { backendStartupError = error; console.error(error); },
     });
+    if (backendChild) {
+      backendReady = await waitForBackendReady({
+        isRunning: () => backendChild.exitCode === null && !backendChild.killed && !backendStartupError,
+      });
+      if (!backendReady) console.error("Face Impact backend readiness check failed");
+    }
   } catch (error) {
     backendStartupError = error;
     console.error(error);
@@ -100,9 +107,11 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
-  launchOptInBackend();
-  if (backendStartupError) console.error("Backend unavailable; UI opens without it");
+app.whenReady().then(async () => {
+  await launchOptInBackend();
+  if (backendStartupError || (backendChild && !backendReady)) {
+    console.error("Backend unavailable; UI opens without it");
+  }
   createWindow();
 });
 
