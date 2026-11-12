@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 import { gotoApp } from './helpers';
 
@@ -89,4 +90,48 @@ test('server-owned raster replay reaches only the requesting dashboard history',
 
   await review.getByRole('button', { name: /synthetic-contact/ }).click();
   await expect(review.getByTestId('synthetic-impact-marker')).toHaveCount(1);
+});
+
+test('synthetic session can be reopened and exported with provenance', async ({ page }) => {
+  const openReview = async () => {
+    await gotoApp(page);
+    await page.getByRole('button', { name: 'Close Select club' }).click();
+    await expect(page.getByLabel('Server connected')).toBeVisible();
+    await page.getByRole('button', { name: 'Open Face Impact dashboard' }).click();
+    const review = page.getByRole('region', { name: 'Offline synthetic impact review' });
+    await review.getByText('Saved synthetic sessions', { exact: true }).click();
+    return review;
+  };
+  const review = await openReview();
+  await review.getByRole('button', { name: 'Run in new session' }).click();
+  await expect(review.getByText('OFFLINE RESULTS: 1 · SYNTHETIC ACCEPTED: 1')).toBeVisible();
+  const selected = await review.getByText('Selected shot:').textContent();
+  const sessionId = selected?.match(/Session: (synthetic-[a-f0-9]{32})/)?.[1];
+  expect(sessionId).toBeTruthy();
+
+  await review.getByLabel('Synthetic replay case').selectOption('missing-ball');
+  await review.getByRole('button', { name: 'Run synthetic replay' }).click();
+  await expect(review.getByText('OFFLINE RESULTS: 2 · SYNTHETIC ACCEPTED: 1')).toBeVisible();
+  await expect(review.getByTestId('synthetic-impact-marker')).toHaveCount(0);
+
+  const reopened = await openReview();
+  await expect(reopened.getByText('OFFLINE RESULTS: 0')).toBeVisible();
+  await reopened.getByLabel('Saved session', { exact: true }).selectOption(sessionId!);
+  await reopened.getByRole('button', { name: 'Load session' }).click();
+  await expect(reopened.getByText('OFFLINE RESULTS: 2 · SYNTHETIC ACCEPTED: 1')).toBeVisible();
+  await reopened.getByRole('button', { name: new RegExp(`${sessionId}-contact`) }).click();
+  await expect(reopened.getByTestId('synthetic-impact-marker')).toHaveCount(1);
+
+  const downloadPromise = page.waitForEvent('download');
+  await reopened.getByRole('link', { name: 'Export session JSON' }).click();
+  const download = await downloadPromise;
+  const archive = JSON.parse(await readFile(await download.path(), 'utf8'));
+  expect(archive.session_id).toBe(sessionId);
+  expect(archive.shots).toHaveLength(2);
+  const [accepted, rejected] = archive.shots;
+  expect(accepted.evidence.accepted).toBe(true);
+  expect(accepted.provenance.calibration.id).toBe('synthetic-brown-five-v1');
+  expect(accepted.provenance.capture.frames).toHaveLength(2);
+  expect(rejected.evidence.accepted).toBe(false);
+  expect(rejected.evidence).not.toHaveProperty('x_mm');
 });

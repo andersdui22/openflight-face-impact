@@ -40,13 +40,14 @@ async function launchOptInBackend() {
 // the UI-only bundle. The club picker must be closed before taking a screenshot.
 async function runDashboardSmoke(win) {
   const expectsBackend = process.env.OPENFLIGHT_GATE11_EXPECT_BACKEND === '1';
+  const expectsSavedSession = process.env.OPENFLIGHT_GATE11_EXPECT_SAVED_SESSION === '1';
   const resultPath = process.env.OPENFLIGHT_GATE11_RESULT;
   try {
     if (backendReady !== expectsBackend) {
       throw new Error(`Expected mock backend ready=${expectsBackend}, got ${backendReady}`);
     }
     const result = await win.webContents.executeJavaScript(`
-      (async (expectsBackend) => {
+      (async (expectsBackend, expectsSavedSession) => {
         const waitFor = async (predicate, message) => {
           for (let attempt = 0; attempt < 100; attempt++) {
             const value = predicate();
@@ -79,10 +80,20 @@ async function runDashboardSmoke(win) {
         if (expectsBackend) {
           await waitFor(marker, 'Mock backend did not render a synthetic impact marker');
           const review = dashboard.querySelector('[aria-label="Offline synthetic impact review"]');
-          const replay = Array.from(review?.querySelectorAll('button') ?? [])
-            .find((button) => button.textContent === 'Run synthetic replay');
-          if (!replay) throw new Error('Offline replay button not rendered');
-          replay.click();
+          const button = (label) => Array.from(review?.querySelectorAll('button') ?? [])
+            .find((item) => item.textContent === label);
+          if (expectsSavedSession) {
+            review.querySelector('details').open = true;
+            const load = await waitFor(() => {
+              const item = button('Load session');
+              return item && !item.disabled && item;
+            }, 'Saved synthetic session did not survive backend restart');
+            load.click();
+          } else {
+            const replay = button('Run synthetic replay');
+            if (!replay) throw new Error('Offline replay button not rendered');
+            replay.click();
+          }
           await waitFor(() => review.textContent.includes('synthetic-contact') &&
             review.querySelector('[data-testid="synthetic-impact-marker"]'),
             'Mock backend did not deliver offline raster evidence');
@@ -93,8 +104,9 @@ async function runDashboardSmoke(win) {
           if (marker()) throw new Error('Disconnected dashboard displayed a synthetic marker');
         }
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        return { ok: true, panels: panels.length, backend_ready: expectsBackend, camera: cameraStatus };
-      })(${JSON.stringify(expectsBackend)})
+        return { ok: true, panels: panels.length, backend_ready: expectsBackend,
+          camera: cameraStatus, restored_session: expectsSavedSession };
+      })(${JSON.stringify(expectsBackend)}, ${JSON.stringify(expectsSavedSession)})
     `);
     const shot = await win.webContents.capturePage();
     const { width, height } = shot.getSize();

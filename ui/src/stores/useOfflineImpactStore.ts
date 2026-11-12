@@ -5,6 +5,7 @@ type OfflineImpactState = {
   sessionId: string | null;
   entries: OfflineImpactEvidence[];
   ingest: (payload: unknown) => void;
+  restore: (sessionId: string, entries: OfflineImpactEvidence[]) => void;
   clear: () => void;
 };
 
@@ -31,5 +32,6 @@ export const useOfflineImpactStore = create<OfflineImpactState>((set) => ({
       };
     });
   },
+  restore: (sessionId, entries) => set({ sessionId, entries: entries.slice(-MAX_ENTRIES) }),
   clear: () => set({ sessionId: null, entries: [] }),
 }));

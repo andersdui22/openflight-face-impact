@@ -251,7 +251,7 @@ class SocketService {
     });
   }
 
-  requestOfflineImpactDemo(caseId: 'contact' | 'missing-ball'): Promise<string> {
+  requestOfflineImpactDemo(caseId: 'contact' | 'missing-ball', sessionId?: string | null): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!this.socket?.connected) {
         reject(new Error('OpenFlight backend is disconnected'));
@@ -259,14 +259,18 @@ class SocketService {
       }
       this.socket
         .timeout(5000)
-        .emit('request_offline_impact_demo', { case_id: caseId }, (error: Error | null, response: unknown) => {
-          const ack = response as { ok?: unknown; shot_id?: unknown } | null;
-          if (error || ack?.ok !== true || typeof ack.shot_id !== 'string' || !ack.shot_id.trim()) {
-            reject(new Error('Synthetic offline replay unavailable'));
-            return;
+        .emit(
+          'request_offline_impact_demo',
+          { case_id: caseId, session_id: sessionId },
+          (error: Error | null, response: unknown) => {
+            const ack = response as { ok?: unknown; shot_id?: unknown } | null;
+            if (error || ack?.ok !== true || typeof ack.shot_id !== 'string' || !ack.shot_id.trim()) {
+              reject(new Error('Synthetic offline replay unavailable'));
+              return;
+            }
+            resolve(ack.shot_id);
           }
-          resolve(ack.shot_id);
-        });
+        );
     });
   }
 

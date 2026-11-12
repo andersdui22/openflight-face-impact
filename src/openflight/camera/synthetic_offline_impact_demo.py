@@ -1,6 +1,8 @@
 """Server-owned synthetic ball and fiducial rasters for offline review."""
 
 from collections.abc import Callable
+from dataclasses import asdict
+from hashlib import sha256
 
 import cv2 as cv
 import numpy as np
@@ -14,6 +16,7 @@ from .triggered_buffer import CameraFrame, TriggeredCapture
 
 def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
     case_id: str, emit: Callable, *, recipient: str,
+    session_id: str = "synthetic-offline-demo-v1", save: Callable | None = None,
 ) -> dict | None:
     """Publish one fixed synthetic case through the actual offline runner."""
     if case_id not in ("contact", "missing-ball"):
@@ -63,18 +66,50 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
         )
         cv.fillPoly(after, [np.rint(project(rim)).astype(np.int32)], 220)
 
+    shot_id = (f"synthetic-{case_id}" if session_id == "synthetic-offline-demo-v1"
+               else f"{session_id}-{case_id}")
     capture = TriggeredCapture(
         (CameraFrame(before, 8_000_000, 16_000_000, 1_000, 1.),
          CameraFrame(after, 16_000_000, 24_000_000, 1_000, 1.)),
-        1, 20_000_000, shot_id=f"synthetic-{case_id}", session_id="synthetic-offline-demo-v1",
+        1, 20_000_000, shot_id=shot_id, session_id=session_id,
     )
     timing = {"max_sensor_gap_ns": 8_000_000, "max_host_gap_ns": 8_000_000}
+    preflight = preflight_offline_capture(capture, **timing)
+    parameters = {
+        "max_marker_distance_px": 2., "ball_radius_mm": radius, "max_ball_residual_rad": 0.03,
+        "max_face_rms_px": 1., "min_face_margin_px": 0.1, "contact_tolerance_mm": 5.,
+        "threshold": 100, "min_area_px": 300., "ball_border_margin_px": 2., "min_circularity": 0.8,
+        **timing,
+    }
+
+    def publish(event, evidence, *, to):
+        if save is not None:
+            evidence = save(evidence, {
+                "club": {"model_id": "synthetic-planar-face-v1", "kind": "synthetic",
+                         "outline_mm": polygon.vertices_face_mm.tolist(),
+                         "landmarks_mm": landmarks.tolist()},
+                "calibration": {"id": "synthetic-brown-five-v1", "image_size_px": [width, height],
+                                "camera_matrix": calibration.camera_matrix.tolist(),
+                                "distortion": calibration.distortion.tolist()},
+                "capture": {"sha256": preflight.source_fingerprint,
+                            "marker_raster_sha256": sha256(marker_image.tobytes()).hexdigest(),
+                            "pre_trigger_count": capture.pre_trigger_count,
+                            "trigger_host_timestamp_ns": capture.trigger_host_timestamp_ns,
+                            "frames": [{"sensor_timestamp_ns": frame.sensor_timestamp_ns,
+                                        "host_timestamp_ns": frame.host_timestamp_ns,
+                                        "exposure_us": frame.exposure_us,
+                                        "analogue_gain": frame.analogue_gain}
+                                       for frame in capture.frames]},
+                "calculation": {"version": "offline-marker-impact-v1", "fixture_case": case_id,
+                                "opencv_version": cv.__version__, "numpy_version": np.__version__,
+                                "parameters": parameters},
+                "quality": {"preflight": asdict(preflight.quality),
+                            "impact_status": "accepted" if evidence["accepted"] else "rejected"},
+            })
+        emit(event, evidence, to=to)
+
     return analyze_marker_observed_offline_capture(
         calibration, capture, {0: marker_image, 1: marker_image},
         reference_pixels, landmarks, polygon,
-        max_marker_distance_px=2., ball_radius_mm=radius, max_ball_residual_rad=0.03,
-        max_face_rms_px=1., min_face_margin_px=0.1, contact_tolerance_mm=5., threshold=100,
-        min_area_px=300., ball_border_margin_px=2., min_circularity=0.8,
-        preflight=preflight_offline_capture(capture, **timing),
-        emit=emit, recipient=recipient, **timing,
+        preflight=preflight, emit=publish, recipient=recipient, **parameters,
     )

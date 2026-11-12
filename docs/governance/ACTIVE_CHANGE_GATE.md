@@ -1,3 +1,12 @@
+# Active Gate 26 software scope — synthetic session history (2026-11-12)
+
+- Authorization: user requested autonomous implementation of persistent Face Impact shots, session history, provenance, export and hardware-free integration tests after auditing PR #45.
+- Repository baseline: `c55d92acf76172995d2cbf1f8e32aea0ed9e4d36` on `mdp-v1.2/phase5-gates20-24-parallel`. All nine latest workflows passed on that SHA. Work continues on draft PR #45.
+- Scope: existing synthetic capture/replay path, local Python session archive and read/export routes, offline React review, matching tests, and mock Windows EXE verification. Acceptance for this software batch requires saving accepted and rejected results with provenance, reopening and exporting them, and restoring a result after a packaged mock backend restart.
+- Physical capture, physical accuracy and broader Gate acceptance remain pending. Preserve the existing camera owner and Project Law boundaries for upstream, ConnectorNext, merges and releases.
+
+---
+
 # USER-APPROVED TECHNICAL CLOSEOUT — GATE 14/15 INTEGRATION (2026-11-11)
 
 The user explicitly approved technical closeout of the Gate 14/15 integration after reviewing the exact-SHA automated CI evidence for code commit `1420b782aa742ee3ebeb531bcb19707b617da0a5`.

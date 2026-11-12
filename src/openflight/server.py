@@ -10,6 +10,7 @@ import math
 import os
 import queue
 import random
+import sqlite3
 import statistics
 import sys
 import threading
@@ -19,6 +20,7 @@ from dataclasses import dataclass, fields, replace
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
+from uuid import uuid4
 
 from flask import Flask, Response, jsonify, request, send_file, send_from_directory
 from flask_cors import CORS
@@ -58,7 +60,7 @@ from .phone_orientation import (
     save_phone_orientation_calibration,
 )
 from .power import SUPPORTED_BATTERY_PROVIDERS, PowerMonitor, PowerStatus
-from .profiles import ProfileStore
+from .profiles import ProfileStore, resolve_profiles_path
 from .rolling_buffer.monitor import estimate_carry_with_spin, get_optimal_spin_for_ball_speed
 from .session_logger import get_session_logger, init_session_logger, log_session_error
 from .shot_stream import SSE_MIMETYPE, ShotStreamBroker, ShotStreamFull
@@ -1861,16 +1863,61 @@ def publish_completed_offline_impact(handoff, *, recipient: str):
     return publish_offline_impact_handoff(handoff, socketio.emit, recipient=recipient)
 
 
+def _local_offline_archive():
+    path = app.config.get("OFFLINE_IMPACT_ARCHIVE_PATH")
+    if path is None or request.remote_addr not in ("127.0.0.1", "::1"):
+        return None
+    from .camera.offline_session_archive import OfflineSessionArchive
+
+    return OfflineSessionArchive(path)
+
+
+@app.route("/api/face-impact/sessions")
+@app.route("/api/face-impact/sessions/<session_id>")
+def offline_impact_history(session_id=None):
+    """List local synthetic sessions or retrieve one for review or export."""
+    archive = _local_offline_archive()
+    if archive is None:
+        return {"error": "Offline session history unavailable"}, 404
+    try:
+        if session_id is None:
+            return jsonify(schema_version=1, sessions=archive.list_sessions())
+        session = archive.load(session_id)
+    except (OSError, sqlite3.Error, ValueError):
+        logger.exception("[SERVER] Could not read offline impact history")
+        return {"error": "Offline session history could not be read"}, 503
+    if session is None:
+        return {"error": "Offline session not found"}, 404
+    response = jsonify(session)
+    if request.args.get("download") == "1":
+        response.headers.set("Content-Disposition", "attachment", filename="face-impact-session.json")
+    return response
+
+
 @socketio.on("request_offline_impact_demo")
 def handle_request_offline_impact_demo(data=None):
     """Replay a fixed synthetic scene for the requesting client."""
-    if not isinstance(data, dict) or set(data) != {"case_id"} or not isinstance(data["case_id"], str):
+    if (not isinstance(data, dict) or set(data) not in ({"case_id"}, {"case_id", "session_id"})
+            or not isinstance(data["case_id"], str)):
         return {"ok": False, "error": "Unknown synthetic replay case"}
     try:
         from .camera.synthetic_offline_impact_demo import publish_synthetic_offline_impact_demo
 
-        payload = publish_synthetic_offline_impact_demo(data["case_id"], socketio.emit, recipient=request.sid)
-    except (ImportError, ValueError):
+        archive = _local_offline_archive()
+        options = {"save": archive.save} if archive is not None else {}
+        if "session_id" in data:
+            session_id = data["session_id"]
+            if archive is None:
+                return {"ok": False, "error": "Offline session history unavailable"}
+            if session_id is None:
+                session_id = f"synthetic-{uuid4().hex}"
+            elif not isinstance(session_id, str) or not archive.load(session_id):
+                return {"ok": False, "error": "Offline session not found"}
+            options["session_id"] = session_id
+        payload = publish_synthetic_offline_impact_demo(
+            data["case_id"], socketio.emit, recipient=request.sid, **options,
+        )
+    except (ImportError, OSError, sqlite3.Error, ValueError):
         logger.exception("[SERVER] Synthetic offline impact replay failed")
         return {"ok": False, "error": "Synthetic offline replay unavailable"}
     if payload is None:
@@ -5593,6 +5640,10 @@ def main():
     ballistics_enabled = args.ballistics
     battery_provider = args.battery
     profile_store = ProfileStore(args.profiles_path)
+    app.config["OFFLINE_IMPACT_ARCHIVE_PATH"] = (
+        resolve_profiles_path(args.profiles_path).with_suffix(".face-impact.sqlite3")
+        if args.mock and args.host in ("127.0.0.1", "localhost", "::1") else None
+    )
     startup_status = StartupStatusReporter(
         args.startup_status_file,
         configured_startup_components(
