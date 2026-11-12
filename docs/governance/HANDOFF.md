@@ -1,3 +1,11 @@
+# WINDOWS PYINSTALLER RUNTIME FAILURE — DIAGNOSTICS (2026-11-12)
+
+- First automatically triggered Python backend prototype workflow on `e1b77427` built the EXE but failed during mock startup: process exited with code 1 before health response. Actual traceback was missing because Windows workflow used a hidden process without redirected stdout/stderr.
+- Updated workflow to redirect backend stdout/stderr to separate runner-temp logs, print last 100 lines in `finally` even on startup failure, and upload both as CI diagnostics with `if: always()`. **This is diagnostic instrumentation, not a runtime fix.** Next CI run must reveal root cause.
+- Existing Electron portable, Python tests, foundation and USB CI green; UI Prettier and PR screenshot remain red. Gates OPEN, no merge/release, physical tests deferred.
+
+---
+
 # WINDOWS BACKEND — AUTOMATIC PR VALIDATION (2026-11-12)
 
 - Expanded the Python backend prototype workflow to run automatically on PRs changing the backend build recipe, entry point or workflow itself, while retaining manual dispatch. On Windows CI it will build PyInstaller EXE, launch mock server, verify exact health contract, and build an Electron portable bundle with the backend staged in resources. This is the first automated integration evidence path; **not yet run on this SHA**.
