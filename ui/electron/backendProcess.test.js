@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { createServer } from 'node:http';
 import { resolveBackendExecutable, stopBackend, waitForBackendReady, probeBackendHealth } from './backendProcess.js';
 
 test('backend disabled by default', () => {
@@ -59,4 +60,52 @@ test('health probe rejects a different endpoint', async () => {
     probeBackendHealth({ path: '/other' }),
     /Unexpected backend health path/,
   );
+});
+
+
+async function withHealthServer(reply, callback) {
+  const server = createServer((_req, response) => {
+    response.writeHead(reply.status ?? 200, { 'content-type': 'application/json' });
+    response.end(JSON.stringify(reply.body));
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  try {
+    return await callback(server.address().port);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+}
+
+test('health accepts matching Face Impact service identity', async () => {
+  const valid = {
+    service: 'openflight-face-impact', protocol_version: 1,
+    status: 'ready', camera_validated: false,
+  };
+  await withHealthServer({ body: valid }, async (port) => {
+    assert.equal(await probeBackendHealth({ port }), true);
+  });
+});
+
+test('health rejects unrelated local HTTP server and incompatible protocol', async () => {
+  for (const body of [
+    { service: 'unrelated', protocol_version: 1, status: 'ready', camera_validated: false },
+    { service: 'openflight-face-impact', protocol_version: 2, status: 'ready', camera_validated: false },
+    { service: 'openflight-face-impact', protocol_version: 1, status: 'ready', camera_validated: true },
+  ]) {
+    await withHealthServer({ body }, async (port) => {
+      assert.equal(await probeBackendHealth({ port }), false);
+    });
+  }
+});
+
+test('health rejects server error even with matching JSON', async () => {
+  await withHealthServer({
+    status: 503,
+    body: {
+      service: 'openflight-face-impact', protocol_version: 1,
+      status: 'ready', camera_validated: false,
+    },
+  }, async (port) => {
+    assert.equal(await probeBackendHealth({ port }), false);
+  });
 });

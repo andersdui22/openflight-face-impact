@@ -1,3 +1,11 @@
+# BATCH B — REAL HTTP READINESS CONTRACT TESTS (2026-11-12)
+
+- Added Node HTTP loopback fixture tests that exercise actual `probeBackendHealth` request/response handling, not merely injected mock callbacks: valid Face Impact identity accepted; unrelated server, incompatible protocol, false physical-validation claim and HTTP 503 rejected.
+- Portable Windows CI already runs `node --test ui/electron/backendProcess.test.js` and checks backendProcess.js is packaged. This extends executable coverage without physical hardware.
+- New exact SHA CI pending; Python executable not yet bundled; no merges/releases; Gates 20–24 OPEN; UI formatting and authentic PR screenshot unresolved.
+
+---
+
 # WINDOWS PACKAGING REPAIR — MISSING IMPORTED MODULE (2026-11-12)
 
 - Found a critical packaging defect: Electron main now imports `backendProcess.js`, but Gate 10 portable builder copied only `main.js` and `resolveTargetUrl.js`. This would prevent packaged EXE from loading at all. Builder now copies backendProcess.js, asserts it exists; Windows CI asserts module presence and runs Node backend lifecycle unit tests before packaging.
