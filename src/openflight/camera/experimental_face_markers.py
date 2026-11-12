@@ -46,7 +46,7 @@ def extract_unlabelled_bright_markers(
     if (not isinstance(threshold, int) or isinstance(threshold, bool)
             or not 0 <= threshold <= 255):
         raise ValueError("threshold must be uint8")
-    if (not np.isfinite(min_area_px) and np.isfinite(max_area_px)
+    if not (np.isfinite(min_area_px) and np.isfinite(max_area_px)
             and 0 < min_area_px <= max_area_px):
         raise ValueError("marker area bounds invalid")
     if not np.isfinite(min_circularity) or not 0 < min_circularity <= 1:

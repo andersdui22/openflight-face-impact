@@ -1,3 +1,13 @@
+# Triggered camera replay from buffer to Windows export (2026-11-13)
+
+- Startup audit verified [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45), branch `mdp-v1.2/phase5-gates20-24-parallel`, and starting SHA `7624ccdd6ed8a89297fe9ec48dd7e0971c5e4b3a` with nine green workflows. The user has verified Windows software behavior on an earlier build. The starting SHA has no new human desktop test.
+- Synthetic before and after rasters now pass through the same triggered ring used by the Windows USB reader. Preflight, observed marker association, calibrated ball and face geometry and unique candidate selection precede SQLite save and targeted Socket.IO delivery. Export identifies the synthetic ring source. The legacy schema and identities remain readable.
+- Invalid images and missing markers return stage-specific errors without recording a shot. Two admissible candidate frames produce a coordinate-free rejected record. The browser and packaged Electron tests cover rejection, accepted replay, history and the backend lifecycle.
+- The USB reader owns copied frame pixels and refuses a trigger when stopped. Host-arrival timestamps, absent exposure and gain remain explicit limits for the current Windows adapter.
+- The [Gate review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md) records requirements and hardware evidence. Verify checks and the portable artifact on the new exact SHA. Gates remain open and physical ELP testing is deferred.
+
+---
+
 # Repeated synthetic shots and capture timing provenance (2026-11-12)
 
 - Read-only audit confirmed the branch `mdp-v1.2/phase5-gates20-24-parallel` and [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45) at `91a99d08fb7deacdde8f84f9ff8e0fef3d9b9ce4`, with all nine workflows green. The user's test of that Windows build confirmed terminal-free startup, the connected backend message, synthetic results and internal shutdown. The user still needs to retest saved sessions after restarting the latest build on their PC.

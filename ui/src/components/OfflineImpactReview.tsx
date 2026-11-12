@@ -125,6 +125,9 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
             <option value="heel-contact">Heel contact</option>
             <option value="compact-contact">Compact club contact</option>
             <option value="missing-ball">Missing ball</option>
+            <option value="invalid-frame">Invalid frame</option>
+            <option value="missing-markers">Missing markers</option>
+            <option value="ambiguous-contact">Ambiguous contact frames</option>
           </select>
         </label>
         <button type="button" onClick={() => void runDemo()} disabled={!connected || loadingDemo || historyBusy}>

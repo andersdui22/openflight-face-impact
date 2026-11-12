@@ -1925,7 +1925,9 @@ def handle_request_offline_impact_demo(data=None):
     ):
         return {"ok": False, "error": "Invalid synthetic replay request ID"}
     try:
-        from .camera.synthetic_offline_impact_demo import publish_synthetic_offline_impact_demo
+        from .camera.synthetic_offline_impact_demo import (
+            SyntheticReplayRejected, publish_synthetic_offline_impact_demo,
+        )
 
         archive = _local_offline_archive()
         options = {"request_id": request_id}
@@ -1940,10 +1942,14 @@ def handle_request_offline_impact_demo(data=None):
             elif not isinstance(session_id, str) or not archive.contains_session(session_id):
                 return {"ok": False, "error": "Offline session not found"}
             options["session_id"] = session_id
-        payload = publish_synthetic_offline_impact_demo(
-            data["case_id"], socketio.emit, recipient=request.sid, **options,
-        )
-    except (ImportError, OSError, sqlite3.Error, ValueError):
+        try:
+            payload = publish_synthetic_offline_impact_demo(
+                data["case_id"], socketio.emit, recipient=request.sid, **options,
+            )
+        except SyntheticReplayRejected as error:
+            logger.info("[SERVER] %s: %s", error, error.__cause__)
+            return {"ok": False, "error": str(error)}
+    except (ImportError, OSError, sqlite3.Error, ValueError, RuntimeError):
         logger.exception("[SERVER] Synthetic offline impact replay failed")
         return {"ok": False, "error": "Synthetic offline replay unavailable"}
     if payload is None:

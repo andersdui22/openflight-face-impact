@@ -1,3 +1,9 @@
+# Active software completion and camera readiness (2026-11-13)
+
+The user authorized software-only implementation for Gates 20–28 on draft PR #45. The audited starting HEAD was `7624ccdd6ed8a89297fe9ec48dd7e0971c5e4b3a` with all nine latest workflows green. Exercise the existing single-camera buffer, trigger, marker and calibrated geometry chain with synthetic input, and verify the packaged Windows application. Keep physical acquisition and formal Gate closure pending. Review the [Gate evidence](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md).
+
+---
+
 # Active software foundation — Gates 20–24 and 26–28 (2026-11-12)
 
 The user authorized software-only work on repeated synthetic shots, history, statistics, export, Windows lifecycle and USB capture interfaces on draft PR #45. The audited starting HEAD was `91a99d08fb7deacdde8f84f9ff8e0fef3d9b9ce4`; all nine latest workflows passed. Keep the six-panel dashboard and the existing single camera owner. The [acceptance review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md) records the remaining work per Gate. Formal closure requires separate approval.

@@ -99,6 +99,11 @@ def test_saved_sessions_round_trip_and_export(tmp_path, monkeypatch, clients):
     assert contact["provenance"]["calibration"]["image_size_px"] == [640, 400]
     assert contact["provenance"]["calculation"]["version"] == "offline-marker-impact-v1"
     assert len(contact["provenance"]["capture"]["sha256"]) == 64
+    buffered = contact["provenance"]["capture"]
+    assert buffered["acquisition"] == "synthetic-triggered-ring-v1"
+    assert buffered["pre_trigger_count"] == 1
+    assert [frame["host_timestamp_ns"] for frame in buffered["frames"]] == [16_000_000, 24_000_000]
+    assert buffered["trigger_host_timestamp_ns"] == 20_000_000
     assert contact["provenance"]["quality"]["preflight"]["frame_count"] == 2
     assert missing["provenance"]["quality"]["impact_status"] == "rejected"
     analysis = http.get(f"{root}/{session_id}?analysis=1").json
@@ -171,3 +176,41 @@ def test_repeated_fixture_is_a_new_shot_but_retry_is_idempotent(tmp_path, monkey
     club, = export["analysis"]["clubs"]
     assert len(club["points_mm"]) == 2
     assert club["spread_mm"] == [0., 0.]
+
+
+@pytest.mark.parametrize(("case_id", "message"), [
+    ("invalid-frame", "Synthetic capture rejected"),
+    ("missing-markers", "Synthetic marker or geometry analysis rejected"),
+])
+def test_bad_camera_replay_never_publishes_or_archives(tmp_path, monkeypatch, clients, case_id, message):
+    archive = OfflineSessionArchive(tmp_path / "offline.sqlite3")
+    monkeypatch.setattr(server, "_local_offline_archive", lambda: archive)
+    requesting, observing = clients
+    ack = requesting.emit("request_offline_impact_demo", {"case_id": case_id}, callback=True)
+    assert ack == {"ok": False, "error": message}
+    assert _offline_events(requesting) == _offline_events(observing) == []
+    assert archive.list_sessions() == []
+
+
+
+def test_two_admissible_frames_export_rejection_without_coordinates(tmp_path, monkeypatch, clients):
+    archive = OfflineSessionArchive(tmp_path / "offline.sqlite3")
+    monkeypatch.setattr(server, "_local_offline_archive", lambda: archive)
+    requesting, observing = clients
+    ack = requesting.emit(
+        "request_offline_impact_demo", {"case_id": "ambiguous-contact"}, callback=True,
+    )
+    rejected, = _offline_events(requesting)
+    assert ack == {"ok": True, "shot_id": rejected["shot_id"]}
+    assert not rejected["accepted"]
+    assert "multiple frames have accepted synthetic geometry" in rejected["reason"]
+    assert not {"frame_index", "x_mm", "y_mm"} & rejected.keys()
+    assert _offline_events(observing) == []
+    response = server.app.test_client().get(
+        f"/api/face-impact/sessions/{rejected['session_id']}?download=1",
+    )
+    assert response.status_code == 200
+    assert response.json["shots"][0]["evidence"] == rejected
+    club, = response.json["analysis"]["clubs"]
+    assert club["points_mm"] == []
+    assert club["rejected_count"] == 1

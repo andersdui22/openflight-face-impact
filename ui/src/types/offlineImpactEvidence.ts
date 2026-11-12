@@ -1,4 +1,11 @@
-export type OfflineReplayCase = 'contact' | 'heel-contact' | 'compact-contact' | 'missing-ball';
+export type OfflineReplayCase =
+  | 'contact'
+  | 'heel-contact'
+  | 'compact-contact'
+  | 'missing-ball'
+  | 'invalid-frame'
+  | 'missing-markers'
+  | 'ambiguous-contact';
 
 /** Version 1 Python offline synthetic impact export. No physical impact claim. */
 export type OfflineImpactEvidence =

@@ -87,6 +87,17 @@ test('server-owned raster replay reaches only the requesting dashboard history',
   await expect(review.getByText('OFFLINE RESULTS: 2 · SYNTHETIC ACCEPTED: 1')).toBeVisible();
   await expect(observer.getByText('OFFLINE RESULTS: 0')).toBeVisible();
 
+  for (const [fixture, reason] of [
+    ['invalid-frame', 'Synthetic capture rejected'],
+    ['missing-markers', 'Synthetic marker or geometry analysis rejected'],
+  ]) {
+    await review.getByLabel('Synthetic replay case').selectOption(fixture);
+    await run.click();
+    await expect(review.getByRole('alert').getByText(reason)).toBeVisible();
+    await expect(review.getByText('OFFLINE RESULTS: 2 · SYNTHETIC ACCEPTED: 1')).toBeVisible();
+    await expect(review.getByTestId('synthetic-impact-marker')).toHaveCount(0);
+  }
+
   await review.getByRole('button', { name: /synthetic-contact/ }).click();
   await expect(review.getByTestId('synthetic-impact-marker')).toHaveCount(1);
 });

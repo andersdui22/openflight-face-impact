@@ -276,10 +276,15 @@ class SocketService {
           (error: Error | null, response: unknown) => {
             const ack = response as {
               ok?: unknown;
+              error?: unknown;
               shot_id?: unknown;
               session_id?: unknown;
               archived?: unknown;
             } | null;
+            if (!error && ack?.ok === false && typeof ack.error === 'string' && ack.error.trim()) {
+              reject(new Error(ack.error));
+              return;
+            }
             if (
               error ||
               ack?.ok !== true ||

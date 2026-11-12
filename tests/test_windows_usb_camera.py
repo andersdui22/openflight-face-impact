@@ -322,3 +322,27 @@ def test_reset_cancels_waiting_capture_consumer_without_timeout():
     thread.join(timeout=1)
     assert not thread.is_alive(), "capture consumer remained blocked after reset"
     assert results == [None]
+
+
+
+def test_usb_copies_reused_grayscale_source_and_blocks_trigger_after_stop():
+    image = np.zeros((8, 12), dtype=np.uint8)
+
+    class ReusingCamera(FakeCamera):
+        def read(self):
+            time.sleep(0.002)
+            return True, image
+
+    camera = WindowsUsbCamera(
+        UsbCameraSettings(pre_frames=1, post_frames=1),
+        camera_factory=lambda _: ReusingCamera(),
+    )
+    camera.start()
+    try:
+        wait_until(lambda: camera.ring.latest_frame is not None)
+        before = camera.ring.latest_frame
+    finally:
+        camera.stop()
+    image.fill(255)
+    assert not before.image.any()
+    assert not camera.trigger()

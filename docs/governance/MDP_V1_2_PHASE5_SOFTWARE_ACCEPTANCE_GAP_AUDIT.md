@@ -13,6 +13,20 @@ Updated 2026-11-12 for branch `mdp-v1.2/phase5-gates20-24-parallel`, draft PR #4
 | 24 | `test_offline_frame_quality.py`, `test_offline_temporal_evidence.py` and `test_offline_session_analysis.py` cover unusable frames, bad timing and incomplete archived evidence. Rejected results stay outside point statistics. | Characterize physical measurement uncertainty and false acceptance under ELP noise and occlusion. |
 | 26 | `test_offline_impact_demo_socket.py`, the browser session test and portable EXE smoke cover save, reopen and export for synthetic evidence. Archive preserves shot, club, calibration, calculation and quality data. | The capture record identifies the image sequence by hashes and timing. Physical frame retention and retrieval need a validated ELP capture path. Formal closeout awaits user approval. |
 
+## Triggered replay readiness update
+
+| Gate | Current software evidence | Before physical acceptance |
+| --- | --- | --- |
+| 20 | Real calibrated synthetic raster analysis through the shared ring. Prior fixtures quantify localization error. | Labelled ELP ball observations with blur, occlusion and reflections. |
+| 21 | Labelled marker extraction; missing and invalid marker inputs abort publication. | Validate landmarks, visibility and pose for the real club and camera geometry. |
+| 22 | The ring brackets an explicit host trigger. Exactly one admissible synthetic frame is required; ambiguity withholds coordinates. | Acquire independent exposure timestamps and compare the contact estimator with an independent timing reference. |
+| 23 | Synthetic coordinates and face boundaries reach the dashboard and export. | Confirm physical geometry, zero point and error against a known location. |
+| 24 | Invalid images and missing markers cannot add a shot. Ambiguous geometry yields a rejected record without coordinates. | Quantify physical false acceptance and uncertainty. |
+| 25 | Existing dashboard shows camera preview/status and separately labelled synthetic results. | Real camera-derived impact data in the existing layout requires the physical data path. |
+| 26 | SQLite stores ring provenance and complete synthetic evidence. Restored sessions export accepted and rejected records across launches. | Retest the latest portable archive on the user's Windows PC. Validate physical evidence retention with real captures. |
+| 27 | Per-club means, dispersion and point counts are checked against exported records. | Verify analysis on physically validated measurements. |
+| 28 | Browser and packaged Electron tests exercise quality errors, replay, reconnect, shutdown and restart. | Verify hardware-specific controls and failure behavior with the ELP adapter. |
+
 ## Current acceptance evidence and remaining work
 
 The source is the approved [MDP V1.2](https://github.com/andersdui22/openflight-face-impact/blob/1c36e1b13142a09f17e0daa6d9799341ddbf1eb1/docs/governance/MASTER_DEVELOPMENT_PLAN.md). The Gates below are open. Verify the exact-SHA checks and Windows artifact before submitting this batch for approval.

@@ -72,8 +72,9 @@ async function verifySessionDownload(win, path, expectsRejectedShot) {
   }
   const exported = JSON.parse(readFileSync(path, 'utf8'));
   if (exported.source !== 'offline_synthetic_analysis' ||
-      exported.shots.filter(({ evidence }) => evidence.shot_id.startsWith('synthetic-contact-') &&
-        evidence.accepted).length !== 2 ||
+      exported.shots.filter(({ evidence, provenance }) =>
+        evidence.shot_id.startsWith('synthetic-contact-') && evidence.accepted &&
+        provenance.capture.acquisition === 'synthetic-triggered-ring-v1').length !== 2 ||
       (expectsRejectedShot && !exported.shots.some(({ evidence }) =>
         evidence.shot_id.startsWith('synthetic-missing-ball-') && !evidence.accepted)) ||
       !exported.analysis.clubs.some((club) => club.points_mm.length === 2 && club.mean_mm.length === 2 &&
@@ -166,6 +167,24 @@ async function runDashboardSmoke(win) {
             return section?.textContent.includes(summary) &&
               section.textContent.includes('Spread (standard deviation) X 0.00 mm · Y 0.00 mm') && section;
           }, 'Repeated shots and their statistics did not render');
+          if (!expectsSavedSession) {
+            const replay = button('Run synthetic replay');
+            const select = review.querySelector('select');
+            for (const [fixture, reason] of [
+              ['invalid-frame', 'Synthetic capture rejected'],
+              ['missing-markers', 'Synthetic marker or geometry analysis rejected'],
+            ]) {
+              select.value = fixture;
+              select.dispatchEvent(new Event('change', { bubbles: true }));
+              await new Promise((resolve) => requestAnimationFrame(resolve));
+              replay.click();
+              await waitFor(() => review.querySelector('[role="alert"]')?.textContent === reason,
+                'Packaged backend did not reject ' + fixture);
+              if (!review.textContent.includes('OFFLINE RESULTS: 2 · SYNTHETIC ACCEPTED: 2')) {
+                throw new Error('Rejected capture changed the saved shot count');
+              }
+            }
+          }
           analysis.querySelector('details').open = true;
           analysis.scrollIntoView({ block: 'start' });
         } else {

@@ -79,3 +79,11 @@ def test_marker_association_rejects_wrong_reference_and_ambiguous_identity():
         associate_markers_with_reference(
             observation, reference, max_distance_px=200.,
         )
+
+
+@pytest.mark.parametrize(("minimum", "maximum"), [(0., 400.), (400., 5.), (5., float("inf"))])
+def test_invalid_marker_area_limits_fail_before_extraction(minimum, maximum):
+    with pytest.raises(ValueError, match="area bounds invalid"):
+        extract_unlabelled_bright_markers(
+            np.zeros((64, 64), dtype=np.uint8), min_area_px=minimum, max_area_px=maximum,
+        )
