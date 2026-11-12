@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { socketService } from '../services/socketService';
 import { listOfflineSessions, loadOfflineSession, offlineSessionUrl } from '../services/offlineImpactHistory';
 import { useOfflineImpactStore } from '../stores/useOfflineImpactStore';
@@ -26,6 +26,7 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyBusy, setHistoryBusy] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const savedSessionLabelId = useId();
   const selected = entries.find((entry) => entry.shot_id === selectedShotId) ?? entries[entries.length - 1];
   const accepted = entries.filter((entry) => entry.accepted);
   const validSelection =
@@ -115,8 +116,9 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
         <summary>Saved synthetic sessions</summary>
         <div className="impact-controls__fields">
           <label>
-            Saved session
+            <span id={savedSessionLabelId}>Saved session</span>
             <select
+              aria-labelledby={savedSessionLabelId}
               value={savedSession}
               onChange={(event) => setSavedSession(event.target.value)}
               disabled={historyBusy}
