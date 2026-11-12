@@ -1,3 +1,11 @@
+# CI REPAIR — CAPTURE MUTATION REJECTED BY EARLIER PROVENANCE GUARD (2026-11-12)
+
+- Exact SHA `f0f891ea` Python 3.12 tests: 2994 passed, 1 failed, 7 skipped. Failure was a regression assertion expecting the opt-in preflight error, but the existing offline handoff provenance guard correctly rejected the same mutated capture first (`offline batch does not belong to this capture`).
+- Updated only the regression's expected error pattern to accept either of the two fail-closed provenance guards. No production behavior weakened. Re-run exact-SHA CI before declaring green.
+- Windows backend, Windows portable, foundation, Pylint, USB and Documentation passed on `f0f891ea`. UI formatting and PR screenshot checks remain red; no Gate closure, physical validation, merge or release.
+
+---
+
 # END-TO-END OFFLINE PREFLIGHT REGRESSION (2026-11-12)
 
 - Added unmocked positive synthetic capture preflight -> real offline assessment -> targeted event regression. Separately injects a mutation during real assessment and verifies no event can be published after the post-assessment fingerprint check.

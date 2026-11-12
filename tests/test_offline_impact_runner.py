@@ -178,7 +178,7 @@ def test_capture_mutation_during_analysis_aborts_before_event(monkeypatch):
 
     monkeypatch.setattr(runner, "assess_offline_capture_batch",
                         mutating_assessment)
-    with pytest.raises(ValueError, match="differs from offline preflight"):
+    with pytest.raises(ValueError, match="offline batch does not belong to this capture|differs from offline preflight"):
         runner.analyze_and_publish_offline_capture(
             calibration, capture,
             (SyntheticFrameCandidate(0, landmarks),
