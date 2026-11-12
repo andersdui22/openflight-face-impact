@@ -1,3 +1,10 @@
+# OFFLINE CAPTURE PREFLIGHT AND PROVENANCE (2026-11-12)
+
+- Added opt-in `preflight_offline_capture` and `require_matching_preflight` composing quality checks with capture fingerprints, detecting changed image bytes/metadata after validation; synthetic regression tests and scope document included.
+- No integration into legacy synthetic runner, no physical camera claim or Gate closure. Prior SHA `2775140a` CI was still running at inspection; new SHA must be verified. UI/PR checks remain outstanding, no merge/release.
+
+---
+
 # NEXT-PHASE OFFLINE CAMERA METADATA INTEGRITY (2026-11-12)
 
 - Hardened capture-wide preflight against negative/boolean/non-integer sensor/host timestamps, invalid exposure, nonfinite/zero analogue gain and invalid trigger timestamps. Also rejects nonfinite frame-quality threshold overrides. Added synthetic regression tests.
