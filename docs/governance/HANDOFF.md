@@ -1,3 +1,10 @@
+# NEXT-PHASE OFFLINE CAMERA METADATA INTEGRITY (2026-11-12)
+
+- Hardened capture-wide preflight against negative/boolean/non-integer sensor/host timestamps, invalid exposure, nonfinite/zero analogue gain and invalid trigger timestamps. Also rejects nonfinite frame-quality threshold overrides. Added synthetic regression tests.
+- Prior exact-SHA `4b3c7f8d` CI was in progress at inspection; no green claim for this commit. Canonical Gates 25–30 acceptance still unverified, Gates 20–24 OPEN, physical ELP tests deferred, no merge/release.
+
+---
+
 # NEXT-PHASE OFFLINE CAPTURE-WIDE PREFLIGHT (2026-11-12)
 
 - Exact prior SHA `93f76d45`: Windows Python backend prototype SUCCESS (packaged mock backend health and Electron resource staging), foundation/Tests/Pylint/USB/Windows portable/Documentation SUCCESS. UI formatting and PR screenshot remain failures.

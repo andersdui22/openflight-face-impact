@@ -5,6 +5,7 @@ This is an independent preflight check, not physical camera validation.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 
 import numpy as np
 
@@ -59,10 +60,11 @@ def require_usable_offline_frame(
         ("max_saturated_fraction", max_saturated_fraction),
         ("max_dark_fraction", max_dark_fraction),
     ):
-        if not isinstance(value, (int, float)) or isinstance(value, bool) or not 0 <= value <= 1:
+        if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value) or not 0 <= value <= 1:
             raise ValueError(f"{name} must be within [0, 1]")
     if (not isinstance(min_contrast_span, (int, float))
             or isinstance(min_contrast_span, bool)
+            or not math.isfinite(min_contrast_span)
             or not 0 <= min_contrast_span <= 255):
         raise ValueError("min_contrast_span must be within [0, 255]")
     quality = inspect_offline_frame(image)

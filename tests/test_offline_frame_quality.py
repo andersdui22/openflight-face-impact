@@ -55,3 +55,12 @@ def test_unusable_frames_fail_closed(level, reason):
 def test_invalid_thresholds_rejected(kwargs):
     with pytest.raises(ValueError):
         require_usable_offline_frame(np.ones((2, 2), dtype=np.uint8), **kwargs)
+
+@pytest.mark.parametrize("kwargs", [
+    {"max_dark_fraction": float("nan")},
+    {"max_saturated_fraction": float("inf")},
+    {"min_contrast_span": float("-inf")},
+])
+def test_nonfinite_quality_thresholds_rejected(kwargs):
+    with pytest.raises(ValueError):
+        require_usable_offline_frame(np.ones((4, 4), dtype=np.uint8), **kwargs)

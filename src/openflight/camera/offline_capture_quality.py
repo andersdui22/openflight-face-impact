@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 
 from .offline_frame_quality import OfflineFrameQuality, require_usable_offline_frame
 from .triggered_buffer import TriggeredCapture
@@ -48,10 +49,23 @@ def require_usable_offline_capture(
         raise ValueError("capture requires a shot identity")
     if not isinstance(capture.session_id, str) or not capture.session_id.strip():
         raise ValueError("capture requires a session identity")
+    if not isinstance(capture.trigger_host_timestamp_ns, int) or isinstance(capture.trigger_host_timestamp_ns, bool) or capture.trigger_host_timestamp_ns < 0:
+        raise ValueError("invalid capture trigger timestamp")
     qualities = []
     intervals = []
     expected_shape = None
     for index, frame in enumerate(frames):
+        for name in ("sensor_timestamp_ns", "host_timestamp_ns", "exposure_us"):
+            value = getattr(frame, name)
+            if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+                raise ValueError(f"invalid frame {name}")
+        if frame.exposure_us == 0:
+            raise ValueError("invalid frame exposure_us")
+        if (not isinstance(frame.analogue_gain, (int, float))
+                or isinstance(frame.analogue_gain, bool)
+                or not math.isfinite(frame.analogue_gain)
+                or frame.analogue_gain <= 0):
+            raise ValueError("invalid frame analogue_gain")
         quality = require_usable_offline_frame(frame.image)
         shape = (quality.height, quality.width)
         if expected_shape is not None and shape != expected_shape:

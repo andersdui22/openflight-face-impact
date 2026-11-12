@@ -87,3 +87,24 @@ def test_capture_bounds_and_single_frame():
 def test_invalid_limits_rejected(options):
     with pytest.raises(ValueError, match="positive integer"):
         require_usable_offline_capture(_capture(), **options)
+
+@pytest.mark.parametrize("field,value", [
+    ("sensor_timestamp_ns", -1),
+    ("host_timestamp_ns", True),
+    ("exposure_us", 0),
+    ("exposure_us", 1.5),
+    ("analogue_gain", float("nan")),
+    ("analogue_gain", float("inf")),
+    ("analogue_gain", 0.),
+])
+def test_invalid_per_frame_metadata_rejected(field, value):
+    capture = _capture()
+    bad = replace(capture.frames[0], **{field: value})
+    with pytest.raises(ValueError, match=field):
+        require_usable_offline_capture(replace(capture, frames=(bad, capture.frames[1])))
+
+
+@pytest.mark.parametrize("value", [-1, True, 1.5])
+def test_invalid_trigger_timestamp_rejected(value):
+    with pytest.raises(ValueError, match="trigger timestamp"):
+        require_usable_offline_capture(replace(_capture(), trigger_host_timestamp_ns=value))
