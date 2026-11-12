@@ -1,3 +1,11 @@
+# NEXT-PHASE OFFLINE CAPTURE-WIDE PREFLIGHT (2026-11-12)
+
+- Exact prior SHA `93f76d45`: Windows Python backend prototype SUCCESS (packaged mock backend health and Electron resource staging), foundation/Tests/Pylint/USB/Windows portable/Documentation SUCCESS. UI formatting and PR screenshot remain failures.
+- Added `offline_capture_quality.py`: bounded sequence-wide validation of frame format, exposure/contrast, stable dimensions, shot/session identity, strictly monotonic sensor/host timestamps, and gap budgets. Fail-closed; no publication or physical measurement claim. Synthetic regression tests included.
+- This is preparatory next-phase software, not formal Gate 25–30 acceptance. Canonical gate plan remains to be reconciled; Gates 20–24 OPEN, physical ELP testing deferred, no merge/release.
+
+---
+
 # PHASE 6 PREPARATORY SOFTWARE START (2026-11-12)
 
 - Following user approval to advance in parallel, added isolated offline grayscale frame quality diagnostics and fail-closed checks with deterministic tests; documented the work in `PHASE6_SOFTWARE_FIRST_START.md`.
