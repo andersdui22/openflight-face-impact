@@ -8,10 +8,27 @@ import { app, BrowserWindow, Menu } from 'electron';
 import { fileURLToPath } from 'node:url';
 import { existsSync, writeFileSync } from 'node:fs';
 import { resolveTargetUrl } from './resolveTargetUrl.js';
+import { resolveBackendExecutable, startBackend, stopBackend } from './backendProcess.js';
 
 const targetUrl = resolveTargetUrl(process.env, process.argv);
 
 Menu.setApplicationMenu(null);
+
+let backendChild = null;
+let backendStartupError = null;
+
+function launchOptInBackend() {
+  try {
+    const executable = resolveBackendExecutable();
+    backendChild = startBackend(executable, {
+      onError: (error) => { backendStartupError = error; console.error(error); },
+    });
+  } catch (error) {
+    backendStartupError = error;
+    console.error(error);
+  }
+}
+
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -83,7 +100,13 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  launchOptInBackend();
+  if (backendStartupError) console.error("Backend unavailable; UI opens without it");
+  createWindow();
+});
+
+app.on("before-quit", () => stopBackend(backendChild));
 
 app.on('window-all-closed', () => {
   app.quit();

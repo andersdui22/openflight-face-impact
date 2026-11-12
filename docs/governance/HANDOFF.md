@@ -1,3 +1,11 @@
+# BATCH B — OPT-IN WINDOWS BACKEND PROCESS LIFECYCLE (2026-11-12)
+
+- Added `ui/electron/backendProcess.js` with explicit absolute-path executable opt-in via `OPENFLIGHT_BACKEND_EXECUTABLE`, shell-free spawn, loopback mock server arguments, error callback and controlled child termination on Electron shutdown. Added Node unit tests for disabled/default, unsafe relative and missing paths, and null shutdown.
+- Wired process manager into Electron main. **Not yet a bundled Python executable, packaged one-click backend, readiness check, production camera support or physical validation.** It starts only when a separately provisioned executable is explicitly configured; otherwise UI remains standalone.
+- Prior `5a032591` CI was in progress at inspection. Formatting and authentic screenshot PR checks remain outstanding. No Gate closure, merge or release.
+
+---
+
 # CI REPAIR — FRAME DIMENSION VALIDATION ORDER (2026-11-12)
 
 - Verified CI for `f83542c2`: 2940 Python tests passed, one failed because malformed marker-image dimensions were rejected by blob-count validation before the explicit dimension guard. Moved dimension guard ahead of marker extraction so malformed input fails with correct reason. Pylint, Face Impact foundation, Windows USB and Documentation were green; UI was still running; PR Checks screenshot still missing.
