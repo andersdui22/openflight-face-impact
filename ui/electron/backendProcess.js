@@ -36,21 +36,38 @@ export function stopBackend(child) {
 
 
 export function probeBackendHealth({
-  host = '127.0.0.1', port = 8080, path = '/',
-  timeoutMs = 1000,
+  host = '127.0.0.1', port = 8080,
+  path = '/api/face-impact/health', timeoutMs = 1000,
 } = {}) {
-  // Never probe arbitrary remote hosts: backend must be loopback-only.
   if (host !== '127.0.0.1' && host !== 'localhost') {
     return Promise.reject(new Error('Backend health probe requires loopback host'));
   }
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     return Promise.reject(new Error('Invalid backend port'));
   }
+  if (path !== '/api/face-impact/health') {
+    return Promise.reject(new Error('Unexpected backend health path'));
+  }
   return new Promise((resolve) => {
     const req = request({ hostname: host, port, path, method: 'GET',
       timeout: timeoutMs }, (response) => {
-      response.resume();
-      resolve(response.statusCode >= 200 && response.statusCode < 500);
+      let body = '';
+      response.setEncoding('utf8');
+      response.on('data', (chunk) => {
+        body += chunk;
+        if (body.length > 4096) req.destroy();
+      });
+      response.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          resolve(response.statusCode === 200 &&
+            data.service === 'openflight-face-impact' &&
+            data.protocol_version === 1 && data.status === 'ready' &&
+            data.camera_validated === false);
+        } catch {
+          resolve(false);
+        }
+      });
     });
     req.on('timeout', () => req.destroy());
     req.on('error', () => resolve(false));

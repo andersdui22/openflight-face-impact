@@ -997,6 +997,13 @@ def shot_to_dict(shot: Shot) -> dict:
     return data
 
 
+@app.route("/api/face-impact/health", methods=["GET"])
+def face_impact_backend_health():
+    """Identify the local Face Impact backend without probing camera hardware."""
+    return {"service": "openflight-face-impact", "protocol_version": 1,
+            "status": "ready", "camera_validated": False}
+
+
 @app.route("/")
 def index():
     """Serve the React app."""

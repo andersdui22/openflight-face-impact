@@ -1,3 +1,11 @@
+# BATCH B — BACKEND IDENTITY HEALTH CONTRACT (2026-11-12)
+
+- Added `GET /api/face-impact/health` to Python Flask server with fixed service identity, protocol version, ready state and explicit `camera_validated: false`; no hardware probe or physical claims.
+- Electron readiness probe now requires exact loopback endpoint, HTTP 200 and validated JSON identity/protocol/status instead of treating any HTTP 2xx–4xx server as ready. Added Python endpoint and Node invalid-path tests.
+- Probe is **not yet wired to Electron startup gating** and Python is **not bundled**. CI on this exact SHA pending. PR screenshot and UI Prettier remain outstanding; Gates OPEN, no merges/releases.
+
+---
+
 # BATCH B — WINDOWS BACKEND READINESS PRIMITIVE (2026-11-12)
 
 - Added loopback-only HTTP health probe with bounded timeout and bounded retry readiness helper, plus Node tests for eventual readiness, early child exit and non-loopback refusal.

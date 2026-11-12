@@ -52,3 +52,11 @@ test('health probe rejects non-loopback targets', async () => {
     /loopback host/,
   );
 });
+
+
+test('health probe rejects a different endpoint', async () => {
+  await assert.rejects(
+    probeBackendHealth({ path: '/other' }),
+    /Unexpected backend health path/,
+  );
+});
