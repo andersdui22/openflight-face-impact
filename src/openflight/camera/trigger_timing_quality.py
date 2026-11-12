@@ -47,6 +47,9 @@ def assess_trigger_timing(capture: TriggeredCapture) -> TriggerTimingQuality:
     ):
         return reject("missing capture identity")
 
+    if any(frame.sensor_timestamp_is_host_alias is not False for frame in frames):
+        return reject("independent sensor timestamp unavailable")
+
     for field in ("sensor_timestamp_ns", "host_timestamp_ns"):
         timestamps = [getattr(frame, field) for frame in frames]
         if any(not isinstance(t, int) or isinstance(t, bool) or t < 0 for t in timestamps):

@@ -6,6 +6,7 @@ import pytest
 
 from openflight.camera.offline_capture_quality import require_usable_offline_capture
 from openflight.camera.offline_frame_spacing import assess_offline_frame_spacing
+from openflight.camera.trigger_timing_quality import validate_candidate_frame_index
 from openflight.camera.windows_usb import UsbCameraSettings, WindowsUsbCamera
 
 
@@ -72,8 +73,10 @@ def test_usb_frames_reuse_existing_ring_and_host_clock():
         spacing = assess_offline_frame_spacing(capture, max_sensor_gap_ns=100_000_000,
                                                max_host_gap_ns=100_000_000)
         assert not spacing.accepted
-        assert spacing.reason == "independent sensor timestamp unavailable"
-        with pytest.raises(ValueError, match=spacing.reason):
+        assert spacing.reason == "invalid trigger timing: independent sensor timestamp unavailable"
+        with pytest.raises(ValueError, match="independent sensor timestamp unavailable"):
+            validate_candidate_frame_index(capture, capture.pre_trigger_count)
+        with pytest.raises(ValueError, match="independent sensor timestamp unavailable"):
             require_usable_offline_capture(capture)
     finally:
         camera.stop()
