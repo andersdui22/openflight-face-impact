@@ -32,9 +32,14 @@ describe('offline synthetic impact review', () => {
 
   it('never draws an impact marker for rejected evidence', () => {
     useOfflineImpactStore.getState().ingest({
-      schema_version: 1, source: 'offline_synthetic_analysis',
-      shot_id: 'shot-b', session_id: 'session-a', accepted: false,
-      reason: 'ambiguous frame', physically_validated: false, position_uncertainty_mm: null,
+      schema_version: 1,
+      source: 'offline_synthetic_analysis',
+      shot_id: 'shot-b',
+      session_id: 'session-a',
+      accepted: false,
+      reason: 'ambiguous frame',
+      physically_validated: false,
+      position_uncertainty_mm: null,
     });
     const html = renderToStaticMarkup(<OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />);
     expect(html).toContain('ambiguous frame');
@@ -44,14 +49,16 @@ describe('offline synthetic impact review', () => {
   it('does not show the earlier accepted marker when the latest shot is rejected', () => {
     useOfflineImpactStore.getState().ingest(accepted);
     useOfflineImpactStore.getState().ingest({
-      schema_version: 1, source: 'offline_synthetic_analysis',
-      shot_id: 'shot-rejected', session_id: 'session-a', accepted: false,
-      reason: 'no unique temporal contact', physically_validated: false,
+      schema_version: 1,
+      source: 'offline_synthetic_analysis',
+      shot_id: 'shot-rejected',
+      session_id: 'session-a',
+      accepted: false,
+      reason: 'no unique temporal contact',
+      physically_validated: false,
       position_uncertainty_mm: null,
     });
-    const html = renderToStaticMarkup(
-      <OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />
-    );
+    const html = renderToStaticMarkup(<OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />);
     expect(html).toContain('shot-a');
     expect(html).toContain('shot-rejected');
     expect(html).toContain('no unique temporal contact');

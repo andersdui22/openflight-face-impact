@@ -241,15 +241,13 @@ class SocketService {
         reject(new Error('OpenFlight backend is disconnected'));
         return;
       }
-      this.socket.timeout(15000).emit('request_synthetic_motion_demo',
-        (error: Error | null, response: unknown) => {
-          if (error || typeof response !== 'object' || response === null ||
-              (response as { ok?: unknown }).ok !== true) {
-            reject(new Error('Synthetic motion demo unavailable'));
-            return;
-          }
-          resolve();
-        });
+      this.socket.timeout(15000).emit('request_synthetic_motion_demo', (error: Error | null, response: unknown) => {
+        if (error || typeof response !== 'object' || response === null || (response as { ok?: unknown }).ok !== true) {
+          reject(new Error('Synthetic motion demo unavailable'));
+          return;
+        }
+        resolve();
+      });
     });
   }
 

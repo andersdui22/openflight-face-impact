@@ -66,9 +66,16 @@ describe('FaceImpactView', () => {
 
   it('never displays a point outside the supplied face outline', () => {
     const html = renderToString(
-      <FaceImpactView polygon={polygon} result={{
-        status: 'ok', x_mm: 90, y_mm: 0, horizontal_region: 'toe', vertical_region: 'center',
-      }} />
+      <FaceImpactView
+        polygon={polygon}
+        result={{
+          status: 'ok',
+          x_mm: 90,
+          y_mm: 0,
+          horizontal_region: 'toe',
+          vertical_region: 'center',
+        }}
+      />
     );
     expect(html).toContain('Impact point outside clubface outline');
     expect(html).not.toContain('synthetic-impact-marker');
@@ -77,9 +84,19 @@ describe('FaceImpactView', () => {
 
   it('never displays a point when the supplied face outline is invalid', () => {
     const html = renderToString(
-      <FaceImpactView polygon={[[0, 0], [1, 0]]} result={{
-        status: 'ok', x_mm: 0.5, y_mm: 0, horizontal_region: 'center', vertical_region: 'center',
-      }} />
+      <FaceImpactView
+        polygon={[
+          [0, 0],
+          [1, 0],
+        ]}
+        result={{
+          status: 'ok',
+          x_mm: 0.5,
+          y_mm: 0,
+          horizontal_region: 'center',
+          vertical_region: 'center',
+        }}
+      />
     );
     expect(html).toContain('Invalid clubface outline');
     expect(html).not.toContain('synthetic-impact-marker');
@@ -87,9 +104,20 @@ describe('FaceImpactView', () => {
 
   it('rejects a zero-area clubface outline without drawing a marker', () => {
     const html = renderToString(
-      <FaceImpactView polygon={[[0, 0], [1, 1], [2, 2]]} result={{
-        status: 'ok', x_mm: 1, y_mm: 1, horizontal_region: 'center', vertical_region: 'center',
-      }} />
+      <FaceImpactView
+        polygon={[
+          [0, 0],
+          [1, 1],
+          [2, 2],
+        ]}
+        result={{
+          status: 'ok',
+          x_mm: 1,
+          y_mm: 1,
+          horizontal_region: 'center',
+          vertical_region: 'center',
+        }}
+      />
     );
     expect(html).toContain('Invalid clubface outline');
     expect(html).not.toContain('synthetic-impact-marker');

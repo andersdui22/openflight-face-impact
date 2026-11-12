@@ -40,15 +40,18 @@ export function isOfflineImpactEvidence(value: unknown): value is OfflineImpactE
     !data.reason.trim() ||
     data.physically_validated !== false ||
     data.position_uncertainty_mm !== null
-  ) return false;
+  )
+    return false;
   const fields = ['frame_index', 'x_mm', 'y_mm', 'horizontal_region', 'vertical_region'];
   if (data.accepted === false) return fields.every((field) => data[field] === undefined);
   if (data.accepted !== true) return false;
   return (
     Number.isSafeInteger(data.frame_index) &&
     (data.frame_index as number) >= 0 &&
-    typeof data.x_mm === 'number' && Number.isFinite(data.x_mm) &&
-    typeof data.y_mm === 'number' && Number.isFinite(data.y_mm) &&
+    typeof data.x_mm === 'number' &&
+    Number.isFinite(data.x_mm) &&
+    typeof data.y_mm === 'number' &&
+    Number.isFinite(data.y_mm) &&
     ['heel', 'center', 'toe'].includes(String(data.horizontal_region)) &&
     ['low', 'center', 'high'].includes(String(data.vertical_region))
   );

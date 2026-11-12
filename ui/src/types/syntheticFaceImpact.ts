@@ -22,12 +22,22 @@ export function isSyntheticFaceImpactResponse(value: unknown): value is Syntheti
   const data = value as Record<string, unknown>;
   if (data.schema_version !== 1 || data.source !== 'synthetic_python_pipeline') return false;
   if (data.ok === false) {
-    return typeof data.error === 'string' && data.error.trim().length > 0 &&
-      data.result === undefined && data.polygon_face_mm === undefined;
+    return (
+      typeof data.error === 'string' &&
+      data.error.trim().length > 0 &&
+      data.result === undefined &&
+      data.polygon_face_mm === undefined
+    );
   }
-  if (data.ok !== true || typeof data.case_id !== 'string' ||
-      !data.case_id.trim() || typeof data.label !== 'string' ||
-      !data.label.trim() || !Array.isArray(data.polygon_face_mm)) return false;
+  if (
+    data.ok !== true ||
+    typeof data.case_id !== 'string' ||
+    !data.case_id.trim() ||
+    typeof data.label !== 'string' ||
+    !data.label.trim() ||
+    !Array.isArray(data.polygon_face_mm)
+  )
+    return false;
   if (
     data.polygon_face_mm.length < 3 ||
     data.polygon_face_mm.length > 128 ||
@@ -48,8 +58,7 @@ export function isSyntheticFaceImpactResponse(value: unknown): value is Syntheti
   // Reject self-intersecting face outlines: a nonzero shoelace area alone is insufficient.
   const orientation = (a: [number, number], b: [number, number], c: [number, number]) =>
     (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
-  const intersects = (a: [number, number], b: [number, number],
-    c: [number, number], d: [number, number]) => {
+  const intersects = (a: [number, number], b: [number, number], c: [number, number], d: [number, number]) => {
     const o1 = orientation(a, b, c);
     const o2 = orientation(a, b, d);
     const o3 = orientation(c, d, a);
@@ -59,8 +68,10 @@ export function isSyntheticFaceImpactResponse(value: unknown): value is Syntheti
   for (let i = 0; i < vertices.length; i++) {
     for (let j = i + 2; j < vertices.length; j++) {
       if (i === 0 && j === vertices.length - 1) continue;
-      if (intersects(vertices[i], vertices[(i + 1) % vertices.length],
-        vertices[j], vertices[(j + 1) % vertices.length])) return false;
+      if (
+        intersects(vertices[i], vertices[(i + 1) % vertices.length], vertices[j], vertices[(j + 1) % vertices.length])
+      )
+        return false;
     }
   }
   if (typeof data.result !== 'object' || data.result === null) return false;
@@ -74,15 +85,21 @@ export function isSyntheticFaceImpactResponse(value: unknown): value is Syntheti
       const [xi, yi] = vertices[i];
       const [xj, yj] = vertices[j];
       const cross = (x - xi) * (yj - yi) - (y - yi) * (xj - xi);
-      if (Math.abs(cross) < 1e-8 &&
-        x >= Math.min(xi, xj) && x <= Math.max(xi, xj) &&
-        y >= Math.min(yi, yj) && y <= Math.max(yi, yj)) {
+      if (
+        Math.abs(cross) < 1e-8 &&
+        x >= Math.min(xi, xj) &&
+        x <= Math.max(xi, xj) &&
+        y >= Math.min(yi, yj) &&
+        y <= Math.max(yi, yj)
+      ) {
         inside = true;
         break;
       }
-      if ((yi > y) !== (yj > y) && x < xi + ((y - yi) * (xj - xi)) / (yj - yi)) inside = !inside;
+      if (yi > y !== yj > y && x < xi + ((y - yi) * (xj - xi)) / (yj - yi)) inside = !inside;
     }
-    return inside && result.rejection_reason === undefined && (
+    return (
+      inside &&
+      result.rejection_reason === undefined &&
       typeof result.x_mm === 'number' &&
       Number.isFinite(result.x_mm) &&
       typeof result.y_mm === 'number' &&

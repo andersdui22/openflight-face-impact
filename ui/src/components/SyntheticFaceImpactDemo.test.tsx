@@ -37,17 +37,37 @@ describe('SyntheticFaceImpactDemo', () => {
     expect(isSyntheticFaceImpactResponse(valid)).toBe(true);
     expect(isSyntheticFaceImpactResponse({ ...valid, result: { status: 'ok', x_mm: 12 } })).toBe(false);
     expect(isSyntheticFaceImpactResponse({ ...valid, polygon_face_mm: [[0, 0]] })).toBe(false);
-    expect(isSyntheticFaceImpactResponse({ ...valid, polygon_face_mm: [[0, 0], [1, 1], [2, 2]] })).toBe(false);
+    expect(
+      isSyntheticFaceImpactResponse({
+        ...valid,
+        polygon_face_mm: [
+          [0, 0],
+          [1, 1],
+          [2, 2],
+        ],
+      })
+    ).toBe(false);
     expect(isSyntheticFaceImpactResponse({ ...valid, result: { ...valid.result, x_mm: 500 } })).toBe(false);
     expect(isSyntheticFaceImpactResponse({ ...valid, result: { ...valid.result, x_mm: Number.NaN } })).toBe(false);
     expect(isSyntheticFaceImpactResponse({ ...valid, label: '' })).toBe(false);
-    expect(isSyntheticFaceImpactResponse({
-      ...valid, result: { ...valid.result, rejection_reason: 'contradictory' },
-    })).toBe(false);
+    expect(
+      isSyntheticFaceImpactResponse({
+        ...valid,
+        result: { ...valid.result, rejection_reason: 'contradictory' },
+      })
+    ).toBe(false);
     expect(isSyntheticFaceImpactResponse({ ...valid, case_id: '' })).toBe(false);
-    expect(isSyntheticFaceImpactResponse({
-      ...valid, polygon_face_mm: [[0, 0], [4, 4], [0, 5], [5, 0]],
-    })).toBe(false);
+    expect(
+      isSyntheticFaceImpactResponse({
+        ...valid,
+        polygon_face_mm: [
+          [0, 0],
+          [4, 4],
+          [0, 5],
+          [5, 0],
+        ],
+      })
+    ).toBe(false);
   });
 
   it('rejects malformed error payloads that could smuggle a displayed result', () => {

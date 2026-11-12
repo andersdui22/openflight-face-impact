@@ -35,16 +35,23 @@ describe('offline impact session ingestion', () => {
   it('replaces prior session history on session identity change', () => {
     useOfflineImpactStore.getState().ingest(accepted);
     useOfflineImpactStore.getState().ingest({
-      ...accepted, session_id: 'session-2', shot_id: 'shot-2',
+      ...accepted,
+      session_id: 'session-2',
+      shot_id: 'shot-2',
     });
     expect(useOfflineImpactStore.getState().entries.map((entry) => entry.shot_id)).toEqual(['shot-2']);
   });
 
   it('retains rejection reasons without coordinates', () => {
     const rejected = {
-      schema_version: 1, source: 'offline_synthetic_analysis',
-      shot_id: 'shot-3', session_id: 'session-1', accepted: false,
-      reason: 'ambiguous', physically_validated: false, position_uncertainty_mm: null,
+      schema_version: 1,
+      source: 'offline_synthetic_analysis',
+      shot_id: 'shot-3',
+      session_id: 'session-1',
+      accepted: false,
+      reason: 'ambiguous',
+      physically_validated: false,
+      position_uncertainty_mm: null,
     };
     useOfflineImpactStore.getState().ingest(rejected);
     expect(useOfflineImpactStore.getState().entries[0]).toEqual(rejected);

@@ -50,9 +50,7 @@ describe('offline socket event -> Zustand -> review contract', () => {
       physically_validated: false,
       position_uncertainty_mm: null,
     });
-    const html = renderToStaticMarkup(
-      <OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />
-    );
+    const html = renderToStaticMarkup(<OfflineImpactReview evidence={useOfflineImpactStore.getState().entries} />);
     expect(html).toContain('ambiguous frame');
     expect(html).not.toContain('synthetic-impact-marker');
   });
