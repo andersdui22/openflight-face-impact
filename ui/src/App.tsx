@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useSocket } from './hooks/useSocket';
 import { useSystemStore } from './stores/useSystemStore';
@@ -8,11 +8,15 @@ import { useDebugStore } from './stores/useDebugStore';
 import { useProfileStore } from './stores/useProfileStore';
 import { useHeroMetricStore } from './stores/useHeroMetricStore';
 import { useCameraReplayController } from './hooks/useCameraReplayController';
+import { useDragScroll } from './hooks/useDragScroll';
 import { socketService } from './services/socketService';
 import { DebugPanel } from './components/DebugPanel';
 import { SyntheticFaceImpactDemo } from './components/SyntheticFaceImpactDemo';
 import { FaceImpactSessionDemo, type DemoShot } from './components/FaceImpactSessionDemo';
+import { OfflineImpactReview } from './components/OfflineImpactReview';
 import { FaceImpactControls } from './components/FaceImpactControls';
+import { SyntheticMotionDiagnostics } from './components/SyntheticMotionDiagnostics';
+import { useSyntheticMotionStore } from './stores/useSyntheticMotionStore';
 import { FaceImpactCameraPreview } from './components/FaceImpactCameraPreview';
 import { DisplayMode } from './components/DisplayMode';
 import { SimShotBadges } from './components/SimShotBadges';
@@ -56,6 +60,9 @@ function FaceImpactDashboard({
   onNavigate: (view: PanelView) => void;
   shotCount: number;
 }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const contentDragScroll = useDragScroll(contentRef);
+  const syntheticMotion = useSyntheticMotionStore((state) => state.payload);
   const [demoEnabled, setDemoEnabled] = useState(false);
   const [demoShots, setDemoShots] = useState<DemoShot[]>([]);
   const demoAverage = (axis: 'x' | 'y') =>
@@ -98,7 +105,7 @@ function FaceImpactDashboard({
           SHOT HISTORY
         </button>
       </aside>
-      <div className="impact-workspace__content">
+      <div ref={contentRef} className="impact-workspace__content" {...contentDragScroll}>
         <header className="impact-workspace__topbar">
           <nav aria-label="Dashboard sections">
             <span className="impact-workspace__active">SUMMARY</span>
@@ -205,7 +212,12 @@ function FaceImpactDashboard({
           shots={demoShots}
           setShots={setDemoShots}
         />
+        <OfflineImpactReview />
         <FaceImpactControls />
+        <details className="impact-controls" aria-label="Advanced synthetic motion diagnostics">
+          <summary>Advanced diagnostics · synthetic motion (developer tools)</summary>
+          <SyntheticMotionDiagnostics payload={syntheticMotion} />
+        </details>
         {demoEnabled && (
           <section className="impact-controls" aria-label="Simulated Face Impact metrics">
             <strong>DEMO METRICS — SIMULATED, NOT MEASURED</strong>
@@ -496,7 +508,7 @@ function AppContent() {
           state={shutdownState}
           onConfirm={handleShutdown}
           onCancel={closeShutdown}
-          onSleep={handleSleepScreen}
+          onSleep={typeof window !== 'undefined' && window.openFlightDesktop ? undefined : handleSleepScreen}
         />
       ) : null}
 

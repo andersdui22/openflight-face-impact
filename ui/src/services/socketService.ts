@@ -1,4 +1,9 @@
+import { useOfflineImpactStore } from '../stores/useOfflineImpactStore';
+import type { OfflineReplayCase } from '../types/offlineImpactEvidence';
 import { io, type Socket } from 'socket.io-client';
+import { ingestOfflineImpactSocketEvent } from './offlineImpactSocketIngestion';
+import { useSyntheticMotionStore } from '../stores/useSyntheticMotionStore';
+import { isSyntheticMotionPayload } from '../types/syntheticMotionPayload';
 import { isSyntheticFaceImpactResponse, type SyntheticFaceImpactResponse } from '../types/syntheticFaceImpact';
 import { useSystemStore } from '../stores/useSystemStore';
 import { useShotStore } from '../stores/useShotStore';
@@ -27,13 +32,17 @@ class SocketService {
   private sessionClearedListeners = new Set<() => void>();
 
   connect() {
-    if (this.socket) return;
+    if (this.socket || (typeof window !== 'undefined' && window.openFlightDesktop?.backendAvailable === false)) return;
 
     this.socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
     });
 
     this.setupListeners();
+  }
+
+  isConnected() {
+    return this.socket?.connected === true;
   }
 
   disconnect() {
@@ -56,7 +65,20 @@ class SocketService {
       this.socket?.emit('get_profiles');
     });
 
+    this.socket.on('offline_impact_evidence', (data: unknown) => {
+      ingestOfflineImpactSocketEvent(data);
+    });
+
+    this.socket.on('synthetic_motion_diagnostics', (data: unknown) => {
+      if (isSyntheticMotionPayload(data)) {
+        useSyntheticMotionStore.getState().setPayload(data);
+      } else {
+        useSyntheticMotionStore.getState().clear();
+      }
+    });
+
     this.socket.on('disconnect', () => {
+      useSyntheticMotionStore.getState().clear();
       console.log('Disconnected from server');
       useSystemStore.getState().setConnected(false);
       useShotStore.getState().finishShotProcessing();
@@ -162,6 +184,7 @@ class SocketService {
       } else {
         useShotStore.getState().setShots(remaining);
       }
+      useOfflineImpactStore.getState().clear();
       this.sessionClearedListeners.forEach((listener) => listener());
     });
 
@@ -214,6 +237,69 @@ class SocketService {
           }
           resolve(response);
         });
+    });
+  }
+
+  requestSyntheticMotionDemo(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket?.connected) {
+        reject(new Error('OpenFlight backend is disconnected'));
+        return;
+      }
+      this.socket.timeout(15000).emit('request_synthetic_motion_demo', (error: Error | null, response: unknown) => {
+        if (error || typeof response !== 'object' || response === null || (response as { ok?: unknown }).ok !== true) {
+          reject(new Error('Synthetic motion demo unavailable'));
+          return;
+        }
+        resolve();
+      });
+    });
+  }
+
+  requestOfflineImpactDemo(
+    caseId: OfflineReplayCase,
+    sessionId?: string | null
+  ): Promise<{ shot_id: string; session_id: string; archived: boolean }> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket?.connected) {
+        reject(new Error('OpenFlight backend is disconnected'));
+        return;
+      }
+      const requestId = Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) =>
+        byte.toString(16).padStart(2, '0')
+      ).join('');
+      this.socket
+        .timeout(5000)
+        .emit(
+          'request_offline_impact_demo',
+          { case_id: caseId, session_id: sessionId, request_id: requestId },
+          (error: Error | null, response: unknown) => {
+            const ack = response as {
+              ok?: unknown;
+              error?: unknown;
+              shot_id?: unknown;
+              session_id?: unknown;
+              archived?: unknown;
+            } | null;
+            if (!error && ack?.ok === false && typeof ack.error === 'string' && ack.error.trim()) {
+              reject(new Error(ack.error));
+              return;
+            }
+            if (
+              error ||
+              ack?.ok !== true ||
+              typeof ack.shot_id !== 'string' ||
+              !ack.shot_id.trim() ||
+              typeof ack.session_id !== 'string' ||
+              !ack.session_id.trim() ||
+              typeof ack.archived !== 'boolean'
+            ) {
+              reject(new Error('Synthetic offline replay unavailable'));
+              return;
+            }
+            resolve({ shot_id: ack.shot_id, session_id: ack.session_id, archived: ack.archived });
+          }
+        );
     });
   }
 

@@ -24,6 +24,12 @@ jobs:
       - name: Build
         run: npm run build
         working-directory: ui
+      - name: Test React UI
+        run: npm test
+        working-directory: ui
+      - name: Test Electron helpers
+        run: npm run test:electron
+        working-directory: ui
 
   lint:
     runs-on: ubuntu-latest

@@ -49,14 +49,8 @@ function calibrationLabel(status: CalibrationStatus | null): string {
   }
 }
 
-function backendOrigin(): string {
-  const origin = getServerOrigin();
-  // Packaged Electron uses file:// and has no bundled Python backend.
-  // An explicit loopback address avoids treating file:// as an HTTP API.
-  return origin === 'null' || origin.startsWith('file:') ? 'http://127.0.0.1:8080' : origin;
-}
-
 export function FaceImpactCameraPreview() {
+  const origin = getServerOrigin();
   const [state, setState] = useState<CameraState>('checking');
   const [error, setError] = useState<string | null>(null);
   const [previewFailed, setPreviewFailed] = useState(false);
@@ -73,7 +67,7 @@ export function FaceImpactCameraPreview() {
       }
       requestInFlight = true;
       try {
-        const response = await fetch(`${backendOrigin()}/api/camera/usb/status`, {
+        const response = await fetch(`${origin}/api/camera/usb/status`, {
           signal: controller.signal,
           cache: 'no-store',
         });
@@ -109,7 +103,7 @@ export function FaceImpactCameraPreview() {
       controller.abort();
       window.clearInterval(timer);
     };
-  }, []);
+  }, [origin]);
 
   const active = state === 'running' && !previewFailed;
   return (
@@ -117,7 +111,7 @@ export function FaceImpactCameraPreview() {
       {active ? (
         <img
           alt="Live USB camera preview — not calibrated or measured"
-          src={`${backendOrigin()}/api/camera/preview.jpg?frame=${frameKey}`}
+          src={`${origin}/api/camera/preview.jpg?frame=${frameKey}`}
           onLoad={() => setPreviewFailed(false)}
           onError={() => setPreviewFailed(true)}
           style={{ maxWidth: '100%', maxHeight: 180, objectFit: 'contain' }}

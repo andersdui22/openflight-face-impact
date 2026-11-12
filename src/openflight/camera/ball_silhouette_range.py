@@ -22,6 +22,32 @@ class BallSilhouettePosition:
     angular_radius_rad: float
     max_residual_rad: float
 
+    def __post_init__(self) -> None:
+        """Keep the accepted camera-space centre independent of caller mutation."""
+        center = np.asarray(self.center_camera_mm)
+        if (
+            center.shape != (3,)
+            or center.dtype.kind not in "iuf"
+            or not np.all(np.isfinite(center))
+        ):
+            raise ValueError("ball centre must be a finite XYZ camera position")
+        if any(
+            not isinstance(value, (int, float, np.integer, np.floating))
+            or isinstance(value, (bool, np.bool_))
+            or not math.isfinite(value)
+            for value in (self.range_mm, self.angular_radius_rad, self.max_residual_rad)
+        ):
+            raise ValueError("ball range diagnostics must be finite numeric scalars")
+        if (
+            self.range_mm <= 0
+            or not 0 < self.angular_radius_rad < math.pi / 2
+            or not 0 <= self.max_residual_rad < self.angular_radius_rad
+        ):
+            raise ValueError("ball range diagnostics are inconsistent")
+        immutable = np.array(center, dtype=np.float64, copy=True)
+        immutable.setflags(write=False)
+        object.__setattr__(self, "center_camera_mm", immutable)
+
 
 def _unit_edge_rays(edge_rays: np.ndarray) -> np.ndarray:
     rays = np.asarray(edge_rays)
@@ -76,9 +102,19 @@ def estimate_ball_position(
     The caller supplies an angular residual budget in radians. The returned
     residual checks consistency with a sphere, not physical measurement accuracy.
     """
-    if isinstance(radius_mm, bool) or not math.isfinite(radius_mm) or radius_mm <= 0:
+    if (
+        isinstance(radius_mm, (bool, str, bytes))
+        or not isinstance(radius_mm, (int, float, np.integer, np.floating))
+        or not math.isfinite(radius_mm)
+        or radius_mm <= 0
+    ):
         raise ValueError("ball radius must be positive and finite")
-    if not math.isfinite(max_residual_rad) or not 0 < max_residual_rad < math.pi / 2:
+    if (
+        isinstance(max_residual_rad, (bool, str, bytes))
+        or not isinstance(max_residual_rad, (int, float, np.integer, np.floating))
+        or not math.isfinite(max_residual_rad)
+        or not 0 < max_residual_rad < math.pi / 2
+    ):
         raise ValueError("angular residual limit must be between zero and pi/2")
     rays = _unit_edge_rays(edge_rays)
     axis = _cone_axis(rays)

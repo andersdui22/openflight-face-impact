@@ -2,12 +2,16 @@
 
 import numpy as np
 
+from .ball_contour_quality import validate_ball_contour_pixels
+from .capture_frame_quality import validate_capture_frame_image
 from .ball_silhouette_range import estimate_ball_position
 from .calibrated_rays import calibrated_pixel_rays
 from .checkerboard_calibration import CheckerboardCalibration
 from .synthetic_face_frame import SyntheticFaceFrame
 from .synthetic_face_landmark_pose import estimate_synthetic_face_pose
 from .synthetic_face_polygon import SyntheticFacePolygon
+from .trigger_timing_quality import validate_candidate_frame_index
+from .triggered_buffer import TriggeredCapture
 from .synthetic_impact_pipeline import (
     SyntheticImpactResult,
     SyntheticImpactStatus,
@@ -28,15 +32,51 @@ def calculate_synthetic_observed_impact(  # pylint: disable=too-many-arguments
     max_face_rms_px: float,
     min_face_margin_px: float,
     contact_tolerance_mm: float,
+    ball_border_margin_px: float = 0.0,
+    capture: TriggeredCapture | None = None,
+    candidate_frame_index: int | None = None,
+    observation_frame_index: int | None = None,
+    validate_frame_image: bool = False,
+    require_observation_frame_identity: bool = False,
 ) -> SyntheticImpactResult:
     """Evaluate one supplied synthetic candidate frame in camera millimetres.
 
     Both pixel sets share a calibrated image and instant. Landmark and polygon
     coordinates share a face-local origin and axes. The caller must supply
     all thresholds; this function does not determine the contact instant.
+    An optional capture/index pair checks provenance. The explicit observation\n    frame index, if supplied, must match the candidate. Opt-in image validation\n    checks dimensions and dtype, not pixel-observation identity or contact time.
     """
     try:
-        rays = calibrated_pixel_rays(calibration, ball_edge_pixels_px, image_size=image_size)
+        if image_size != calibration.image_size:
+            raise ValueError("image dimensions must match the calibration")
+        if capture is None and candidate_frame_index is not None:
+            raise ValueError("candidate frame index requires a capture")
+        if capture is not None:
+            validate_candidate_frame_index(capture, candidate_frame_index)
+        if not isinstance(require_observation_frame_identity, bool):
+            raise ValueError("require_observation_frame_identity must be boolean")
+        if require_observation_frame_identity and observation_frame_index is None:
+            raise ValueError("explicit observation frame identity is required")
+        if observation_frame_index is not None:
+            if capture is None:
+                raise ValueError("observation frame index requires a capture")
+            validate_candidate_frame_index(capture, observation_frame_index)
+            if observation_frame_index != candidate_frame_index:
+                raise ValueError("observation frame index differs from candidate frame")
+        if not isinstance(validate_frame_image, bool):
+            raise ValueError("validate_frame_image must be boolean")
+        if validate_frame_image:
+            if capture is None:
+                raise ValueError("frame image validation requires a capture")
+            validate_capture_frame_image(
+                capture, candidate_frame_index, image_size=image_size,
+            )
+        contour = validate_ball_contour_pixels(
+            ball_edge_pixels_px,
+            image_size=image_size,
+            border_margin_px=ball_border_margin_px,
+        )
+        rays = calibrated_pixel_rays(calibration, contour, image_size=image_size)
         ball = estimate_ball_position(
             rays,
             radius_mm=ball_radius_mm,

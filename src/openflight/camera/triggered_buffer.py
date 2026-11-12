@@ -21,6 +21,7 @@ class CameraFrame:
     host_timestamp_ns: int
     exposure_us: int
     analogue_gain: float
+    sensor_timestamp_is_host_alias: bool = False
 
 
 @dataclass(frozen=True)

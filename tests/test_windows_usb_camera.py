@@ -4,6 +4,9 @@ import time
 import numpy as np
 import pytest
 
+from openflight.camera.offline_capture_quality import require_usable_offline_capture
+from openflight.camera.offline_frame_spacing import assess_offline_frame_spacing
+from openflight.camera.trigger_timing_quality import validate_candidate_frame_index
 from openflight.camera.windows_usb import UsbCameraSettings, WindowsUsbCamera
 
 
@@ -66,6 +69,15 @@ def test_usb_frames_reuse_existing_ring_and_host_clock():
         assert capture is not None
         assert capture.pre_trigger_count == 2
         assert capture.post_trigger_count == 2
+        assert all(frame.sensor_timestamp_is_host_alias for frame in capture.frames)
+        spacing = assess_offline_frame_spacing(capture, max_sensor_gap_ns=100_000_000,
+                                               max_host_gap_ns=100_000_000)
+        assert not spacing.accepted
+        assert spacing.reason == "invalid trigger timing: independent sensor timestamp unavailable"
+        with pytest.raises(ValueError, match="independent sensor timestamp unavailable"):
+            validate_candidate_frame_index(capture, capture.pre_trigger_count)
+        with pytest.raises(ValueError, match="independent sensor timestamp unavailable"):
+            require_usable_offline_capture(capture)
     finally:
         camera.stop()
     assert fake.released
@@ -310,3 +322,27 @@ def test_reset_cancels_waiting_capture_consumer_without_timeout():
     thread.join(timeout=1)
     assert not thread.is_alive(), "capture consumer remained blocked after reset"
     assert results == [None]
+
+
+
+def test_usb_copies_reused_grayscale_source_and_blocks_trigger_after_stop():
+    image = np.zeros((8, 12), dtype=np.uint8)
+
+    class ReusingCamera(FakeCamera):
+        def read(self):
+            time.sleep(0.002)
+            return True, image
+
+    camera = WindowsUsbCamera(
+        UsbCameraSettings(pre_frames=1, post_frames=1),
+        camera_factory=lambda _: ReusingCamera(),
+    )
+    camera.start()
+    try:
+        wait_until(lambda: camera.ring.latest_frame is not None)
+        before = camera.ring.latest_frame
+    finally:
+        camera.stop()
+    image.fill(255)
+    assert not before.image.any()
+    assert not camera.trigger()

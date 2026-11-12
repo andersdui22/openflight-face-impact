@@ -104,3 +104,63 @@ def test_invalid_inputs(calibration, landmarks, size, message):
         estimate_synthetic_face_pose(
             calibration, landmarks, pixels, image_size=size, max_rms_px=0.5, min_margin_px=0.1,
         )
+
+
+@pytest.mark.parametrize("bad_limit", [
+    None, True, False, "0.5", [], {}, np.array([0.5]),
+    0., -1., float("nan"), float("inf"),
+])
+@pytest.mark.parametrize("field", ["max_rms_px", "min_margin_px"])
+def test_gate21_malformed_pose_quality_threshold_fails_closed(
+    calibration, bad_limit, field,
+):
+    pixels = project(
+        calibration, rotation_from_front((0.29, -0.32, 0.2)),
+        np.array([64.0, -22.0, 420.0]),
+    )
+    limits = {"max_rms_px": 0.5, "min_margin_px": 0.1}
+    limits[field] = bad_limit
+    with pytest.raises(ValueError, match="pose score thresholds"):
+        estimate_synthetic_face_pose(
+            calibration, LANDMARKS, pixels, image_size=SIZE, **limits,
+        )
+
+
+def test_gate21_landmark_border_margin_accepts_clear_synthetic_pose(calibration):
+    pixels = project(
+        calibration, rotation_from_front((0.29, -0.32, 0.2)),
+        np.array([64.0, -22.0, 420.0]),
+    )
+    result = estimate_synthetic_face_pose(
+        calibration, LANDMARKS, pixels, image_size=SIZE,
+        max_rms_px=0.5, min_margin_px=0.1,
+        landmark_border_margin_px=2.,
+    )
+    assert result.rms_px < 1e-6
+
+
+def test_gate21_landmark_border_margin_rejects_excluded_observation(calibration):
+    pixels = project(
+        calibration, rotation_from_front((0.29, -0.32, 0.2)),
+        np.array([64.0, -22.0, 420.0]),
+    )
+    with pytest.raises(ValueError, match="excluded image border"):
+        estimate_synthetic_face_pose(
+            calibration, LANDMARKS, pixels, image_size=SIZE,
+            max_rms_px=0.5, min_margin_px=0.1,
+            landmark_border_margin_px=200.,
+        )
+
+
+@pytest.mark.parametrize("margin", [-1., float("nan"), float("inf"), True])
+def test_gate21_landmark_border_margin_rejects_invalid_limit(calibration, margin):
+    pixels = project(
+        calibration, rotation_from_front((0.29, -0.32, 0.2)),
+        np.array([64.0, -22.0, 420.0]),
+    )
+    with pytest.raises(ValueError, match="landmark border margin"):
+        estimate_synthetic_face_pose(
+            calibration, LANDMARKS, pixels, image_size=SIZE,
+            max_rms_px=0.5, min_margin_px=0.1,
+            landmark_border_margin_px=margin,
+        )

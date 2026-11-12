@@ -9,7 +9,7 @@ describe('SyntheticFaceImpactDemo', () => {
     expect(html).toContain('Synthetic Face Impact test case');
     expect(html).toContain('Request synthetic result');
     expect(html).toContain('Not a camera measurement');
-    expect(html).toContain('Waiting for synthetic backend result');
+    expect(html).toContain('OpenFlight backend is disconnected');
     expect(html).not.toContain('synthetic-impact-marker');
     expect(html).not.toContain('X:');
   });
@@ -37,6 +37,44 @@ describe('SyntheticFaceImpactDemo', () => {
     expect(isSyntheticFaceImpactResponse(valid)).toBe(true);
     expect(isSyntheticFaceImpactResponse({ ...valid, result: { status: 'ok', x_mm: 12 } })).toBe(false);
     expect(isSyntheticFaceImpactResponse({ ...valid, polygon_face_mm: [[0, 0]] })).toBe(false);
+    expect(
+      isSyntheticFaceImpactResponse({
+        ...valid,
+        polygon_face_mm: [
+          [0, 0],
+          [1, 1],
+          [2, 2],
+        ],
+      })
+    ).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...valid, result: { ...valid.result, x_mm: 500 } })).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...valid, result: { ...valid.result, x_mm: Number.NaN } })).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...valid, label: '' })).toBe(false);
+    expect(
+      isSyntheticFaceImpactResponse({
+        ...valid,
+        result: { ...valid.result, rejection_reason: 'contradictory' },
+      })
+    ).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...valid, case_id: '' })).toBe(false);
+    expect(
+      isSyntheticFaceImpactResponse({
+        ...valid,
+        polygon_face_mm: [
+          [0, 0],
+          [4, 4],
+          [0, 5],
+          [5, 0],
+        ],
+      })
+    ).toBe(false);
+  });
+
+  it('rejects malformed error payloads that could smuggle a displayed result', () => {
+    const error = { schema_version: 1, source: 'synthetic_python_pipeline', ok: false, error: 'rejected' };
+    expect(isSyntheticFaceImpactResponse(error)).toBe(true);
+    expect(isSyntheticFaceImpactResponse({ ...error, result: { status: 'ok', x_mm: 0, y_mm: 0 } })).toBe(false);
+    expect(isSyntheticFaceImpactResponse({ ...error, error: '  ' })).toBe(false);
   });
 
   it('rejects contact coordinates in a rejected result', () => {
@@ -62,6 +100,12 @@ describe('SyntheticFaceImpactDemo', () => {
       isSyntheticFaceImpactResponse({
         ...base,
         result: { status: 'outside_face', rejection_reason: 'outside', x_mm: 0 },
+      })
+    ).toBe(false);
+    expect(
+      isSyntheticFaceImpactResponse({
+        ...base,
+        result: { status: 'outside_face', rejection_reason: 'outside', horizontal_region: 'toe' },
       })
     ).toBe(false);
   });

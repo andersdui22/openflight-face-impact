@@ -1,3 +1,1024 @@
+# Triggered camera replay from buffer to Windows export (2026-11-13)
+
+- Startup audit verified [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45), branch `mdp-v1.2/phase5-gates20-24-parallel`, and starting SHA `7624ccdd6ed8a89297fe9ec48dd7e0971c5e4b3a` with nine green workflows. The user has verified Windows software behavior on an earlier build. The starting SHA has no new human desktop test.
+- Synthetic before and after rasters now pass through the same triggered ring used by the Windows USB reader. Preflight, observed marker association, calibrated ball and face geometry and unique candidate selection precede SQLite save and targeted Socket.IO delivery. Export identifies the synthetic ring source. The legacy schema and identities remain readable.
+- Invalid images and missing markers return stage-specific errors without recording a shot. Two admissible candidate frames produce a coordinate-free rejected record. The browser and packaged Electron tests cover rejection, accepted replay, history and the backend lifecycle.
+- The USB reader owns copied frame pixels and refuses a trigger when stopped. Host-arrival timestamps, absent exposure and gain remain explicit limits for the current Windows adapter.
+- The [Gate review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md) records requirements and hardware evidence. Verify checks and the portable artifact on the new exact SHA. Gates remain open and physical ELP testing is deferred.
+
+---
+
+# Repeated synthetic shots and capture timing provenance (2026-11-12)
+
+- Read-only audit confirmed the branch `mdp-v1.2/phase5-gates20-24-parallel` and [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45) at `91a99d08fb7deacdde8f84f9ff8e0fef3d9b9ce4`, with all nine workflows green. The user's test of that Windows build confirmed terminal-free startup, the connected backend message, synthetic results and internal shutdown. The user still needs to retest saved sessions after restarting the latest build on their PC.
+- Each replay action now has a distinct request identity. Repeating a case intentionally adds a shot. Resending the same request for the same case and session retains one record, including on a retry of new-session creation. Legacy request bodies keep their existing identifiers. SQLite commits before the targeted Socket.IO event. The review refreshes the active session's statistics and diagnostics after save, and JSON retains each shot and its provenance. The chart counts coincident points and marks the mean.
+- The portable smoke adds two identical accepted shots on launch one, restarts the embedded Python process while Electron stays open and verifies automatic Socket.IO recovery. The next launches verify native window close, persisted history and export, a forced backend stop after a rejected shot is saved, and restart with all three records. Check the runner's backend exit and port 8080 checks on the current SHA.
+- The Windows USB adapter tags host-clock aliases explicitly. Independent sensor spacing and offline preflight fail closed on these frames. The synthetic evidence path retains the existing calibrated geometry, quality and storage contracts. Test data now covers a noisy gradient, clipped ball rim and extra fiducial.
+- Next open work is listed in the [Gate acceptance review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md). Physical ELP work remains deferred, and no Golden physical baseline exists.
+
+---
+
+# Windows connection and shutdown recovery (2026-11-12)
+
+- Read-only GitHub audit confirmed [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45) on `mdp-v1.2/phase5-gates20-24-parallel` at `e9c24fe1e05a61920da2f003c91d375039e791be`. All nine latest baseline workflows passed. [Baseline checks](https://github.com/andersdui22/openflight-face-impact/commit/e9c24fe1e05a61920da2f003c91d375039e791be/checks)
+- The user's Windows EXE opened without a terminal and displayed the dashboard, synthetic Contact replay and marker, saved sessions, statistics and diagnostics. The user reported a disconnected backend message and a failed shutdown confirmation. The report is desktop software evidence with the synthetic fixture.
+- The synthetic calculation panel now waits for Socket.IO, drops the live result on disconnect and automatically requests it when the connection returns. The replay review reports the current connection and labels loaded archive evidence separately from replay events. Running a new replay requires the live backend. A previously loaded result remains available for review during a disconnect.
+- The packaged shutdown dialog calls Electron via a scoped preload. Window close uses the same cleanup. Electron closes the owned mock backend's private input pipe, waits for cleanup and terminates that child if it exceeds the grace period. Startup checks the identity of the specific child before connecting. The browser shutdown path remains available over HTTP.
+- Local Electron and Python smoke covered normal internal shutdown, native window close, forced backend loss followed by internal shutdown, and archive reopen and export after restart. It checked committed accepted and rejected evidence, statistics, and port 8080 after each exit. Windows Actions runs the same flow against the packaged backend and checks the child process has exited.
+- Review the new SHA's Windows evidence before handing over its portable download. Retest the status, both shutdown paths and archived sessions on the user's Windows PC. Gates 26–28 remain open. Follow the Phase 6 evidence requirements for the remaining software and defer physical ELP work.
+
+---
+
+# Archived synthetic statistics, diagnostics and EXE export (2026-11-12)
+
+- Read-only GitHub audit confirmed draft PR #45 and branch HEAD `6bc11e2b799b2121b21b84a305cc2db87e9b904a`. All nine latest baseline workflows passed. Python 3.12 reported 3,006 passed and seven skipped, UI reported 282 React, 17 Electron and 58 browser tests passed. [Baseline checks](https://github.com/andersdui22/openflight-face-impact/commit/6bc11e2b799b2121b21b84a305cc2db87e9b904a/checks)
+- Loading a saved session now returns backend-validated synthetic evidence, per-model counts, X/Y means and population standard deviations, and shot diagnostics. Standard deviation is available from two accepted points. Each club has its own face outline and distribution. Invalid rows are excluded from markers and calculations. Reports remain scoped to the selected session and can be filtered by club.
+- Diagnostics inspect archived frame brightness, contrast, saturation and dark fractions, optics metadata, independent sensor and host intervals, and calculation status. Export preserves the archival record and includes its current analysis and validation status. The analysis uses saved metadata and does not recompute raster hashes without the original raster bytes.
+- The browser flow exercises accepted and rejected replay, multiple positions and club geometries, reopening, filtering, diagnostics and JSON download. The portable smoke saves on the first launch, restores the record and downloads its export on the second. Both builds continue to run against the mock backend with acquisition disabled.
+- Local Electron opened the saved session on the second launch and downloaded JSON with its validated analysis. Both launches released port 8080. [Statistics and diagnostics after restart](../evidence/gate27-28-session-analysis-electron.png)
+- [Gates 20–24 and 26 evidence review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md) records what is verified and what is deferred. Gates remain open. Verify final workflow results on the new exact SHA before using the build as software evidence.
+
+---
+
+# Synthetic session persistence and restart evidence (2026-11-12)
+
+- Startup audit confirmed branch and [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45) at `c55d92acf76172995d2cbf1f8e32aea0ed9e4d36`. All nine latest workflows passed on the baseline. Python 3.12 reported 3,002 passed and seven skipped. UI CI reported 282 React, 17 Electron helper and 57 browser tests passed. [Baseline Python](https://github.com/andersdui22/openflight-face-impact/actions/runs/43202649338) · [Baseline Windows](https://github.com/andersdui22/openflight-face-impact/actions/runs/43202649271)
+- Gate 26 software batch adds the local synthetic SQLite archive beside the resolved profiles file. The backend commits versioned evidence before sending the targeted result. Replaying the same case in the same session keeps the first saved evidence. A new session starts with the first replay and has its own shot IDs.
+- Saved sessions can be opened in the existing offline review or exported as JSON. The export carries shot/session identity, synthetic club geometry, optics, capture timestamps and hashes, calculation versions and parameters, preflight quality, and accepted or rejected evidence. Raw raster bytes are regenerated by the synthetic fixture. Rejected records carry a reason and no impact coordinates.
+- The integration tests cover a failed write, requester isolation, accepted/rejected evidence, reload and JSON download. The Windows smoke records the first launch, restarts both Electron and Python, and opens the archived result from the renderer on the second launch. Verify these jobs on the new commit SHA.
+- Local UI format, lint, build, 282 React tests and 17 Electron helper tests passed. The local Linux Electron smoke restored a saved result on the second launch and released port 8080 after both launches. [Restored session in the renderer](../evidence/gate26-session-restore-electron.png)
+- On `6cd92a8a98f6b934f422d684a7a776eb11e697fa`, Python 3.12 passed 3,006 tests with seven skipped, and Windows restored the session across two portable EXE launches. The first browser run reported 57 passing tests and one failure because the saved-session selector's label included its option text. The follow-up binds the selector to an explicit accessible label and retains the full browser test. [Python CI](https://github.com/andersdui22/openflight-face-impact/actions/runs/43231175862) · [Windows CI](https://github.com/andersdui22/openflight-face-impact/actions/runs/43231175941) · [First UI run](https://github.com/andersdui22/openflight-face-impact/actions/runs/43231175814)
+- Next software work: prepare Gate 27 labelled statistics from archived evidence and Gate 28 session diagnostics. Gates 20–24 and 26 remain open. Actual ELP recordings and independent physical acceptance are deferred.
+
+---
+
+# Offline replay, Windows dependencies and screenshot evidence (2026-11-12)
+
+- On `1989fb2bd79ef3b93f47c790fd3776fd1082a782`, UI format, lint, build, React and Electron units and Playwright all passed. Tests, Pylint, Documentation, foundation, USB and the UI-only Windows portable workflow passed. The staged Windows backend started and connected, but its synthetic calculation failed in the renderer. The frozen build omitted OpenCV, which the existing synthetic mesh projection imports. The mock package now includes the existing headless OpenCV dependency and its renderer smoke requests both the existing synthetic result and offline raster replay.
+- [Windows UI-only renderer run](https://github.com/andersdui22/openflight-face-impact/actions/runs/43200528915) produced the [verified dashboard PNG](../evidence/phase5-windows-dashboard-1989fb2.png) in artifact `13935176570`. Verified the ZIP digest, visual content, and renderer result. The PNG SHA-256 is `6805160e9b9166e5a424bc16da34e523af47abe425ebd76deb0d1cd6fc224fc8`. The screenshot records the UI-only bundle at the named SHA. Verify the current code and its Windows mock artifact independently.
+- Added a server-owned synthetic raster replay into the existing React offline review. Only two fixed cases are accepted. The positive case binds preflight to frame bytes and metadata, extracts ball and marker pixels, reconstructs a synthetic pose, and publishes versioned evidence to the requesting Socket.IO session. The missing-ball case keeps its rejection reason and suppresses coordinates. The dashboard keeps its six panels and scrolls to expose the review when results expand.
+- Focused local Python suite passed 27 tests. Local UI build, formatting, lint, 282 React tests and 17 Electron tests passed. Local Linux Electron with the real mock Python server displayed the accepted raster result and released port 8080. The [local renderer screenshot](../evidence/phase5-offline-replay-electron.png) shows the review and its synthetic marker. The browser test exercises a second client, a rejected case and reselecting the accepted result. Verify its GitHub result on the new code SHA.
+- Gates 20–24 remain open. Next software batch is session persistence and export preparation for Gate 26, starting with shot, capture, club, calibration and calculation provenance. Physical ELP acquisition, real timing, independent impact reference and accuracy remain deferred.
+
+---
+
+# Startup audit and portable dashboard verification (2026-11-12)
+
+- Repository `andersdui22/openflight-face-impact`, branch `mdp-v1.2/phase5-gates20-24-parallel`, [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45). Verified starting HEAD `628f98c4ea26ef8b28aacaaf94de2720fef89b5d`, PR base `fcda0ff666eb6c39f90777947d8b70a55a172492`, default branch HEAD `a3ab081a8abff71fd344d4fd782412d624b99f3f`. Scope is the user-authorized software-first continuation under Project Law V1. Gates 20–24 remain open.
+- On that starting SHA, [Python Tests](https://github.com/andersdui22/openflight-face-impact/actions/runs/43197593742) passed on 3.10, 3.11 and 3.12. The Python 3.12 log shows 2,995 passed and seven skipped. Documentation, Pylint, Face Impact foundation, Windows USB, Windows Python prototype and Gate 10 portable all passed. UI failed Prettier on 13 files. PR Checks failed description completeness because the screenshot was missing. The verified [MDP V1.2 archive](https://github.com/andersdui22/openflight-face-impact/blob/1c36e1b13142a09f17e0daa6d9799341ddbf1eb1/docs/governance/MASTER_DEVELOPMENT_PLAN.md) defines software integration as Gates 25–28 and physical validation as Gates 29–32.
+- Formatted the 13 files in a dedicated commit. The portable `file://` renderer now uses the same explicit loopback origin for Socket.IO and camera status. The Electron runner covers both target URL and backend lifecycle helpers. Local UI format, lint, build, 282 React tests and 17 Electron tests passed.
+- The earlier [Windows renderer artifact](https://github.com/andersdui22/openflight-face-impact/actions/runs/43196354560/artifacts/13933242135) displayed the club picker over the dashboard. The smoke now dismisses the picker and checks camera status, a synthetic marker with the mock backend, and safe disconnected rendering in the UI-only bundle. A local Linux Electron run verified both states and two consecutive mock-backed starts with port 8080 released between runs. Windows CI exercises the frozen backend health identity and repeats start/close with the staged backend inside the portable folder. PyInstaller `onedir` keeps the frozen backend in the single process Electron owns. Keep its `_internal` directory beside the executable.
+- Verify Windows runs and visually inspect the replacement artifact before attaching evidence to PR #45. Continue the server-owned synthetic raster replay into the existing offline review with browser and targeting tests. Physical ELP/IR, physical contact timing and accuracy are deferred. No Golden physical baseline exists.
+
+---
+
+# CI REPAIR — CAPTURE MUTATION REJECTED BY EARLIER PROVENANCE GUARD (2026-11-12)
+
+- Exact SHA `f0f891ea` Python 3.12 tests: 2994 passed, 1 failed, 7 skipped. Failure was a regression assertion expecting the opt-in preflight error, but the existing offline handoff provenance guard correctly rejected the same mutated capture first (`offline batch does not belong to this capture`).
+- Updated only the regression's expected error pattern to accept either of the two fail-closed provenance guards. No production behavior weakened. Re-run exact-SHA CI before declaring green.
+- Windows backend, Windows portable, foundation, Pylint, USB and Documentation passed on `f0f891ea`. UI formatting and PR screenshot checks remain red; no Gate closure, physical validation, merge or release.
+
+---
+
+# END-TO-END OFFLINE PREFLIGHT REGRESSION (2026-11-12)
+
+- Added unmocked positive synthetic capture preflight -> real offline assessment -> targeted event regression. Separately injects a mutation during real assessment and verifies no event can be published after the post-assessment fingerprint check.
+- No physical ELP or real impact acceptance. Exact previous SHA `8bc7ea59` CI still in progress at inspection; Gates 20–24 OPEN; UI format and PR screenshot outstanding; no merge/release.
+
+---
+
+# OPT-IN PREFLIGHT WIRED TO OFFLINE ANALYSIS (2026-11-12)
+
+- Added optional typed `preflight` argument to the trusted offline analysis/publish runner. It checks capture provenance before assessment and immediately before targeted event publication; mismatch fails closed. Default `None` preserves existing synthetic fixture semantics. Regression tests cover invalid preflight and altered capture preventing assessment/publication.
+- Exact prior SHA `86a9df9e` CI was running when inspected. No physical validation or Gate 25–30 closure; Gates 20–24 OPEN; UI/PR checks unresolved; no merge/release.
+
+---
+
+# OFFLINE CAPTURE PREFLIGHT AND PROVENANCE (2026-11-12)
+
+- Added opt-in `preflight_offline_capture` and `require_matching_preflight` composing quality checks with capture fingerprints, detecting changed image bytes/metadata after validation; synthetic regression tests and scope document included.
+- No integration into legacy synthetic runner, no physical camera claim or Gate closure. Prior SHA `2775140a` CI was still running at inspection; new SHA must be verified. UI/PR checks remain outstanding, no merge/release.
+
+---
+
+# NEXT-PHASE OFFLINE CAMERA METADATA INTEGRITY (2026-11-12)
+
+- Hardened capture-wide preflight against negative/boolean/non-integer sensor/host timestamps, invalid exposure, nonfinite/zero analogue gain and invalid trigger timestamps. Also rejects nonfinite frame-quality threshold overrides. Added synthetic regression tests.
+- Prior exact-SHA `4b3c7f8d` CI was in progress at inspection; no green claim for this commit. Canonical Gates 25–30 acceptance still unverified, Gates 20–24 OPEN, physical ELP tests deferred, no merge/release.
+
+---
+
+# NEXT-PHASE OFFLINE CAPTURE-WIDE PREFLIGHT (2026-11-12)
+
+- Exact prior SHA `93f76d45`: Windows Python backend prototype SUCCESS (packaged mock backend health and Electron resource staging), foundation/Tests/Pylint/USB/Windows portable/Documentation SUCCESS. UI formatting and PR screenshot remain failures.
+- Added `offline_capture_quality.py`: bounded sequence-wide validation of frame format, exposure/contrast, stable dimensions, shot/session identity, strictly monotonic sensor/host timestamps, and gap budgets. Fail-closed; no publication or physical measurement claim. Synthetic regression tests included.
+- This is preparatory next-phase software, not formal Gate 25–30 acceptance. Canonical gate plan remains to be reconciled; Gates 20–24 OPEN, physical ELP testing deferred, no merge/release.
+
+---
+
+# PHASE 6 PREPARATORY SOFTWARE START (2026-11-12)
+
+- Following user approval to advance in parallel, added isolated offline grayscale frame quality diagnostics and fail-closed checks with deterministic tests; documented the work in `PHASE6_SOFTWARE_FIRST_START.md`.
+- **No Gate 25–30 closure claimed**: canonical MDP V1.2 Gate definitions must be reconciled; no real ELP capture or accuracy validation. Gates 20–24 remain open while their CI and PR evidence is resolved.
+- No upstream edits, merge, release or physical tests.
+
+---
+
+# WINDOWS BACKEND PYINSTALLER ROOT CAUSE AND FIX (2026-11-12)
+
+- On CI run 43192473352 the PyInstaller build itself succeeded, but launching the EXE failed at Flask-SocketIO initialization with `ValueError: Invalid async_mode specified`. This is consistent with PyInstaller omitting the dynamically imported `engineio.async_drivers.threading` driver.
+- Added explicit `--hidden-import engineio.async_drivers.threading` to the isolated Windows backend PyInstaller command. The exact-SHA Windows CI must now confirm startup, Face Impact health identity, and Electron staging. This commit does NOT claim a passing runtime test.
+- Physical ELP tests deferred, Gates OPEN, no merge or release. UI format and PR screenshot checks still outstanding.
+
+---
+
+# WINDOWS PYINSTALLER RUNTIME FAILURE — DIAGNOSTICS (2026-11-12)
+
+- First automatically triggered Python backend prototype workflow on `e1b77427` built the EXE but failed during mock startup: process exited with code 1 before health response. Actual traceback was missing because Windows workflow used a hidden process without redirected stdout/stderr.
+- Updated workflow to redirect backend stdout/stderr to separate runner-temp logs, print last 100 lines in `finally` even on startup failure, and upload both as CI diagnostics with `if: always()`. **This is diagnostic instrumentation, not a runtime fix.** Next CI run must reveal root cause.
+- Existing Electron portable, Python tests, foundation and USB CI green; UI Prettier and PR screenshot remain red. Gates OPEN, no merge/release, physical tests deferred.
+
+---
+
+# WINDOWS BACKEND — AUTOMATIC PR VALIDATION (2026-11-12)
+
+- Expanded the Python backend prototype workflow to run automatically on PRs changing the backend build recipe, entry point or workflow itself, while retaining manual dispatch. On Windows CI it will build PyInstaller EXE, launch mock server, verify exact health contract, and build an Electron portable bundle with the backend staged in resources. This is the first automated integration evidence path; **not yet run on this SHA**.
+- Python backend still uses inherited OpenFlight mock server, not dedicated ELP capture; no physical tests, no merge/release. Existing UI Prettier and PR screenshot issues remain.
+
+---
+
+# WINDOWS PYINSTALLER PROTOTYPE — OPT-IN CI VALIDATION (2026-11-12)
+
+- Added manually triggered `Face Impact Windows Python backend prototype` workflow. It compiles the backend with the experimental PowerShell/PyInstaller recipe, launches it in mock mode on loopback, checks exact Face Impact health identity, kills the process, and uploads a development-only EXE artifact on success. Bounded CI job (35 min) and probe attempts.
+- **Workflow is not yet executed.** Do not claim PyInstaller compatibility, integrated Electron runtime, or physical camera functionality until evidence is obtained. Not a release; no merge; Gates OPEN. UI Prettier and PR screenshot remain unresolved.
+
+---
+
+# WINDOWS BACKEND — FIRST PYINSTALLER BUILD RECIPE (2026-11-12)
+
+- Added a separate, opt-in Windows PyInstaller backend build script and minimal Python entry point that invokes the existing OpenFlight server `main()`. Uses Python 3.12 venv, explicitly installs mock-server dependencies, packages a one-file `OpenFlightFaceImpactBackend.exe` into `out/face-impact-backend`; staging into Electron portable bundle remains a separate opt-in step.
+- **Unverified prototype**: Windows compilation, PyInstaller hidden imports, runtime and real USB camera behavior have NOT been tested. This inherits the upstream server's mock-mode implementation and is NOT a camera-only backend. The default CI does not execute this recipe. Do not release or claim EXE success until Windows CI/runtime evidence exists.
+- On exact preceding SHA, foundation, Python, Windows portable and USB checks were green; UI format (13 files) and PR screenshot checks remained red. CI for this SHA pending; Gates OPEN.
+
+---
+
+# CI REPAIR — SEPARATE NODE AND VITEST TEST RUNNERS (2026-11-12)
+
+- Root cause confirmed from GitHub logs: Vitest included `electron/backendProcess.test.js` despite that file using `node:test`, resulting in `No test suite found`. Restricted Vitest include to TypeScript UI tests; added `npm run test:electron` as explicit Node test runner. Existing Windows Gate 10 CI invokes Node tests directly.
+- No tests removed: Electron Node tests remain in Windows workflow; UI tests remain in Vitest. CI exact SHA pending; 13 Prettier files and genuine PR screenshot remain unresolved. Gates OPEN; no merge/release.
+
+---
+
+# BATCH B — OPTIONAL BACKEND STAGING FOR PORTABLE WINDOWS BUNDLE (2026-11-12)
+
+- Portable Windows builder now accepts an explicit `OPENFLIGHT_BACKEND_BUILD_EXE` path to a separately produced Windows backend binary, validates it is an existing .exe and copies it to `resources/backend/OpenFlightFaceImpactBackend.exe`, matching Electron's packaged discovery convention. Default build stays UI-only; invalid input fails closed.
+- This is **staging only**: no PyInstaller build, no Python runtime/dependency bundling, no backend execution verification or hardware validation. The CI workflow does not set the opt-in variable. CI exact SHA pending; Gates OPEN, no merges/releases.
+
+---
+
+# BATCH B — OPTIONAL BUNDLED BACKEND DISCOVERY (2026-11-12)
+
+- Electron now checks `process.resourcesPath/backend/OpenFlightFaceImpactBackend.exe` for packaged Windows deployments, falling back to no backend if absent. Explicit `OPENFLIGHT_BACKEND_EXECUTABLE` takes priority and still must be an existing absolute path. Added temporary-directory Node tests for bundled discovery and override.
+- **This does not create or ship the Python executable.** It establishes a stable packaging location for a later independently validated backend build. Portable UI-only EXE remains supported, with no camera claims. CI for exact SHA pending; no merge/release; Gates OPEN.
+
+---
+
+# BATCH B — REAL HTTP READINESS CONTRACT TESTS (2026-11-12)
+
+- Added Node HTTP loopback fixture tests that exercise actual `probeBackendHealth` request/response handling, not merely injected mock callbacks: valid Face Impact identity accepted; unrelated server, incompatible protocol, false physical-validation claim and HTTP 503 rejected.
+- Portable Windows CI already runs `node --test ui/electron/backendProcess.test.js` and checks backendProcess.js is packaged. This extends executable coverage without physical hardware.
+- New exact SHA CI pending; Python executable not yet bundled; no merges/releases; Gates 20–24 OPEN; UI formatting and authentic PR screenshot unresolved.
+
+---
+
+# WINDOWS PACKAGING REPAIR — MISSING IMPORTED MODULE (2026-11-12)
+
+- Found a critical packaging defect: Electron main now imports `backendProcess.js`, but Gate 10 portable builder copied only `main.js` and `resolveTargetUrl.js`. This would prevent packaged EXE from loading at all. Builder now copies backendProcess.js, asserts it exists; Windows CI asserts module presence and runs Node backend lifecycle unit tests before packaging.
+- Gate 10 CI path triggers extended to backend process source/tests. This is a packaging repair, **not** a bundled Python backend or a validated release. CI exact SHA pending; physical tests deferred; Gates OPEN.
+
+---
+
+# BATCH B — ELECTRON STARTUP READINESS GATE (2026-11-12)
+
+- Electron now awaits opt-in backend readiness before creating its window; readiness verifies Face Impact identity through `/api/face-impact/health`, with bounded retry and early child-exit checks. If no backend executable is configured, the standalone UI opens normally; if configured but not ready, it logs failure and opens UI in degraded mode rather than hanging indefinitely.
+- This does **not** yet bundle a Python executable, display a user-facing backend failure notice, or validate real camera operation. Health probe currently assumes loopback port 8080. CI for this exact SHA pending; PR screenshot/Prettier unresolved. Gates OPEN, no merge/release.
+
+---
+
+# BATCH B — BACKEND IDENTITY HEALTH CONTRACT (2026-11-12)
+
+- Added `GET /api/face-impact/health` to Python Flask server with fixed service identity, protocol version, ready state and explicit `camera_validated: false`; no hardware probe or physical claims.
+- Electron readiness probe now requires exact loopback endpoint, HTTP 200 and validated JSON identity/protocol/status instead of treating any HTTP 2xx–4xx server as ready. Added Python endpoint and Node invalid-path tests.
+- Probe is **not yet wired to Electron startup gating** and Python is **not bundled**. CI on this exact SHA pending. PR screenshot and UI Prettier remain outstanding; Gates OPEN, no merges/releases.
+
+---
+
+# BATCH B — WINDOWS BACKEND READINESS PRIMITIVE (2026-11-12)
+
+- Added loopback-only HTTP health probe with bounded timeout and bounded retry readiness helper, plus Node tests for eventual readiness, early child exit and non-loopback refusal.
+- This is a **readiness primitive**, not yet wired into UI startup gating. A 2xx–4xx HTTP response is considered transport-reachable, not proof of the correct OpenFlight backend identity. Must add backend-specific health contract before enabling production gating.
+- No packaged backend executable yet. Exact SHA CI pending; PR screenshot and UI Prettier outstanding; physical tests deferred.
+
+---
+
+# BATCH B — OPT-IN WINDOWS BACKEND PROCESS LIFECYCLE (2026-11-12)
+
+- Added `ui/electron/backendProcess.js` with explicit absolute-path executable opt-in via `OPENFLIGHT_BACKEND_EXECUTABLE`, shell-free spawn, loopback mock server arguments, error callback and controlled child termination on Electron shutdown. Added Node unit tests for disabled/default, unsafe relative and missing paths, and null shutdown.
+- Wired process manager into Electron main. **Not yet a bundled Python executable, packaged one-click backend, readiness check, production camera support or physical validation.** It starts only when a separately provisioned executable is explicitly configured; otherwise UI remains standalone.
+- Prior `5a032591` CI was in progress at inspection. Formatting and authentic screenshot PR checks remain outstanding. No Gate closure, merge or release.
+
+---
+
+# CI REPAIR — FRAME DIMENSION VALIDATION ORDER (2026-11-12)
+
+- Verified CI for `f83542c2`: 2940 Python tests passed, one failed because malformed marker-image dimensions were rejected by blob-count validation before the explicit dimension guard. Moved dimension guard ahead of marker extraction so malformed input fails with correct reason. Pylint, Face Impact foundation, Windows USB and Documentation were green; UI was still running; PR Checks screenshot still missing.
+- No Gate closure or physical accuracy claim. Exact new SHA CI pending.
+
+---
+
+# BATCH A — FRAME PROVENANCE AND FAIL-CLOSED MARKER INPUT (2026-11-12)
+
+- Marker-image adapter now fingerprints the typed capture before and after marker extraction/association and aborts if frame bytes, timing or identity changed. Explicit recipient is required before expensive analysis; no silent fallback publication.
+- Added regressions for empty mapping, out-of-range frame, image size mismatch and no mutation of supplied raster input.
+- Latest CI on `e50e1d92` was still in progress at inspection; prior `b0c83560` passed Python, Pylint, foundation, Windows USB and E2E, but UI formatting and PR screenshot checks remained red. No merges/releases, Gates 20–24 OPEN, physical tests deferred.
+
+---
+
+# BATCH A — CI REVIEW AND MARKER INPUT GUARDS (2026-11-12)
+
+- Verified CI for `b0c83560`: Python Tests, Pylint, Face Impact foundation, Windows USB camera, Documentation and browser E2E passed; UI lint/build passed. UI format still fails due Prettier drift across 13 files; PR Checks still requires authentic screenshot.
+- Hardened marker runner's trusted-reference input: finite numeric 3..8 Nx2 landmarks, numeric distance budget, and integer-only frame keys before sorting. Added tests for malformed reference shapes, NaN, too many reference points, invalid frame keys and fail-closed multi-frame partial observations.
+- **Not** a physically validated or unmarked clubface detector. Gates 20–24 OPEN; do not claim closure; exact new SHA CI pending.
+
+---
+
+# BATCH A — RASTER MARKERS THROUGH OFFLINE PIPELINE (2026-11-12)
+
+- Added `offline_marker_runner.py`, a bounded adapter from **controlled marker raster images** to extracted unlabelled fiducials, trusted-reference correspondence, typed `SyntheticFrameCandidate` entries and the existing complete offline analysis/Socket.IO publication runner.
+- Tests exercise raster marker observation through real offline pipeline with blank ball frames (must reject, no fabricated impact coordinates), missing marker and wrong-reference failure. No physical camera or unmarked clubface recognition.
+- This adapter intentionally requires externally trusted labelled reference pixels and separate marker images. It does not establish physical impact accuracy. CI for new SHA pending; Gates 20–24 OPEN.
+- Prior CI blocker repair at `0c3d6853` was still in progress at last check. PR Checks screenshot requirement outstanding.
+
+---
+
+# CI BLOCKER REPAIR — 2026-11-12
+
+- Inspected completed CI on `4291f823`: Python tests 7 failures due to invalid fixture construction outside expected exception context; UI test parser failed because JSX was in a `.ts` file; UI lint and format failed for same parse error. Fixed fixture assertions to cover constructor and serialization, added explicit type guards to capture identity validation, and moved JSX test to `.tsx`. Removed unused destructured variables in rejection test.
+- Remaining PR Checks failure requires authentic screenshot in PR description; do not bypass without real evidence. CI on this exact SHA still to be verified. Gates 20–24 OPEN.
+
+---
+
+# BATCH A — LABELLED REFERENCE MARKER ASSOCIATION (2026-11-12)
+
+- Added fail-closed association from image-extracted **unlabelled** bright marker centres to separately trusted **labelled reference pixels**, with global one-to-one assignment, maximum per-point displacement and best-versus-runner-up ambiguity margin. Limited exhaustive matching to <=8 points; no guessed left-to-right label ordering.
+- Added positive permuted-reference and negative wrong-reference/ambiguous correspondence raster tests. Association returns immutable labelled image pixels for downstream pose only when constraints pass.
+- **Still missing** actual trusted reference acquisition, automated face geometry/pose integration, camera measurements and full browser E2E. This is a controlled offline preparatory component, not unmarked clubface detection.
+- Exact SHA CI pending. Gates 20–24 OPEN; physical tests deferred; no merge/release.
+
+---
+
+# BATCH A — EXPERIMENTAL IMAGE-DERIVED FIDUCIAL OBSERVATIONS (2026-11-12)
+
+- Added `experimental_face_markers.py`: controlled grayscale image -> thresholded, area/circularity/border-validated bright-marker centres, with exact count enforcement and immutable unlabelled pixel observations. Raster regression tests cover four observed points, missing/extra markers and unsupported images.
+- This is a **preparatory image-observation primitive only**. The points have no established correspondence to face coordinates and are not fed into pose/impact estimation. No claim of automatic unmarked clubface detection or physical validity.
+- PR Checks failure investigated: genuine screenshot absent from PR description. Do not fabricate screenshot. Exact SHA CI pending.
+- Gates 20–24 OPEN; physical ELP tests deferred.
+
+---
+
+# BATCH A — OFFLINE EVIDENCE BOUNDARY HARDENING (2026-11-12)
+
+- Strengthened the Python Socket.IO transport boundary: reject missing/whitespace/oversized shot and session identifiers, missing/oversized reasons, nonboolean acceptance, and noncallable emitter before any event publication. Added parameterized negative contract tests.
+- Diagnosed PR Checks failure on `2074790c`: PR description lacks a real UI screenshot; the required headings and other checks passed. Do not bypass by inventing screenshots; capture authentic browser/Electron evidence in a later UI test.
+- Exact-SHA CI for this commit must still be reviewed. Physical camera validation remains deferred; Gates 20–24 OPEN.
+
+---
+
+# AUTONOMOUS LARGE-BATCH DEVELOPMENT DIRECTIVE — 2026-11-12
+
+User explicitly requested the largest practical autonomous development cycles. Prioritize complete functional slices and batch tests over micro-edits. The software-first batch sequence and acceptance conditions are recorded in `docs/governance/SOFTWARE_FIRST_AUTONOMOUS_DELIVERY_PLAN.md`. No change to Project Law V1 approval boundaries, no merges/releases, no physical tests yet.
+
+---
+
+# BATCH B — FRONTEND REGRESSION HARDENING (2026-11-12)
+
+- Removed brittle exact React SSR whitespace-comment assertion from offline socket-to-review contract test. Added mixed accepted/rejected history test: latest rejected shot must not inherit an earlier accepted impact marker.
+- Exact SHA `336bedd9` CI was still running at inspection; PR Checks failed. This change is not evidence of a completed browser/network end-to-end run.
+- Next: verify exact SHA CI and add a controlled, server-owned synthetic replay path for true browser integration. Gates 20–24 OPEN; physical tests deferred.
+
+---
+
+# BATCH B — SOCKET EVENT TO REACT VIEW CONTRACT (2026-11-12)
+
+- Extracted the actual `offline_impact_evidence` Socket.IO listener ingestion to a shared typed handler, used by production listener and new contract tests.
+- Tests exercise event payload -> strict runtime validation -> Zustand history -> server-rendered React review, accepted marker, rejected no-marker, and forged physical-validation rejection. This is **not** a live browser-to-Python network E2E test.
+- Python real Socket.IO test and accepted raster emission tests are in preceding commits, pending CI. This adds UI side coverage without claiming live ELP or physical measurement.
+- Gates 20–24 OPEN; no merge/release; camera tests deferred.
+
+---
+
+# BATCH B — IN-PROCESS REAL FLASK-SOCKETIO DELIVERY (2026-11-12)
+
+- Extended positive unmocked synthetic raster integration to instantiate a real Flask-SocketIO test client, send the completed typed offline handoff through `server.publish_completed_offline_impact`, and assert the delivered `offline_impact_evidence` payload matches the independently asserted runner payload.
+- This tests the real Python server transport and targeted socket delivery in-process. It does **not** launch the React browser, automatically process ELP frames, or establish physical accuracy.
+- Exact SHA `dd4ed35a` workflows queued at review; new commit CI pending. Gates 20–24 OPEN; physical tests deferred; no merges/releases.
+
+---
+
+# BATCH B — POSITIVE UNMOCKED RASTER TO SOCKET EMISSION REGRESSION (2026-11-12)
+
+- Extended previously proven positive synthetic raster geometry fixture to invoke `analyze_and_publish_offline_capture` directly, repeating real image extraction, batch assessment, temporal selection, safe export and recipient-targeted event publication.
+- Assert accepted x/y, face region, shot/session/frame identity, physically unvalidated metadata, and exactly one `offline_impact_evidence` emission. No mocked geometry calculations. This tests the Python-to-Socket.IO emission contract, **not an actual running browser/socket connection**.
+- Physical ELP camera tests, automatic server capture callback, actual face landmark detection and browser transport integration remain deferred/open.
+- Exact SHA `e59f99de`: Foundation, Pylint, Documentation and Windows USB camera passed; Tests and UI still running at review; PR Checks failed. New commit CI must be checked before acceptance.
+
+---
+
+# BATCH B — ACTUAL OFFLINE ANALYSIS TO EVENT ORCHESTRATION (2026-11-12)
+
+- Added `analyze_and_publish_offline_capture` trusted Python entry point: unmocked captured-frame assessment, fingerprint-bound audit, temporal handoff, and targeted Socket.IO event publishing. It validates recipient/emitter before expensive analysis and aborts on errors without a fabricated impact.
+- Added unmocked two-frame raster integration regression asserting a **rejected** synthetic result arrives as `offline_impact_evidence` with shot/session identity and no coordinates; and missing-recipient no-emission test.
+- Existing earlier positive raster-to-export regression covers accepted synthetic geometry, but **a single accepted image-to-socket-to-browser regression is not yet demonstrated**.
+- This runner is not wired into a live camera or automatic server capture callback. Explicit synthetic face landmarks remain supplied inputs. No physical measurements, merges, or releases.
+- Previous exact SHA `d46ae6ad` CI still running at start of this batch. Verify new SHA CI; Gates 20–24 OPEN.
+
+---
+
+# CI REGRESSION REPAIR — SSR ZUSTAND SNAPSHOT (2026-11-12)
+
+- Investigated exact SHA `f7dede01` CI: Python Tests, Pylint, Documentation, Windows USB camera and UI browser E2E passed. UI format failed (existing Prettier drift), and Foundation ui-unit-linux failed 3 new `OfflineImpactReview` tests (275 others passed).
+- Cause: server-side `renderToStaticMarkup` uses Zustand's initial server snapshot, not a mutated client store; tests incorrectly expected injected runtime state to appear in SSR. Added explicit optional evidence injection to the review component and passed the validated store entries from the three tests. Normal production rendering still subscribes to the live store. This is a testability seam, not a bypass of the runtime transport validator.
+- CI for this repair must be checked at its new exact SHA. PR Checks still failing, format not yet repaired, Gates 20–24 OPEN.
+
+---
+
+# BATCH B — SERVER-SIDE OFFLINE RESULT PUBLICATION SEAM (2026-11-12)
+
+- Added `publish_offline_impact_handoff`: accepts only a typed `OfflineImpactHandoff`, serializes via schema-v1 offline evidence, and emits `offline_impact_evidence` to one explicit Socket.IO recipient. Added server adapter `publish_completed_offline_impact` and publisher contract tests.
+- **Not yet automatic:** the offline capture/assessment producer still must call this server-side adapter when a capture is completed. No client-originated socket handler was added; clients cannot claim a physical measurement through this path.
+- This is a genuine backend emission seam compatible with the React listener, but it is not proof of a fully integrated shot capture-to-dashboard run. CI for this commit pending; Gates 20–24 OPEN, no physical tests, merge or release.
+
+---
+
+# BATCH B — OFFLINE IMPACT VISUAL REVIEW (2026-11-12)
+
+- Replaced text-only offline synthetic history with `OfflineImpactReview`, using `FaceImpactView` for accepted evidence, selectable shot history, and clear rejection messages. New component tests cover accepted marker, rejected no-marker, and accepted point outside illustrative outline.
+- **Important:** face outline is explicitly illustrative and uncalibrated. The marker is a display of an accepted *synthetic offline result*, not a measured camera contact; no physical accuracy claim. The existing main Face Impact demo remains separate.
+- Python still does not emit the new `offline_impact_evidence` event from actual offline captures. The UI subscription and review can consume such events once the backend is wired.
+- Exact SHA `8aa9fd4b` CI pending at review; PR Checks failed. Gates 20–24 OPEN; physical tests deferred; no merge/release.
+
+---
+
+# BATCH B — FRONTEND OFFLINE EVIDENCE EVENT INGESTION (2026-11-12)
+
+- Added bounded Zustand store `useOfflineImpactStore` and tests for validated event ingestion, immutable shot deduplication, session rollover and rejected evidence. Source must be versioned `offline_synthetic_analysis` and explicitly physically unvalidated.
+- Socket.IO frontend now listens for `offline_impact_evidence` and clears offline history on server `session_cleared`. Disconnect does not falsely delete previously received offline history.
+- Dashboard includes a separate, clearly marked **OFFLINE SYNTHETIC RESULTS — NOT CAMERA MEASUREMENTS** section with accepted/rejected counts, latest result and shot history. This does not alter legacy shot count or fabricate camera measurements.
+- **Critical limitation:** Backend does not yet emit this event from an actual offline capture. It is an ingestion contract and display path, not a completed Python-to-UI end-to-end feature. Main clubface marker remains synthetic demo until linked to real offline evidence.
+- Exact SHA `39ba87e4` CI pending at review. Gates 20–24 OPEN; no physical tests, merges or releases.
+
+---
+
+# BATCH B — VERSIONED PYTHON / REACT OFFLINE RESULT CONTRACT (2026-11-12)
+
+- Introduced `serialize_offline_impact_evidence` with explicit schema v1, source `offline_synthetic_analysis`, shot/session/frame provenance, finite coordinate validation and strict `physically_validated=False`.
+- Added Python JSON serialization and rejection tests; rejected evidence cannot carry a frame index or impact coordinates.
+- Added matching React discriminated-union type and fail-closed runtime validator for future event ingestion. **No Socket.IO emission, UI ingestion, session persistence or physical measurement is claimed yet.**
+- Existing synthetic demo event is separate from this offline export contract. Next functional batch must wire actual offline handoff outputs into a real backend event and dashboard state without treating them as measured.
+- Exact SHA `0d2c2219` CI was pending at review, PR Checks still failing; do not infer green. Gates 20–24 OPEN; physical tests deferred; no merge/release.
+
+---
+
+# BATCH A CI RECONCILIATION — REAL BROWSER FAILURES (2026-11-12)
+
+- Reviewed exact SHA `ec95a5dd`: Python Tests, Pylint and Documentation passed; UI lint/build passed, but UI format and two browser E2E tests failed; Windows camera and foundation still queued at review. PR Checks still failed.
+- Both browser failures were caused by a stale assertion demanding eight `not measured` metric labels. The eighth tile is intentionally a session shot count with `session shots` label. Updated both E2E assertions to target the eight metric sublabels and require seven `not measured` plus one `session shots`, preserving the invariant that no fabricated camera measurement appears.
+- Prettier format job independently reports eight unformatted UI source files; this commit does not claim to fix that formatting gate. PR screenshot evidence must still be resolved with authentic running-app capture.
+- The newly added unmocked positive raster-to-export test was part of the successful Python Tests workflow, but a separate foundation run was pending at review. Gates 20–24 OPEN. No physical tests, merges or releases.
+
+---
+
+# BATCH A — FIRST POSITIVE UNMOCKED RASTER-TO-EXPORT REGRESSION (2026-11-12)
+
+- Added `tests/test_offline_positive_synthetic_image_export.py`: deterministic projected sphere silhouette rasterized into an actual grayscale `CameraFrame`, with projected six-point synthetic clubface landmarks and calibrated distortion. The test passes the genuine contour extractor, batch assessor, temporal selection and impact exporter without mocks, asserting explicit shot/session/frame identity, expected toe/high impact and `physically_validated=False`.
+- The blank frame is the negative control; the disk frame is the positive candidate. Rasterization quantizes pixels, so synthetic contact tolerance is explicitly 5 mm; this is **not** a claim of 5 mm measured accuracy.
+- Test added to GitHub but **CI not yet verified**. If it fails, inspect the actual failure and correct fixture geometry or document the blocker; do not weaken checks solely to manufacture acceptance.
+- Gates 20–24 remain OPEN pending CI and all acceptance evidence. No physical tests, merges or releases.
+
+---
+
+# USER-APPROVED SOFTWARE-FIRST CRITICAL PATH (2026-11-11)
+
+- User explicitly approved changing development priority from serial micro-hardening to larger functional batches and deferring camera-specific fine-tuning to physical tests.
+- New canonical execution guide: `docs/governance/FACE_IMPACT_SOFTWARE_FIRST_CRITICAL_PATH.md`. Batches A (positive unmocked offline synthetic export), B (Python result to UI/session), C (ELP-only capture/replay), D (Windows launcher/package), E (physical validation deferred).
+- Audited actual `ui/electron/main.js`, `ui/package.json`, `ui/src/App.tsx`, `ui/src/services/socketService.ts`: existing Electron portable UI is **not** proof of a bundled Python backend; synthetic demo is **not** a measured impact. Do not claim complete EXE or physical accuracy.
+- Exact SHA `9136ba07`: Tests, Foundation, Pylint, Documentation, Windows USB camera passed; UI still in progress, PR Checks failed on authentic screenshot requirement at review.
+- No Gate closed; no physical tests, merge or release.
+
+---
+
+# PHASE 5 REJECTED-RESULT FIELD ISOLATION (2026-11-11)
+
+- Reconciled React Socket.IO result validation with Python `SyntheticImpactResult` invariants: accepted synthetic impacts cannot also contain a rejection reason; rejected impacts cannot expose horizontal/vertical regions, in addition to coordinates. Added regressions for both contradictory payload classes.
+- This prevents misleading display state at the transport boundary, but does not resolve the P0 positive unmocked image-to-export integration test or physical validation.
+- CI for exact SHA `e9598c50` was queued/in progress at review. Do not infer passing results. PR Checks screenshot requirement remains outstanding.
+- Gates 20–24 OPEN. No physical tests, merges or releases.
+
+---
+
+# PHASE 5 HANDOFF REGRESSION COVERAGE AND ACCEPTANCE RECONCILIATION (2026-11-11)
+
+- Extended the unmocked synthetic-image capture handoff tests to reject over-budget frame batches and reordered frame captures even when frame count and identities otherwise match. This verifies both bounded processing and capture fingerprint provenance.
+- Reconfirmed the canonical Phase 5 gap audit's P0 **positive** image-to-export synthetic success path remains open. No synthetic acceptance result has been fabricated to satisfy the test.
+- Exact SHA `a38cc9f9` workflows were queued/in progress at review. No CI success is inferred from earlier SHAs. PR screenshot requirement remains unresolved.
+- Gates 20–24 OPEN. Physical ELP validation postponed; no merge/release.
+
+---
+
+# PHASE 5 OFFLINE HANDOFF FRAME IDENTITY INTEGRITY (2026-11-11)
+
+- Audited the genuine `prepare_offline_impact_handoff` chain against the Phase 5 acceptance gap document. Added early rejection of empty/oversized assessed frame batches, duplicated frame identities and out-of-capture indices before audit/timing/export. This prevents ambiguous or fabricated frame identities from reaching evidence export.
+- Added unmocked integration regressions for duplicated, out-of-range and empty assessed frame tuples using the existing real synthetic-image capture fixture. They exercise rejection, not a positive accepted synthetic impact.
+- Positive unmocked image-to-export accepted impact remains a P0 acceptance gap; do not claim it is completed. The earlier exact SHA `1d29bc67` passed Tests, Face Impact foundation, Pylint, Documentation and Windows USB camera checks. Later SHA `394717a1` still had pending workflows at last review, PR Checks failed on missing genuine screenshot. New SHA CI must be checked.
+- Gates 20–24 OPEN, hardware testing deferred, no merges/releases.
+
+---
+
+# PHASE 5 SYNTHETIC RESPONSE CONTRACT HARDENING (2026-11-11)
+
+- Extended React synthetic Socket.IO response contract to require nonempty case/label identifiers, nonempty error text, and to forbid impact data attached to a failed response.
+- Rejected self-intersecting face outlines in the response guard, in addition to existing finite-coordinate, nonzero-area, bounded-vertex and point-inside-face checks.
+- Added negative tests for malformed error payloads, missing labels and crossing polygons. No change to physically unverified status.
+- Prior exact SHA `1d29bc67` had successful `Tests`, `Face Impact foundation`, `Pylint`, `Documentation`, and `Face Impact Windows USB camera` workflows; `UI` was still in progress and `PR Checks` failed due to missing authentic UI screenshot. The new SHA requires independent CI validation.
+- The P0 positive unmocked synthetic image-to-batch-to-export integration test remains **outstanding**. This contract hardening is not a substitute for that Gate acceptance requirement.
+- Gates 20–24 OPEN; no physical testing, merges or releases.
+
+---
+
+# PHASE 5 SOCKET PAYLOAD IMPACT-BOUNDARY VALIDATION (2026-11-11)
+
+- Strengthened `isSyntheticFaceImpactResponse` at the network boundary: rejects degenerate zero-area and oversized polygons, non-finite coordinates and successful impact points outside the supplied face polygon. Existing `FaceImpactView` fail-closed checks remain independent defense in depth.
+- Extended synthetic backend contract tests for collinear face vertices, outside impact and NaN coordinates. This is **synthetic** geometry validation only; physical contact remains unverified.
+- At the time of review, exact SHA `1d29bc67` Documentation succeeded, PR Checks failed due to missing genuine screenshot, and remaining CI workflows were still running. Verify new exact SHA before Gate decisions.
+- Gates 20–24 OPEN; no hardware tests, merges, releases.
+
+---
+
+# PHASE 5 UI REGRESSION TEST FIX (2026-11-11)
+
+- Investigated failed `Face Impact foundation` job for SHA `f5feff11` using the actual GitHub Actions log. `SyntheticMotionDiagnostics.test.tsx` still failed: regex omitted the literal space between 'frame' and React's `<!-- -->` SSR separator. Updated both assertions to normalize React SSR comment separators before asserting exact user-visible text. This is a test-only correction; no application runtime behavior changed.
+- CI for `05880cf0` was still in progress at review. PR Checks still fail on the genuine missing running-UI screenshot requirement, not something to bypass.
+- Gates 20–24 OPEN; physical testing deferred; no merges/releases.
+
+---
+
+# PHASE 5 FACE VIEW TYPE SAFETY AND DEGENERATE OUTLINE GUARD (2026-11-11)
+
+- Reviewed `FaceImpactView` after prior commit `f5feff11`. Corrected discriminated-union narrowing before accessing `x_mm`/`y_mm` for rejected statuses, preventing a TypeScript compile regression.
+- Strengthened synthetic face outline validity with a bounded vertex count and nonzero shoelace area. Added zero-area outline regression; invalid outlines cannot display an impact marker. This is a frontend guard, not proof of physical accuracy.
+- Exact-SHA CI on `f5feff11` was still running when checked; Documentation succeeded and PR Checks failed because real UI screenshot evidence is outstanding. New commit CI must be verified.
+- Gates 20–24 remain OPEN. No hardware tests, merge, or release.
+
+---
+
+# PHASE 5 IMPACT-FIRST FACE VISUALIZATION HARDENING (2026-11-11)
+
+- Updated the existing `FaceImpactView` (not a competing UI) to draw subtle face-center guides for synthetic impact interpretation.
+- Added fail-closed UI checks: a synthetic impact marker is not drawn if its coordinates are non-finite, the supplied polygon is malformed (fewer than 3 points or non-finite), or the impact lies outside the polygon boundary. Boundary points are accepted. This is a display safety check, not a replacement for backend geometry validation or physical clubface recognition.
+- Added React SSR regression tests for center guides, outside-face point and invalid polygon. CI on the new exact SHA is required before any acceptance claim.
+- Prior exact SHA `5eb1e7cb`: Documentation and Windows USB camera workflows succeeded; other workflows were still running at review. PR Checks remained red because actual UI screenshots are not yet supplied; PR #45 description was updated accurately without bypassing that requirement.
+- Gates 20–24 remain OPEN; all hardware tests deferred, no merge/release.
+
+---
+
+# PHASE 5 IMPACT-FIRST DASHBOARD AND UI CI REPAIR (2026-11-11)
+
+- User confirmed image-space ball/face separation is a developer diagnostic, **not** a primary user-facing feature. Moved `SyntheticMotionDiagnostics` behind a collapsed **Advanced diagnostics** disclosure in the existing dashboard. The main impact face visualization and existing demo controls remain visible and unchanged; do not pretend the current synthetic demo is a measured impact.
+- Audited exact SHA `d4be4e4c` CI: Foundation `ui-unit-linux` failed in `SyntheticMotionDiagnostics.test.tsx` because React server rendering inserts `<!-- -->` between adjacent text and numeric values; test asserted a literal continuous string. Repaired assertions to accept React's SSR separator without weakening runtime validation.
+- PR Checks failure at `d4be4e4c` is PR-description completeness, not an application test failure; requires separate PR metadata remediation. Other CI workflows may still be pending. Verify all checks for this new SHA.
+- No physical ELP tests, upstream modifications, merges, releases, or Gate closure. Gates 20–24 OPEN; continue impact-first development and software-only tests.
+
+---
+
+# PHASE 5 SYNTHETIC MOTION FRAME INSPECTION (2026-11-11)
+
+- Added selectable observed-frame controls and explicit per-frame pixel separation/sensor timestamp to the existing React diagnostics panel. This is **metadata inspection**, not photographic frame replay or measured impact.
+- Removed obsolete commented duplicate TypeScript payload declaration; retained shared typed contract and fail-closed checks.
+- Extended UI render regression to cover frame controls and selected-frame readout. New exact-SHA CI must be verified; Gates 20–24 OPEN, no physical tests/merge/release.
+
+---
+
+# PHASE 5 SYNTHETIC MOTION DASHBOARD AND SOCKET HANDOFF (2026-11-11)
+
+- Active repository: `andersdui22/openflight-face-impact`; branch `mdp-v1.2/phase5-gates20-24-parallel`; draft PR #45. Latest reviewed implementation SHA before this handoff update: `c9ddf590b4be1d5dc68bbc5827c9e4ead4b1d73a`.
+- Gates 20–24 remain **OPEN**. All 35 Gates should be developed software-first, deferring ELP OV9281 physical tests until no further meaningful software-only progress is possible. No upstream OpenFlight or ConnectorNext changes; no merge or release without separate authorization.
+- Added real synthetic image sequence → dual-object observation → image-space proximity → temporal trend → safe JSON UI payload in `offline_motion_analysis_pipeline.py`. This never confirms physical contact, real impact coordinates, or calibrated uncertainty.
+- Corrected three synthetic motion test fixtures so the moving ball and static face share the same vertical image region (`dfac4316`). The synthetic scene remains only a fixture; CI must establish test pass.
+- Added `SyntheticMotionDiagnostics` panel to existing React/Electron dashboard (`44c6ea0f`), with distance plot and explicit non-measurement labels. The design illustration shown in conversation is **not** a screenshot of the actual UI and includes features not yet implemented.
+- Added React Socket.IO listener, strict synthetic payload validation, Zustand state, and disconnect clearing (`c092e47c`). Do not render invalid or physical-contact-claiming data.
+- Added explicit, user-triggered `request_synthetic_motion_demo` Flask-SocketIO handler and Python-generated grayscale fixture through the real analysis pipeline, emitting `synthetic_motion_diagnostics` to the requesting client only (`c41cc211`). UI has Load/Reload synthetic motion demo buttons. This is **not** automatic ELP camera analysis.
+- Added Flask-SocketIO integration tests for event payload, session isolation and no unsolicited emission, plus a technical handoff document at `docs/governance/PHASE5_SYNTHETIC_SOCKET_HANDOFF.md` (`c9ddf590`).
+- **CI status:** Recent exact-SHA workflows were queued/in progress when checked. No all-green claim is made for `c9ddf590` or this handoff commit. Check exact-SHA Tests, UI, Pylint, Foundation, Documentation, PR Checks and Windows USB camera workflow where applicable. Fix failures before proposing Gate closeout.
+- **Next work:** run and inspect actual CI failures; correct any synthetic pipeline/Socket.IO regression; verify React build and complete end-to-end request→Python→Socket.IO→React test; then implement image replay within existing dashboard without falsely implying physical measurements. Reconcile canonical approved MDP V1.2 acceptance criteria before Gate closure.
+
+---
+
+# PHASE 5 SOFTWARE-ONLY ACCEPTANCE GAP AUDIT (2026-11-11)
+
+- Added `docs/governance/MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md` with explicit Gate 20–24 evidence, remaining P0/P1 software gaps and hardware-deferred acceptance.
+- `fa0972cc` CI queued at audit time. Prior `d99ea571` exact-SHA six workflows SUCCESS; not transferable to newer commits.
+- Gates 20–24 remain OPEN; canonical approved MDP V1.2 acceptance criteria still absent in inspected repository. No merge/release/physical tests.
+
+---
+
+# PHASE 5 GATES 20–24 AUDITED OFFLINE HANDOFF INTEGRATION (2026-11-11)
+
+- Exact-SHA `d99ea571`: all six CI workflows SUCCESS.
+- Added `offline_impact_handoff.py`: composes existing audited capture batch, independent host/sensor timing checks, unique synthetic frame selection and fail-closed impact export. Reaudits batch before export to reject stale or tampered audit counts.
+- Added unmocked synthetic image integration tests for rejected candidate geometry, invalid timing, tampered audit and wrong input type. This tests the actual contour-to-batch-to-handoff rejection path; it does NOT demonstrate successful physical impact detection or contact timing.
+- Gates 20–24 remain OPEN pending software acceptance audit; physical tests deferred. No merge/release. Verify new SHA CI.
+
+---
+
+# PHASE 5 GATES 23/24 OFFLINE IMPACT EVIDENCE HANDOFF (2026-11-11)
+
+- Verified `8fee97fe` exact-SHA CI: all six workflows SUCCESS.
+- Added typed `offline_impact_evidence.py` export for selected **synthetic-only** impact coordinates. Preserves shot/session/frame and rejects coordinate disclosure if timing or uniqueness gates fail. Physical validation remains false; uncertainty remains unknown. Cross-checks selected accepted indices against provided candidate batch.
+- Tests: accepted synthetic coordinates, ambiguous and invalid-timing fail-closed, mismatched selection, forbidden physical claims and rejected coordinates, invalid input.
+- No real contact instant, camera hardware tests, merge or release. Gates 20–24 OPEN; new SHA CI pending.
+
+---
+
+# PHASE 5 GATES 22/24 COMBINED OFFLINE TEMPORAL EVIDENCE (2026-11-11)
+
+- Added `offline_temporal_evidence.py` to compose existing strict frame-spacing validation with existing unique synthetic geometry frame selector. Only an unambiguous synthetic candidate **and** valid bounded timing can pass the offline analysis gate; no physical contact claim.
+- Tests cover positive synthetic candidate, invalid timing despite unique geometry, ambiguous candidates, out-of-capture indices, and impossible evidence mutations.
+- Previous `9e270c40` CI was running when inspected; previous UI E2E rerun also running. New SHA CI must be checked. No merge/release or physical tests; Gates 20–24 remain OPEN.
+
+---
+
+# PHASE 5 GATE 22 OFFLINE FRAME SPACING QUALITY (2026-11-11)
+
+- Verified `7949276b` Python Tests, Pylint, Foundation, Documentation and PR Checks SUCCESS; UI E2E failed before execution because runner could not resolve Ubuntu apt mirror; rerun requested, E2E pending.
+- Added `offline_frame_spacing.py`: bounded offline diagnostic for sensor-clock and host-clock inter-frame gaps, using existing strict trigger timing validator. Both clocks remain separate. Rejection preserves explicit reasons; no frame ranking, physical FPS certification, exposure synchronization or contact inference.
+- Tests cover positive synthetic clock intervals, independent gap limits, invalid trigger timing, invalid limits, and forbidden physical-contact claims.
+- No camera ownership changes, no physical tests, no merge/release. Gates 20–24 OPEN. Verify CI at new SHA.
+
+---
+
+# PHASE 5 GATE 21 ROBUSTNESS: HOLES AND MALFORMED THRESHOLDS (2026-11-11)
+
+- Verified `48c0c3b5` exact-SHA CI: all six workflows SUCCESS, including the unmocked synthetic image-to-pose regression.
+- Hardened optional synthetic perspective quadrilateral extraction against filled-contour **interior holes** and malformed/non-numeric/boolean acceptance thresholds. A bright outline with dark interior must not be accepted as a filled face candidate.
+- Added negative regression tests for interior holes, malformed area/fill thresholds and wrong calibration dimensions. Existing rectangle mode, camera ownership, and real pose solver remain unchanged.
+- No claim of real clubface detection or physical impact; Gates 20–24 remain OPEN; physical tests deferred; no merge/release. Verify CI on new SHA.
+
+---
+
+# PHASE 5 GATE 21 UNMOCKED SYNTHETIC PERSPECTIVE POSE REGRESSION (2026-11-11)
+
+- Verified exact-SHA `3dd6f5ca`: all six GitHub Actions workflows SUCCESS.
+- Added end-to-end **unmocked** synthetic regression: render a tilted planar quadrilateral from known metric pose using OpenCV camera projection, place it in a correctly bracketed two-frame capture, extract its image corners through the new quadrilateral mode, and solve with the existing real IPPE pose estimator. Assert reprojection RMS and metric translation/rotation within tolerances that account for integer rasterization.
+- This is simulated image-domain evidence only, not real clubface recognition, hardware calibration or contact timing. Gate 21 remains OPEN pending real-world evidence and further robustness; all physical tests deferred until all Gates are software-complete.
+- New SHA CI still requires verification. No merge or release.
+
+---
+
+# PHASE 5 GATE 21 QUADRILATERAL-TO-EXISTING-POSE BRIDGE (2026-11-11)
+
+- Verified exact-SHA `d410c78b` and `c3652a5e` CI: all six workflows SUCCESS for both.
+- Added explicit `observation_mode=\"quadrilateral\"` to existing `estimate_capture_synthetic_face_pose`, retaining `rectangle` default and rejecting unsupported modes. Reuses the existing quadrilateral image extractor and planar PnP solver, no duplicate solver or camera owner.
+- Added isolated synthetic wiring test (spy solver) and unsupported-mode rejection. No claim of unmocked positive perspective pose accuracy or physical clubface identity. Gates 20–24 OPEN. Hardware tests deferred; no merge/release.
+- New SHA CI must be verified independently.
+
+---
+
+# PHASE 5 GATE 21 SYNTHETIC PERSPECTIVE QUADRILATERAL (2026-11-11)
+
+- Preserved existing strict axis-aligned rectangular fixture proposal and pose solver unchanged. Added **optional** `synthetic_face_quadrilateral.py` to extract four ordered image corners from a single isolated convex bright perspective quadrilateral in an offline captured frame.
+- Fail-closed checks: exactly one connected contour, size, convex four-vertex polygon, border margin, fill and upright synthetic ordering. Shot/session/frame provenance retained through existing immutable observation model. Regression tests cover perspective synthetic positive, blank/multiple objects, circle, border, wrong frame and threshold.
+- Explicit limitation: a bright quadrilateral does not identify a real clubface. Corner ordering is only a synthetic upright convention, not arbitrary rotation, handedness or physical contact. No automatic real-world pose/contact claims. Existing camera owner and geometry solver unchanged.
+- Earlier `d410c78b` PR Checks and Documentation passed; remaining CI pending at observation time. Verify CI at new SHA. No merge/release; physical tests and screenshots deferred.
+
+---
+
+# PHASE 5 CI TEST-FIX: TRIGGER BRACKETING (2026-11-11)
+
+- Read exact-SHA CI at `a1d87ce8ab03be1391663874b1caac3ec3956dd8`: PR Checks, Documentation, Pylint, UI, Foundation SUCCESS; Python 3.11 Tests FAILURE: 7 new tests failed because their single-frame synthetic captures violated the pre/post trigger timing contract. Python 3.10/3.12 jobs cancelled.
+- Fixed **test fixtures only**: two strictly monotonic synthetic frames, pre-trigger count 1, trigger host timestamp bracketed between frames. No weakening of `validate_candidate_frame_index`, camera timing, pose solver or image provenance.
+- Recheck new exact SHA CI; Gates 20–24 remain OPEN; no physical tests, merge or release.
+
+---
+
+# PHASE 5 GATE 21 SYNTHETIC CAPTURE-TO-POSE COMPOSITION (2026-11-11)
+
+- Audited existing selected-frame synthetic corner extractor and `estimate_synthetic_face_pose` planar PnP contract before implementation. Added `estimate_capture_synthetic_face_pose` as a thin provenance-preserving bridge, **not** a duplicate pose solver or camera reader.
+- Tests verify selected-frame image-derived pixels reach the existing solver, rejection before solver on missing image evidence, propagation of ambiguous pose rejection and invalid frame identity. The positive wiring test spies on the solver; it is **not** an unmocked physical or positive pose-accuracy test.
+- Rectangle fixture is synthetic only; real clubface landmark identity, arbitrary perspective corner extraction and contact instant remain unverified. No physical tests until all 35 Gates developed software-first; no merge/release.
+- CI on the exact new SHA remains to be verified.
+
+---
+
+# PHASE 5 GATE 21 IMAGE-DERIVED SYNTHETIC LANDMARK PROVENANCE (2026-11-11)
+
+- Audited existing Gate 08/10 synthetic IR face-region proposal, Gate 22 selected-frame image validator and Gate 21 supplied-landmark pose solver. Reused the strict rectangular detector rather than creating a competing clubface detector or camera owner.
+- New `synthetic_face_pixel_observation.py` extracts four ordered corner pixels from the **selected buffered image** and binds shot/session/frame identity, with defensive immutable pixel copy. Tests cover valid rectangle, no/ambiguous rectangles, frame/dimension mismatch and invalid provenance.
+- This is a synthetic axis-aligned rectangle fixture ONLY; the pixel corner order is not proof of real clubface identity, handedness, perspective shape, physical face geometry or contact. The existing pose solver remains unchanged; end-to-end real-world observation still OPEN.
+- All 35 Gates software-first, physical testing and user screenshots deferred; no merge/release. CI must be checked at the new exact SHA.
+
+---
+
+# PHASE 5 GATE 22/24 OFFLINE FRAME EVIDENCE SELECTION (2026-11-11)
+
+- Audited Phase 5 HANDOFF, current scope matrix, existing `synthetic_frame_candidates.py`, `offline_capture_batch.py`, `synthetic_impact_quality.py`, and tests before implementation. The previous batch already assesses explicit frames; do not duplicate capture, geometry or pose solvers.
+- Added isolated `offline_frame_selection.py`: a bounded, deterministic, fail-closed **unique synthetic geometry** selector consuming existing assessed frames. Exactly one accepted synthetic geometry frame yields a synthetic candidate; zero yields no selection; multiple yield an ambiguous result with **no** selected frame. Reject duplicate/malformed identities and inconsistent quality. No physical contact inference, timing, frame ranking, image-derived clubface landmarks or uncertainty estimate.
+- Added hardware-free tests for unique/none/ambiguous outcomes, input limits, contradictory quality, duplicate IDs and forbidden physical validation claims. This is a new software capability, not final Gate 22 or 24 acceptance.
+- All physical ELP tests and user-supplied screenshots remain deferred until all 35 Gates are developed as far as possible without hardware. No merge/release. Exact-new-SHA CI must be checked; do not inherit previous passing CI.
+
+---
+
+# PHASE 5 GATES 20–24 SOFTWARE EVIDENCE REVIEW (2026-11-11)
+
+- Read-only PR #45 audit at exact SHA `925c1a3f3248c0112ff7708356117fde20b0a9d0`: Tests, Foundation, UI, Pylint and Documentation all SUCCESS; PR Checks FAILURE (PR metadata). Positive rendered-image integration is in the passing test suite; this does not prove physical accuracy.
+- Reconciled stale Phase 5 scope status and recorded per-Gate implemented offline evidence, concrete missing software and separately deferred physical work in `MDP_V1_2_PHASE5_GATES20_24_PARALLEL_SCOPE.md`. Gates 20–24 remain OPEN. In particular, image-derived clubface landmark extraction and contact-frame selection remain absent; supplied face pixels and manually chosen frames must not be described as measured detections.
+- Canonical approved MDP V1.2 acceptance text not verified in repository. No final Gate closure without reconciliation. All physical tests postponed until all 35 Gates are developed as far as possible without hardware. No merge/release.
+- This documentation change requires its own new-SHA CI verification; previous successful CI belongs only to the audited SHA.
+
+---
+
+# PHASE 5 CI REPAIR AND TEST BOUNDARY (2026-11-11)
+
+- Read-only audit exact SHA `b81b14e128fbfde8c83ac685da9a35f4f6fdb87d`: Tests FAILURE (Python 3.11: 2751 passed, 1 failed, 7 skipped; 3.10 and 3.12 cancelled), Foundation/Pylint/UI/Documentation SUCCESS; PR Checks FAILURE.
+- Root cause: test `test_rejects_accepted_result_missing_coordinates` attempted `dataclasses.replace(..., x_mm=None)` and expected aggregate-audit rejection, but `SyntheticImpactResult.__post_init__` correctly fails closed at construction. Updated test to assert the earliest model-validation boundary. No production geometry logic changed.
+- Positive unmocked rendered-image integration test was not listed among failed tests on Python 3.11; this does not establish hardware accuracy or all-version CI success. New SHA CI pending.
+- All physical tests remain postponed until all 35 Gates are as complete as possible without hardware. Gates 20–24 OPEN. No merges/releases.
+
+---
+
+# PHASE 5 GATES 20–24 POSITIVE RENDERED-IMAGE INTEGRATION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `81effe47bfe20c9111b5d65bfc9e101e1b536016`: Documentation SUCCESS; Tests, Pylint, Foundation, UI IN PROGRESS; PR Checks FAILURE.
+- Added a positive **unmocked** synthetic image-to-contact regression: render a 720-sample sphere silhouette to an actual uint8 frame; use OpenCV contour extraction, calibrated rays, sphere cone estimation, projected face landmark pose, contact geometry, quality assessment and batch audit. Verify known 12mm toe / 5mm high synthetic contact within 5mm tolerance; no physical accuracy claim.
+- The test is committed but **not yet confirmed passing**. If CI fails, diagnose exact test failure and correct within scope. No physical ELP camera or live shots until all 35 Gates are developed as far as possible. Gates 20–24 OPEN; no merge/release.
+
+---
+
+# PHASE 5 GATES 20–24 INTEGRATED OFFLINE BATCH ENTRY POINT (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `b32f84f0bb2100e8813e12a0b3880893001e2231`: Documentation SUCCESS; Tests, UI, Pylint, Foundation IN PROGRESS; PR Checks FAILURE.
+- Added `assess_offline_capture_batch`, one explicit bounded offline API that composes selected-frame contour extraction, synthetic face observations, per-frame impact/quality and a validated aggregate evidence audit. No physical contact frame selection, accuracy claims or camera acquisition.
+- Integration regression tests cover two independently rejected selected frames (blank vs real disk with degenerate face pixels), batch counts, fail-closed status, duplicate frame and resource limit. Positive full image-to-contact acceptance remains an explicit outstanding item.
+- All hardware-dependent testing postponed until all 35 Gates are developed as far as possible without hardware. Gates 20–24 OPEN; no merges/releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATE 24 BATCH AUDIT HARDENING (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `2c247dc262e08c7100a25fcc65a4364617b26d24`: five technical workflows SUCCESS, PR Checks FAILURE.
+- Hardened offline aggregate audit against malformed nested assessment types, negative/boolean frame identities and accepted impact results missing coordinates or regions. Added focused regression cases.
+- All physical calibration, camera capture and live golf shots explicitly postponed until all 35 Gates have been developed as far as possible without hardware. Gates 20–24 remain OPEN. No merges or releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATES 20–24 BATCH AUDIT AND REJECTION MATRIX (2026-11-11)
+
+- Read-only audit PR #45 SHA `49c9f793375b7aa74f7572ebf54c47ad9ca5d652`: Documentation SUCCESS; Tests, Foundation, UI, Pylint IN PROGRESS; PR Checks FAILURE.
+- Added `audit_synthetic_candidate_batch`: validates consistent synthetic status/quality, distinct frame IDs, rejection reasons and hidden rejected coordinates, and forbids physical accuracy claims. Summarizes all four status categories without selecting a physical contact frame. Offline tests cover four statuses and contradictory/invalid results.
+- Positive end-to-end image-derived impact remains pending; this audit does not replace it. Gates 20–24 OPEN. No hardware tests, merges or releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATES 20–24 BATCH DEVELOPMENT: MULTI-FRAME OFFLINE ASSESSMENT (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `2f66f312ac08b50a94093b5e2991aa51f0e2e38e`: all five technical workflows SUCCESS (Tests, UI, Pylint, Foundation, Documentation); PR Checks FAILURE (PR metadata).
+- New bounded pure `assess_synthetic_frame_candidates` evaluates multiple **explicit** frame candidates in one call. Each candidate retains its frame index and independently supplied face pixels, and receives an individual synthetic result plus quality report. No best-frame selection or physical contact timestamp inference.
+- Strict input validation: bounded nonempty tuple, unique nonnegative integer indices, finite Nx2 face pixels copied to read-only arrays, positive integer maximum. Offline tests cover multiple different rejection stages, invalid frame, pixel aliasing, duplicate indices, malformed batches, invalid pixels and limits.
+- Caller face metadata identity is internally tied to the corresponding frame index; this is not proof of actual face pixel origin. Successful full image-derived impact and physical accuracy remain unverified. Gates 20–24 OPEN; no hardware tests, merges, releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATE 24 FACE-FRAME IDENTITY QUALITY PROPAGATION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `99a7fc0b4ddeb4d3940274af1e48de42068c44b0`: Documentation SUCCESS; Foundation, Tests, Pylint, UI IN PROGRESS; PR Checks FAILURE.
+- Propagated optional `face_observation_frame_index` through the public quality wrapper to the underlying capture-impact function. Regression verifies mismatched face-frame metadata fails closed and quality carries the same rejection reason without coordinates or invented uncertainty.
+- Metadata does not prove pixel origin. Physical contact and successful image-to-impact positive test still open. Gates 20–24 OPEN; no hardware tests, merges, releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATE 21/23 OPTIONAL FACE-FRAME IDENTITY GUARD (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `bdf5580dd05ecde77c88c92ee9d903e511ca3a4f`: Tests, Pylint, Foundation, Documentation SUCCESS; UI IN PROGRESS; PR Checks FAILURE.
+- Added opt-in `face_observation_frame_index` to selected-frame synthetic impact calculation. If supplied, mismatched or boolean frame identity is rejected before contour processing and without impact coordinates. Existing callers remain unchanged.
+- This is **metadata consistency only**, not proof that externally supplied face landmarks were detected from that frame. Positive image-to-contact integration and actual face feature extraction remain open. No physical tests, merge, release. New SHA CI pending.
+
+---
+
+# PHASE 5 GATE 24 SELECTED-FRAME POSITIVE CONTOUR / NEGATIVE FACE REGRESSION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `ab6bbd2e690991169173e9563cca95c6a0ecef4f`: Documentation SUCCESS; Tests, Pylint, Foundation, UI IN PROGRESS; PR Checks FAILURE.
+- Added actual synthetic grayscale disk frame integration test: selected-frame contour is extracted and passes the single-contour stage, while deliberately degenerate face landmarks must reject downstream geometry without publishing coordinates. Quality reason must match rejection.
+- This is **not** the still-pending positive full impact result. The earlier accepted-quality regression mocks geometry. Face pixel provenance and physical contact remain unverified. Gates 20–24 OPEN; no hardware tests, merges, releases; new SHA CI pending.
+
+---
+
+# PHASE 5 GATE 24 ACCEPTED-RESULT COMPOSITION REGRESSION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `756aa4cc56876e238d1be53e8aada3e02ef5cd61`: Documentation SUCCESS; Tests, Pylint, Foundation, UI IN PROGRESS; PR Checks FAILURE.
+- Added isolated acceptance-path regression for `assess_capture_ball_synthetic_impact`: injected successful synthetic geometry is carried unchanged to the quality report, with physical validation False and uncertainty None. Existing real selected-frame negative integration test remains.
+- This test **mocks the underlying geometry calculation**; it does not establish a successful camera-frame-to-contact end-to-end case. Such a case and face-observation provenance remain open. Gates 20–24 OPEN; no hardware tests, merges, releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATE 24 END-TO-END SYNTHETIC QUALITY COMPOSITION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `ea34c998371f5d3bbfaa09defbd493ee497af62c`: Foundation, Pylint, Documentation SUCCESS; Tests and UI IN PROGRESS; PR Checks FAILURE.
+- Added `assess_capture_ball_synthetic_impact` composing selected-frame bright contour, synthetic face impact and explicit quality assessment in one offline call. Integration test verifies absent ball produces no coordinates, carries rejection reason consistently and never invents physical validation or millimetre uncertainty.
+- Face landmarks remain externally supplied; successful real-world impact, physical timing and accuracy unverified. Gates 20–24 OPEN. No hardware tests, merges or releases; new SHA CI pending.
+
+---
+
+# PHASE 5 GATE 24 SYNTHETIC QUALITY CONTRACT (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `60f558feab6425b9ec57890f13ba7f6f6c986ec4`: Documentation and Pylint SUCCESS; Tests, UI, Foundation IN PROGRESS; PR Checks FAILURE.
+- Added pure `assess_synthetic_impact_quality` summary for accepted and rejected synthetic results. Accepted geometry is explicitly **not** physically validated; uncertainty in millimetres is `None`, never invented. Rejected results retain their explicit reason. Added offline tests for accepted, each rejection status, and invalid input.
+- This is a reporting contract, not a validated statistical uncertainty estimator. Gates 20–24 OPEN; no hardware tests, merges or releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATES 20/22/23 CAPTURE-CONTOUR SYNTHETIC IMPACT COMPOSITION (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `719faa9a445cbb3ee84381f0ffb546a5b9b282a8`: Tests, Pylint, Foundation, Documentation SUCCESS; UI IN PROGRESS; PR Checks FAILURE.
+- Added `calculate_capture_ball_synthetic_impact`, composing selected-frame image validation, image-derived contour, and existing synthetic observed-impact geometry with explicit matching frame identity. Offline negative integration tests reject absent contours and invalid frame indices without coordinates.
+- Face landmark pixels remain caller-supplied and **are not independently proven to come from the same frame**. No physical impact timing, classification or accuracy established. Gates 20–24 OPEN; no hardware tests, merges or releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATES 20/22 SELECTED-FRAME CONTOUR PROVENANCE (2026-11-11)
+
+- Read-only audit PR #45 exact SHA `8ca95cd1c817102a6ddebfdb7037f7f093dca3dc`: Tests, Pylint, Foundation and Documentation SUCCESS; UI IN PROGRESS; PR Checks FAILURE.
+- Added `extract_capture_ball_contour`: validates a selected buffered frame and extracts a contour **from that frame's copied image**. Returns immutable contour with shot/session/frame identity, unlike independent caller-supplied pixels. Tests cover valid extraction, wrong frame, invalid capture identity/dimensions and ambiguous components.
+- Does not identify the object as a golf ball, establish contact time, derive face landmarks, or publish a physical impact. Gates 20–24 OPEN. No hardware tests, merge or release; new SHA CI pending.
+
+---
+
+# PHASE 5 GATE 22 EXPLICIT OBSERVATION IDENTITY MODE (2026-11-11)
+
+- Startup audit PR #45 exact SHA `885b5ce757f0daa1e0b4ebee9a2fa6c927bbad14`: Documentation SUCCESS; Tests, UI, Pylint, Foundation IN PROGRESS; PR Checks FAILURE.
+- Added opt-in `require_observation_frame_identity=True` to the synthetic impact composition: rejects missing explicit observation index, while existing index consistency and timing checks reject mismatches. Preserves previous synthetic callers by default; added missing-index rejection and matching-index acceptance tests.
+- This verifies only declared metadata consistency, **not** image-pixel provenance, contact instant or real impact accuracy. Gates 20–24 OPEN; no physical tests, merges or releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATE 21 LANDMARK BORDER QUALITY (2026-11-11)
+
+- Read-only audit PR #45 head `dffc2efa8b2673d6eafd106f64918ed7901ab7c2`: Documentation and Pylint SUCCESS; Tests, Foundation and UI IN PROGRESS; PR Checks FAILURE.
+- Added optional, explicitly bounded image-edge margin to existing planar face landmark pose estimator. Calibrated pixels within the excluded border now reject before pose estimation. Preserves default behavior and existing camera ownership; synthetic acceptance, rejection and invalid-parameter tests added.
+- This is a supplied-landmark observation-quality check, **not automatic clubface landmark extraction** or physical accuracy evidence. Gates 20–24 OPEN; no physical tests, merge or release. New SHA CI pending.
+
+---
+
+# PHASE 5 GATE 20 OPTIONAL SILHOUETTE CIRCULARITY (2026-11-11)
+
+- Exact-SHA startup audit of PR #45 `32003d727ab6254146187dfe192e6531e9688715`: Tests, Pylint, Foundation, UI and Documentation SUCCESS; PR Checks FAILURE.
+- Added explicit optional `min_circularity` threshold (0..1) to the existing bright-contour extractor, forwarded by contour-to-ball-range composition. Rejects elongated candidates using OpenCV area/perimeter, with offline disk, elongated shape and invalid-threshold tests. Default zero preserves prior synthetic callers.
+- Circularity is a shape heuristic, not golf-ball identification or physical accuracy. Gates 20–24 OPEN; no hardware tests, merges, releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATE 20 OFFLINE CONTOUR-TO-SPHERE COMPOSITION (2026-11-11)
+
+- Exact-SHA startup audit of PR #45 `c68deb447d25d1d893ffef9f42474322cfcee6b3`: Tests, Pylint, Foundation, UI and Documentation SUCCESS; PR Checks FAILURE on metadata.
+- New pure `estimate_bright_ball_position` composes existing single-bright-component extraction, calibrated pixel rays and existing ball silhouette range solver; validates calibrated image dimensions before processing. No duplicate ray or sphere solver, no camera reader.
+- Added offline disk/invalid-dimensions/ambiguous-component/invalid-radius tests. Brightness is not proof of golf-ball identity, and synthetic results are not physical accuracy evidence. No live impact publication. Gates 20–24 OPEN; no hardware tests, merges, releases. New SHA CI pending.
+
+---
+
+# PHASE 5 GATE 20 SYNTHETIC BRIGHT CONTOUR EXTRACTION (2026-11-11)
+
+- Read-only startup audit of PR #45 exact HEAD `3be171b1aa2b870f6631f9ae97f0bd6c178d7b87`: Tests, Pylint, Foundation, UI, Documentation SUCCESS; PR Checks FAILURE on PR metadata.
+- Added a pure offline OpenCV bright-foreground contour extraction helper with caller-specified intensity threshold, minimum contour area and border margin. Rejects zero/multiple eligible components, invalid image type/size, invalid thresholds and clipped contours. Reuses existing Gate 20 contour quality validator; does not add a camera reader.
+- Synthetic regression tests included. A bright connected component is **not** proof of ball identity, roundness, contact timing or physical accuracy. Not wired to physical measurement publication. Gate 20–24 OPEN; no physical tests, merge or release. New SHA CI pending.
+
+---
+
+# PHASE 5 GATE 22 OPTIONAL IMAGE-DOMAIN INTEGRATION (2026-11-11)
+
+- Startup audit PR #45 head `57da15f6ac977a263561761844622fe96aa267a0`: Documentation, Pylint, foundation SUCCESS; Tests and UI IN PROGRESS; PR Checks FAILURE on metadata.
+- Integrated `validate_capture_frame_image` into synthetic observed impact behind explicit `validate_frame_image=True` opt-in. A supplied capture/index must now contain a grayscale uint8 image matching calibrated dimensions, otherwise fail closed without impact coordinates. Default False preserves prior synthetic placeholder-frame tests. Added integrated rejection/acceptance and missing-capture regression tests.
+- Fixed accidental literal backslash-n in function docstring. Image validation **does not establish** that independent ball/face pixels came from selected image. No automatic detection, physical contact inference, hardware tests, merge or release. Gates 20–24 OPEN; exact-SHA CI pending.
+
+---
+
+# PHASE 5 GATE 22 OFFLINE CAPTURE IMAGE DOMAIN (2026-11-11)
+
+- Read-only audit of PR #45 head `ddf2b2abc585c669216dcff4927a35605ce2c661`: Pylint, foundation, Documentation SUCCESS; Tests and UI IN PROGRESS at audit; PR Checks FAILURE on metadata. No claim of completed CI.
+- New standalone `validate_capture_frame_image` verifies explicit candidate index, capture timing/identity, uint8 2D grayscale image and exact declared calibrated width/height; returns a defensive copy. Eleven hardware-free cases test valid copy, mismatched shape/dtype, invalid size, invalid provenance.
+- This is a **pure validator**, not automatic image extraction or proof that independently supplied ball/face pixels came from the image. It does not create a camera reader or alter existing synthetic impact API. No physical tests, merge or release. Gates 20–24 OPEN; exact-SHA CI pending.
+
+---
+
+# PHASE 5 GATE 22 OBSERVATION-FRAME METADATA BINDING (2026-11-11)
+
+- Startup audit: PR #45 at `1b5e7d55077350dca695eb7ea73e2c9f863bb42b`; CI was in progress for Tests/Pylint/Foundation/UI, Documentation SUCCESS and PR Checks FAILURE on metadata. No CI success inferred.
+- Gate 22 synthetic impact API gains optional `observation_frame_index`. If supplied, it requires a valid capture and a valid index identical to the explicit candidate frame index. Reject mismatched, out-of-range or malformed observation indices without coordinates. Existing callers remain compatible.
+- Important: this binds **caller-provided metadata only**; it cannot prove that pixel observations were extracted from that image, or that the image contains physical contact. Future image extraction must carry trusted frame provenance.
+- Added offline integration regression tests. One atomic source/test/handoff commit; verify exact-SHA CI. Gates 20–24 remain OPEN. No physical tests, merges, releases.
+
+---
+
+# PHASE 5 GATE 24 CI TEST-DATA FIX (2026-11-11)
+
+- Exact-SHA CI at `bf87de053d90ea996077c549731c35b027722c2a`: Tests FAILURE (Python 3.10: 2650 passed, 1 failed, 7 skipped); Pylint, foundation, UI and Documentation SUCCESS; PR Checks FAILURE on metadata.
+- Root cause: Gate 24 regression parameter contained literal backslash+t rather than a tab character; whitespace-only validation correctly did not reject that nonblank string. Test now uses the actual tab escape in Python source. Production code unchanged, assertions retained.
+- Batch updates test and handoff together; reverify CI on the new SHA. Gates 20–24 OPEN; no hardware tests, merge or release.
+
+---
+
+# PHASE 5 GATE 24 RESULT INVARIANT BATCH (2026-11-11)
+
+- Read-only startup audit of PR #45 head `f9c1fef0be725cf922988fa772a984d01cd5b4d7`: Tests, Pylint, Face Impact foundation, UI and Documentation SUCCESS; PR Checks FAILURE (title/description metadata).
+- Gate 24: accepted synthetic impact results now reject whitespace-only horizontal or vertical region labels, consistent with existing rejected-result nonblank reason validation. Added four offline regression cases. No change to physical measurement semantics.
+- Source, tests and handoff committed atomically to minimize CI runs. New exact-SHA CI is pending. Gates 20–24 remain OPEN. No physical camera test, merge, release or PR-check bypass.
+
+---
+
+# PHASE 5 GATE 20 RESULT-CONTRACT HARDENING (2026-11-11)
+
+- Read-only startup audit of draft PR #45 at `bbb8a5f7a14da70ea975e1fd9f60a931fbe76b40`: all five technical workflows SUCCESS; PR Checks FAILURE due title and required PR-description sections. Source and tests inspected before editing.
+- Gate 20: reject invalid/nonfinite/boolean or inconsistent range, angular radius and residual in immutable BallSilhouettePosition results. Tests cover malformed scalar diagnostics and valid contract; no physical accuracy claim.
+- Atomic batch changes source, tests and handoff in one commit. CI for this new HEAD pending; do not infer results from preceding SHA. Gate 20–24 OPEN. No hardware tests, merges, releases, or PR check bypass.
+
+---
+
+# PHASE 5 GATE 22 CI CONTRACT FIX (2026-11-11)
+
+- Read-only audit at `2d1fab4cd3502319790c3c7c3c40f2db17e86869`: Documentation, Pylint, Face Impact foundation and UI passed; Tests failed 3 assertions on changed error wording. PR Checks still fail title/description. CI logs show all 3 failures expect substring `missing capture identity` while the new stricter identity validator returned `missing or invalid capture identity`.
+- This atomic batch preserves existing diagnostic contract `missing capture identity` while retaining the new requirement that shot_id and session_id be nonblank strings. No test weakening, no hardware changes. All source/tests from previous batch remain.
+- CI for new SHA must be checked; gates 20–24 remain OPEN. No physical tests, merge or release.
+
+---
+
+# PHASE 5 GATE 22 IDENTITY VALIDATION BATCH (2026-11-11)
+
+- Read-only startup audit of draft PR #45, head `b7483af87ba55972df97239bfbcf736376e85af7`: Tests, Pylint, Face Impact foundation, UI and Documentation all SUCCESS. PR Checks FAILURE: title and missing required description headings.
+- Gate 22 hardening: require both shot_id and session_id to be nonblank strings, not merely truthy values; reject malformed integers, booleans, lists and whitespace-only identity. New focused regression tests. This protects offline provenance validation only; it does not infer physical contact or bind supplied pixels to a capture frame.
+- Changes to source, tests and handoff committed atomically once to minimize GitHub CI. New commit CI must be verified before claiming acceptance. PR metadata still requires edit; no tool currently available for PR edits.
+- All Gates 20–24 OPEN; physical testing deferred until all 35 Gates developed. No merges/releases.
+
+---
+
+# PHASE 5 GATE 22 BATCH REGRESSION CHECKPOINT (2026-11-11)
+
+- CI on `ae78a6991a5c239084e8e092087eec9dc2943fdb`: **all five technical workflows passed** (Tests, Pylint, Face Impact foundation, UI, Documentation). PR Checks failed exclusively on conventional title and required PR-description sections. Do not claim PR Checks green.
+- This batch adds synthetic integration regression tests for invalid capture session identity, nonmonotonic host clock, unbracketed trigger and omitted candidate index. Every rejection must expose no impact coordinates or region labels. No actual image-to-frame correspondence verification and no contact timing inference.
+- PR metadata still needs a compliant title and required headings; no connected PR-edit tool available. Do not change CI rules or bypass checks. CI on this batch's new SHA is pending.
+- User-approved batched development: keep code, tests and handoff in same Git tree commit to reduce redundant CI. Gates 20–24 remain OPEN, no physical tests until all 35 Gates developed, no merge/release.
+
+---
+
+# PHASE 5 BATCH CI FAILURE AND FIX (2026-11-11)
+
+- Read-only audit of draft PR #45 at `d6b701f853a6ee35710c30ced2829712458c7109`: Documentation, Pylint and Face Impact foundation passed; Tests FAILED on Python 3.11 (2627 passed, 1 failed, 7 skipped); UI still in progress at audit. PR Checks failed on nonconventional PR title and missing required PR description sections, NOT on screenshot check according to job list.
+- Exact failure: `test_mismatched_calibration_size_is_rejected` expected `dimensions`, but newly inserted Gate 20 contour border validation rejected the observation first. This batch fixes fail-closed validation ordering: `calculate_synthetic_observed_impact` now rejects `image_size != calibration.image_size` before contour inspection, with explicit dimensions message. Regression test also supplies a clipped contour and mismatched dimensions to lock precedence.
+- PR metadata must be updated separately (title conventional, description headings `Why was this required?`, `Automated tests`, `Manual (human) testing`), without claiming manual testing. GitHub tool surface currently has no PR edit action; do not bypass governance or invent screenshots.
+- Source, regression test and handoff committed together in one Git tree/ref update to minimize CI. Recheck CI on resulting HEAD. Gates 20–24 OPEN; no physical testing, merge or release.
+
+---
+
+# PHASE 5 BATCH DEVELOPMENT CHECKPOINT (2026-11-11)
+
+- User approved batching changes to reduce GitHub Actions cost. This checkpoint is included in the **same Git tree commit** as source and tests, rather than a separate handoff push.
+- Batch integrates optional Gate 22 timing provenance into `calculate_synthetic_observed_impact`: caller can supply a `TriggeredCapture` and explicit `candidate_frame_index`; invalid timing/identity/index rejects with `INVALID_GEOMETRY` and no impact coordinates. Existing synthetic-only callers remain supported. This is **NOT** frame-image correspondence verification, a physical contact detector, or a claim that the trigger equals impact time. No second camera acquisition owner.
+- Synthetic integration tests cover accepted explicit candidate, out-of-range candidate, and missing capture. Source/test/handoff committed together. CI must be checked at resulting HEAD; do not claim green until verified.
+- Gates 20–24 remain OPEN. No physical testing until 35 Gates, no merge or release without separate approval.
+- Next: same-SHA CI, correct failures as one batch, then continue quality/uncertainty integration. Prefer single Git tree/commit/ref update per coherent batch.
+
+---
+
+# PHASE 5 GATE 20 OBSERVED IMPACT INTEGRATION (2026-11-11)
+
+- Read-only audit of PR #45 at `64e1a674f685898b4331a4301ac84f8d5213ec0c`: draft, technical workflows queued at time of check; no latest-SHA CI success claimed.
+- Commit `8b67a41407edc4e99851151cfc5789b259612b4d`: `calculate_synthetic_observed_impact` now calls `validate_ball_contour_pixels` before calibrated ray inversion. Optional explicit `ball_border_margin_px=0.0` maintains existing caller compatibility. Invalid or clipped contours yield existing `INVALID_GEOMETRY` rejection with no impact coordinates. This is synthetic/offline only.
+- Commit `bafabf36ec3e01887435e78d4d893f616fbf00df`: synthetic observed-impact tests check rejection for border clipping and accepted known contact with positive margin.
+- Important: No actual image contour detector, no physical contact timing, no ELP hardware test, no release/merge. Gate 20–24 remain OPEN. Latest code has NOT been verified against same-SHA CI; inspect and fix technical failures. Reassess whether optional zero margin is sufficient for eventual physical observations (requires evidence).
+- Next: exact-SHA CI, then Gate 21/22/23/24 synthetic end-to-end gating and quality contract; avoid asserting physical accuracy. Handoff update advances SHA.
+
+---
+
+# PHASE 5 GATE 20 IMAGE-DOMAIN CONTOUR QUALITY (2026-11-11)
+
+- Draft PR #45 audited at `9d57a2484e0d94543989c7c332f3bb10bf9e50d4`: Documentation passed; foundation and Pylint in progress; Tests, UI and PR Checks queued. Prior `6c741f57...` had Documentation, Pylint, foundation green; Tests/UI in progress; PR Checks failed. **Do not claim latest SHA CI green.**
+- Gate 20 new standalone offline contour-quality validator `src/openflight/camera/ball_contour_quality.py` at commit `cd1be109138974fe97f6f5bf773b7bf4e0233801`: checks image dimensions, explicit safe border margin, >=5 finite distinct pixel pairs, clipping; returns a defensive copy. This does **not** detect contours, infer ball identity or assert physical accuracy.
+- Gate 20 tests `tests/test_ball_contour_quality.py` at `82494302338c5fc2bf4d9728fe033947401fbc6d`: valid copy, bad shapes/nonfinite/duplicate samples, border clipping, invalid image/margin.
+- This is standalone; next step is to integrate into the synthetic observed-impact path with an explicit configurable margin, and verify existing call sites/tests before modifying signatures. Calibrated ray solver already checks ray coverage and consistency separately.
+- Gate 22 explicit frame-index and provenance checks, Gate 21 pose quality, Gates 23–24 impact result invariants remain in same branch; see previous handoff entries. Recheck exact-SHA CI and resolve technical failures. No physical tests, merges or releases.
+
+---
+
+# PHASE 5 GATE 22 CANDIDATE FRAME CHECKPOINT (2026-11-11)
+
+- PR #45 remains draft/unmerged. Last read-only audit of `6c741f579fba1bd8d2359687cb9b886368635be8`: Pylint and Documentation passed; foundation in progress; Tests, UI and PR Checks queued. A much older SHA `70093cfae191068f4eb7056f5b43e4c65e575e9b` had all technical workflows green, with PR Checks red (deferred screenshots). **No same-SHA green claim for latest changes.**
+- Gate 22 commit `b912d31a3e1bf237bb5cf2890c6f7aebfad576c7`: `validate_candidate_frame_index(capture, candidate_index)` now requires valid capture timing/identity and an explicitly supplied bounded frame index. It does NOT infer the physical impact instant from trigger or timestamps. Test commit `e051dc75e39eebe2f2a0e72097cbd385fb1496c8` checks accepted indices, invalid indices and rejected provenance.
+- This is an offline contract helper only, **not yet wired into impact calculation or live publication**. The selected candidate remains a hypothesis, not verified physical contact.
+- Next: verify CI on new HEAD, check Pylint and tests, then continue Gate 20 contour quality and Gate 21/23/24 integration. No physical tests until all 35 Gates, no merge/release without authorization. Handoff commit advances HEAD.
+
+---
+
+# PHASE 5 GATE 22 RING INTEGRATION TEST CHECKPOINT (2026-11-11)
+
+- PR #45 read-only audit: HEAD `85e87a96545adbb117f966907ea17a216405085b`, draft, unmerged. All six PR workflows were **queued** when checked, including Tests, Pylint, UI, Documentation, foundation and PR Checks. **No same-SHA pass has been verified.**
+- Commit `872a3ff4b19495ced1e2f225ef9a05801ca5ec39` adds an offline Gate 22 regression test feeding actual `TriggeredFrameBuffer` frames, firing a deterministic host trigger, consuming `TriggeredCapture`, checking shot/session identity and passing it to `assess_trigger_timing`. Also tests rejection when trigger precedes the last pre-frame host timestamp. No hardware involved.
+- **Important:** This integration test only exercises synthetic frame metadata and the existing ring buffer; no physical contact timestamp is inferred. Gate 22 validator is still standalone and not connected to real measurement publication.
+- NEXT: Recheck GitHub CI on latest HEAD after this handoff commit; avoid repeatedly pushing documentation-only commits if CI is queued. If technical CI fails, inspect job logs and fix. Also inspect existing `SyntheticImpactResult` constructors for Gate 23–24 contract compatibility and reconcile exact MDP V1.2 Gate definitions before closeout. Continue approved parallel Gates 20–24, no merge/release/physical testing.
+
+---
+
+# PHASE 5 GATE 22 OFFLINE TIMING PROVENANCE (2026-11-11)
+
+- Draft PR #45 remains the approved Phase 5 work surface; no merge/release/physical tests.
+- Read `triggered_buffer.py`, `capture_runtime.py` and `test_camera_triggered_buffer.py`. Existing `TriggeredCapture` has distinct sensor timestamps, host timestamps, host trigger time, shot/session IDs and pre/post frame boundary. This is a pre-existing camera ring, not proof of actual impact instant.
+- Gate 22 implementation commit `e2d7859f14f9c7ad985440f5f6cb97828c99c89c`: new pure `src/openflight/camera/trigger_timing_quality.py` rejects missing pre/post frames, bad/missing shot/session identity, invalid/nonmonotonic sensor or host clocks and host triggers not bracketed by the pre/post host timestamps. It **does not** compare unrelated sensor and host clock epochs, infer contact time or create a second acquisition owner.
+- Gate 22 synthetic tests commit `94ff3f3b89b3aed21895b0d72fc6c6e2eb0d7042`: valid and rejected capture provenance, nonmonotonic clocks and distinct clock origins.
+- This is an **offline validator not yet wired to a physical publication path**. It is not hardware calibration or exposure-time verification.
+- The latest new commit's CI is not verified. Inspect exact-SHA workflow outcomes and fix failures; consider whether the host trigger bracketing rule is too strict for a real asynchronous trigger before integrating (keep it a conservative rejection until justified).
+- Gate 20, 21, 23 and 24 changes are documented in preceding handoff sections. Recheck their CI and result-constructor compatibility. Current handoff edit advances HEAD.
+
+---
+
+# PHASE 5 PARALLEL GATES 21, 23, 24 — CHECKPOINT (2026-11-11)
+
+- Branch `mdp-v1.2/phase5-gates20-24-parallel`, draft PR #45 https://github.com/andersdui22/openflight-face-impact/pull/45 (unmerged). At previous SHA `70093cfae191068f4eb7056f5b43e4c65e575e9b`, Documentation, foundation and Pylint succeeded, UI and Tests were still in progress, and PR Checks failed on the deferred screenshot policy. These are NOT checks on the new commits below.
+- **Gate 21** code `5c91e524e274b037267954e9dfdf8d36300b22bf`: existing synthetic planar pose estimator rejects malformed RMS/margin thresholds before OpenCV. Tests `01f09cc1b3d4f893b0d0a7bb63b977962a07dd0b`: invalid scalar/bool/array/nonfinite thresholds.
+- **Gates 23–24** code `7e6002af00663ee2af776ac530cf9ffdc01c7621`: synthetic impact result contract enforces finite coordinates and populated region labels for accepted results, and forbids coordinates/regions on rejected results, requiring an explicit rejection reason. Tests `061a6ee3bbff102af4ef6b0953c87536f029a900`: contradictory-result regressions.
+- **Gate 20** earlier code and tests remain on the branch; Gate 22 timing/trigger provenance audit is still pending.
+- All new code is synthetic/offline only; no physical camera tests, merge, release, new camera receive owner, or claims of physical pose/impact accuracy.
+- **Immediate next step:** verify the new exact-SHA technical CI; inspect and correct failures. Audit all existing `SyntheticImpactResult` constructors for compatibility with new fail-closed invariant. Then audit Gate 22 timestamp source and shot/session ownership. Update this handoff after meaningful milestones. This handoff commit advances SHA, so re-fetch remote HEAD.
+
+---
+
+# PHASE 5 GATE 20 IMMUTABILITY CHECKPOINT (2026-11-11)
+
+- Draft PR #45 remains unmerged. At last observed PR HEAD `7c2b89af1cf96d27cb55e2f97d4465e23c331f83`, Documentation succeeded, other technical CI workflows were in progress, and PR Checks failed under the previously deferred screenshot requirement. Do not claim technical CI passed.
+- Gate 20 commit `a155ae8b54fcd13b0e16aedf07f361a227aa80e2`: `BallSilhouettePosition` now validates, copies and write-protects its camera XYZ result array to prevent caller mutation/aliasing of an accepted observation.
+- Gate 20 commit `9d913ecfd1bb8f9d94594b454daf722de0008d9e`: regression tests for write protection, caller-array aliasing and invalid result coordinates.
+- **New commits require same-SHA CI verification**. Next: inspect tests/Pylint on newest head and fix introduced failures. Continue only within approved Gates 20–24; no physical ELP tests, merge or release.
+- This handoff edit advances HEAD again; always fetch current GitHub HEAD and CI before continuing.
+
+---
+
+# PHASE 5 PR AND CI CHECKPOINT (2026-11-11)
+
+- Created **draft PR #45**: https://github.com/andersdui22/openflight-face-impact/pull/45, head `mdp-v1.2/phase5-gates20-24-parallel`, base `mdp-v1.2/phase4-gates17-19-parallel`. No merge/release.
+- PR creation triggered GitHub Actions on SHA `d3992511719458bec1d09ca5689cff4f963ad9be`. At observation, Tests, Pylint, UI, Documentation and PR Checks were **in progress**; Face Impact foundation **queued**. No successful same-SHA result yet. Recheck latest HEAD after this handoff commit and verify **its** CI.
+- Gate 20 source and regression test commits: `105e99ec`, `ff801f0e`. Only strict validation of supplied radius and angular residual budget has changed; no physical ball detector or camera reader added.
+- Next: inspect failing CI jobs if any, fix within scope, then continue bounded Gate 20 observation-quality and Gate 21 pose-validation work. Keep this file current after milestones.
+
+---
+
+# PHASE 5 IMPLEMENTATION UPDATE — GATE 20 (2026-11-11)
+
+- Verified Phase 5 branch `mdp-v1.2/phase5-gates20-24-parallel` at prior handoff SHA `2d388f87537ab6216ece5b1b61b84043d9f48822`; no PR-triggered workflow runs were returned for that SHA (not a pass).
+- Read `src/openflight/camera/ball_silhouette_range.py` and `tests/test_ball_silhouette_range.py`. Reused the existing sphere/rim estimator; **did not** add a second camera owner or detector.
+- Gate 20 code commit `105e99ec15159e019c23e4aa35f89b11e95fc336`: fail-closed scalar type checking for radius and angular residual budget, avoiding exceptions or ambiguous NumPy array truth values.
+- Gate 20 test commit `ff801f0e7f1361013e137e7927d81a766b0f842e`: malformed scalar/radius/budget regression cases. These are synthetic hardware-free tests, not physical accuracy validation.
+- **CI for `ff801f0e` and this handoff's newer SHA has NOT been verified**. Next: check same-SHA CI; if absent because no Phase 5 PR exists, create a draft PR on the approved Phase 5 branch with the proper stacked base, then verify checks. Fix any introduced failures.
+- Continue Gates 20–24 within user-approved scope. All physical testing deferred until after development of 35 Gates; no merge/release/screenshot bypass.
+- Read the current full handoff and `MDP_V1_2_PHASE5_GATES20_24_PARALLEL_SCOPE.md` below before resuming.
+
+---
+
+# CURRENT HANDOFF — PHASE 5 GATES 20–24 (2026-11-11)
+
+**READ THIS FIRST.** This section supersedes earlier status snapshots below. GitHub is authoritative for current HEAD, CI, PRs and files. Re-audit before any code change; this handoff is a dated snapshot.
+
+## Mission and authorization
+- Project: standalone Windows **OpenFlight Face Impact** using one **ELP OV9281 USB camera**; reuse existing Python/OpenCV and React/Electron code. No ConnectorNext, MLM2PRO, Bluetooth, radar, GSPro or upstream OpenFlight edits.
+- Law: `docs/governance/PROJECT_LAW.md` **Project Law V1**. The user explicitly approved **parallel development of Phase 5 Gates 20–24**, starting with read-only audit, then hardware-free tests and CI. Physical testing is postponed until development of **all 35 Gates**. **No merge, release or physical testing** without separate authorization. UI screenshots are deferred, **not waived**; never fake or bypass PR Checks.
+- Working repository: `andersdui22/openflight-face-impact`. Current Phase 5 branch: `mdp-v1.2/phase5-gates20-24-parallel`, branched from Phase 4 integration SHA `fcda0ff666eb6c39f90777947d8b70a55a172492`. Phase 5 scope/audit commit `659d51988ce0dd2540a683469907208dd0947894`. **This handoff edit creates a newer HEAD: verify it remotely before claiming same-SHA CI.**
+- Phase 4 integration: branch `mdp-v1.2/phase4-gates17-19-parallel`, draft PR **#44** (unmerged). Six technical workflows passed on code SHA `8e44a8584d95dfa6ea5229e9af5072c862fcfb60`; subsequent Phase 4 documentation SHA `fcda0ff6` had mixed completed/in-progress checks at the last audit. PR Checks failed due deferred screenshot requirement. Gates 17–19 remain OPEN; do not claim physical acceptance.
+- Earlier draft PRs #40–43 were not merged at Phase 5 startup. Check their current status independently. No physical Golden baselines exist.
+
+## Phase 5 read-only startup audit and next work
+- Scope and acceptance directions: `docs/governance/MDP_V1_2_PHASE5_GATES20_24_PARALLEL_SCOPE.md`. Read that file, `PROJECT_LAW.md`, `ACTIVE_CHANGE_GATE.md`, `BASELINES.md`, `CANDIDATES.md` and this handoff before resuming. The older `ACTIVE_CHANGE_GATE.md` contains historical Gate 14/15 text and is not the latest Phase 5 authorization; the user's current approval plus Phase 5 scope govern the new work.
+- Gate 20: ball detection/silhouette/observation quality. Existing `src/openflight/camera/ball_silhouette_range.py` estimates a sphere centre from explicit calibrated silhouette rays, known radius and angular residual; `calibrated_rays.py` provides rays. Neither physically detects ball pixels or proves accuracy. Next: audit existing tests and add minimal **pure fail-closed observation-quality validation** with focused tests; no second camera reader.
+- Gate 21: clubface detection and 3D pose. Reuse `synthetic_face_landmark_pose.py`, `synthetic_pose_observability.py`, `synthetic_mesh_pose.py`. Reject ambiguous/nonobservable poses and unsupported physical inference.
+- Gate 22: contact instant and temporal reconstruction. Inspect single acquisition owner, buffered frame metadata, shot/session identity and timing source. Do not equate host-arrival with exposure timestamp or fabricate subframe contact.
+- Gate 23: face-local impact coordinates, centre distance and face boundaries. Reuse `synthetic_observed_impact.py`, `synthetic_impact_pipeline.py`, `synthetic_face_polygon.py` and Phase 4 planar reference contracts; rejected impacts have no coordinates.
+- Gate 24: uncertainty, quality controls and explicit rejection. Keep offline residuals separate from physical accuracy and carry provenance into results.
+- The canonical Master Development Plan V1.2 file was **not found in the inspected GitHub tree**; Gate names were recovered from prior user-approved conversation. Reconcile before individual closeout; do not invent unverified acceptance criteria.
+- The existing `get_synthetic_face_impact` SocketIO endpoint is a synthetic demonstration, **not** a physical ELP measurement publication boundary. Do not gate it on physical calibration or modify unrelated radar processing. Physical mode, lens/crop identity, face pose, real club geometry and physical impact accuracy remain UNKNOWN.
+- Candidate registry includes restricted 690CB assets. Do not import restricted models or assume licensing.
+- No Phase 5 production code or tests have yet been changed as of this handoff. Phase 5 CI for `659d5198` was not returned by the PR-triggered workflow query (no Phase 5 PR yet); **do not interpret absence of runs as a pass**.
+
+## Resume procedure / evidence discipline
+1. Fetch current branch SHA and any PRs from GitHub. Reconcile drift against this snapshot; inspect exact-SHA CI. Do not assume a clean local checkout from remote contents alone.
+2. Read Project Law, active scope, baseline/candidate registers, handoff and relevant source/tests. Confirm approved change boundaries before editing.
+3. Continue Gate 20 read-only code/test audit, then minimal hardware-free implementation with tests; work Gates 21–24 in parallel only where dependencies allow.
+4. Record each new commit SHA, same-SHA CI, changed files, failures and unknowns. Maintain this **top-of-file current handoff** after meaningful milestones and before handing off; keep earlier snapshots below for history.
+5. No merges, releases, physical tests, destructive Git operations, screenshot bypass or unsupported physical accuracy claims. Draft PR and exact-SHA CI are separate from Gate acceptance.
+
+---
+
 # GATE 13 USER-APPROVED TECHNICAL CLOSEOUT — 2026-11-10
 
 The user explicitly approved technical closeout of Phase 3 Gate 13 after all technical CI checks passed on exact SHA `b4843c71b326a0c6adb02127d974756bdfec70b7`. This approval **closes Gate 13 technically**, not physically. The previously deferred screenshot-in-PR-description requirement remains **deferred, not waived**, and the PR description completeness check remains failed. Physical ELP camera testing, calibrated measurement validation and end-to-end Electron/Python backend integration remain unverified.

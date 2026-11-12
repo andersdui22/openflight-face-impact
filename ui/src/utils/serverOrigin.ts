@@ -1,4 +1,8 @@
 export function getServerOrigin(): string {
+  if (typeof window !== 'undefined' && window.openFlightDesktop?.backendAvailable === false) {
+    return window.location.href;
+  }
+
   if (import.meta.env.VITE_SOCKET_URL) {
     return import.meta.env.VITE_SOCKET_URL;
   }
@@ -8,6 +12,10 @@ export function getServerOrigin(): string {
   }
 
   const { protocol, hostname, port, origin } = window.location;
+
+  if (protocol === 'file:') {
+    return 'http://127.0.0.1:8080';
+  }
 
   if (port === '5173') {
     return `${protocol}//${hostname}:8080`;

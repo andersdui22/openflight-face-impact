@@ -124,11 +124,12 @@ class WindowsUsbCamera:
                 if image.ndim != 2 or image.dtype != np.uint8:
                     raise RuntimeError("unsupported USB frame format")
                 self.ring.add_frame(CameraFrame(
-                    image=np.ascontiguousarray(image),
+                    image=np.array(image, copy=True, order="C"),
                     sensor_timestamp_ns=host_ns,  # host-clock alias; NOT sensor exposure
                     host_timestamp_ns=host_ns,
                     exposure_us=0,  # unknown until hardware controls are validated
                     analogue_gain=0.0,  # unknown
+                    sensor_timestamp_is_host_alias=True,
                 ))
                 with self._arrival_lock:
                     self._arrival_times_ns.append(host_ns)
@@ -172,4 +173,4 @@ class WindowsUsbCamera:
 
     def trigger(self) -> bool:
         """Explicit software trigger; shot detection is outside Gate 03."""
-        return self.ring.trigger(time.monotonic_ns())
+        return self.is_running and not self._stop.is_set() and self.ring.trigger(time.monotonic_ns())

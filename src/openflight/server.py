@@ -10,6 +10,8 @@ import math
 import os
 import queue
 import random
+import re
+import sqlite3
 import statistics
 import sys
 import threading
@@ -19,6 +21,7 @@ from dataclasses import dataclass, fields, replace
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
+from uuid import uuid4
 
 from flask import Flask, Response, jsonify, request, send_file, send_from_directory
 from flask_cors import CORS
@@ -58,7 +61,7 @@ from .phone_orientation import (
     save_phone_orientation_calibration,
 )
 from .power import SUPPORTED_BATTERY_PROVIDERS, PowerMonitor, PowerStatus
-from .profiles import ProfileStore
+from .profiles import ProfileStore, resolve_profiles_path
 from .rolling_buffer.monitor import estimate_carry_with_spin, get_optimal_spin_for_ball_speed
 from .session_logger import get_session_logger, init_session_logger, log_session_error
 from .shot_stream import SSE_MIMETYPE, ShotStreamBroker, ShotStreamFull
@@ -488,6 +491,13 @@ def _shutdown_process_after_delay(delay_s: float = 0.5) -> None:
         return
     logger.info("[SERVER] Goodbye")
     os._exit(0)
+
+
+def _watch_desktop_parent() -> None:
+    """Use Electron's private pipe to stop the owned mock backend on parent exit."""
+    if sys.stdin is not None:
+        sys.stdin.read()
+        _shutdown_process_after_delay(0)
 
 
 # Max smash factor adjustment in degrees (clamped to prevent floor-dependence)
@@ -995,6 +1005,16 @@ def shot_to_dict(shot: Shot) -> dict:
             data[field] = round(data[field], digits) if digits is not None else round(data[field])
     data["carry_range"] = [round(value) for value in data["carry_range"]]
     return data
+
+
+@app.route("/api/face-impact/health", methods=["GET"])
+def face_impact_backend_health():
+    """Identify the local Face Impact backend without probing camera hardware."""
+    health = {"service": "openflight-face-impact", "protocol_version": 1,
+              "status": "ready", "camera_validated": False}
+    if instance := os.environ.get("OPENFLIGHT_DESKTOP_INSTANCE"):
+        health["desktop_instance"] = instance
+    return health
 
 
 @app.route("/")
@@ -1835,6 +1855,109 @@ def handle_get_synthetic_face_impact(data=None):
 
     case_id = data.get("case_id") if isinstance(data, dict) else None
     return synthetic_face_impact_response(case_id)
+
+
+@socketio.on("request_synthetic_motion_demo")
+def handle_request_synthetic_motion_demo():
+    """Explicit synthetic fixture only; never camera-derived live impact."""
+    from .camera.synthetic_motion_socket import synthetic_motion_demo_response
+
+    payload = synthetic_motion_demo_response()
+    socketio.emit("synthetic_motion_diagnostics", payload, to=request.sid)
+    return {"ok": True, "kind": "synthetic_image_space_motion"}
+
+
+def publish_completed_offline_impact(handoff, *, recipient: str):
+    """Server-side only: deliver a completed offline synthetic analysis to a UI."""
+    from .camera.offline_impact_transport import publish_offline_impact_handoff
+
+    return publish_offline_impact_handoff(handoff, socketio.emit, recipient=recipient)
+
+
+def _local_offline_archive():
+    path = app.config.get("OFFLINE_IMPACT_ARCHIVE_PATH")
+    if path is None or request.remote_addr not in ("127.0.0.1", "::1"):
+        return None
+    from .camera.offline_session_archive import OfflineSessionArchive
+
+    return OfflineSessionArchive(path)
+
+
+@app.route("/api/face-impact/sessions")
+@app.route("/api/face-impact/sessions/<session_id>")
+def offline_impact_history(session_id=None):
+    """List local synthetic sessions or retrieve one for review or export."""
+    archive = _local_offline_archive()
+    if archive is None:
+        return {"error": "Offline session history unavailable"}, 404
+    download = request.args.get("download") == "1"
+    try:
+        if session_id is None:
+            return jsonify(schema_version=1, sessions=archive.list_sessions())
+        session = archive.load(session_id)
+        if session is not None and (download or request.args.get("analysis") == "1"):
+            from .camera.offline_session_analysis import analyze_offline_session
+
+            analysis = analyze_offline_session(session)
+            if not download:
+                return jsonify(analysis)
+            session["analysis"] = {key: analysis[key] for key in ("clubs", "diagnostics")}
+    except (OSError, sqlite3.Error, ValueError):
+        logger.exception("[SERVER] Could not read offline impact history")
+        return {"error": "Offline session history could not be read"}, 503
+    if session is None:
+        return {"error": "Offline session not found"}, 404
+    response = jsonify(session)
+    if download:
+        response.headers.set("Content-Disposition", "attachment", filename="face-impact-session.json")
+    return response
+
+
+@socketio.on("request_offline_impact_demo")
+def handle_request_offline_impact_demo(data=None):
+    """Replay a fixed synthetic scene for the requesting client."""
+    if (not isinstance(data, dict) or data.keys() - {"case_id", "session_id", "request_id"}
+            or not isinstance(data.get("case_id"), str)):
+        return {"ok": False, "error": "Unknown synthetic replay case"}
+    request_id = data.get("request_id")
+    if "request_id" in data and (
+        not isinstance(request_id, str) or re.fullmatch(r"[0-9a-f]{32}", request_id) is None
+    ):
+        return {"ok": False, "error": "Invalid synthetic replay request ID"}
+    try:
+        from .camera.synthetic_offline_impact_demo import (
+            SyntheticReplayRejected, publish_synthetic_offline_impact_demo,
+        )
+
+        archive = _local_offline_archive()
+        options = {"request_id": request_id}
+        if archive is not None:
+            options["save"] = archive.save
+        if "session_id" in data:
+            session_id = data["session_id"]
+            if archive is None:
+                return {"ok": False, "error": "Offline session history unavailable"}
+            if session_id is None:
+                session_id = f"synthetic-{request_id or uuid4().hex}"
+            elif not isinstance(session_id, str) or not archive.contains_session(session_id):
+                return {"ok": False, "error": "Offline session not found"}
+            options["session_id"] = session_id
+        try:
+            payload = publish_synthetic_offline_impact_demo(
+                data["case_id"], socketio.emit, recipient=request.sid, **options,
+            )
+        except SyntheticReplayRejected as error:
+            logger.info("[SERVER] %s: %s", error, error.__cause__)
+            return {"ok": False, "error": str(error)}
+    except (ImportError, OSError, sqlite3.Error, ValueError, RuntimeError):
+        logger.exception("[SERVER] Synthetic offline impact replay failed")
+        return {"ok": False, "error": "Synthetic offline replay unavailable"}
+    if payload is None:
+        return {"ok": False, "error": "Unknown synthetic replay case"}
+    ack = {"ok": True, "shot_id": payload["shot_id"]}
+    if request_id is not None:
+        ack.update(session_id=payload["session_id"], archived=archive is not None)
+    return ack
 
 
 @socketio.on("get_camera_capture_settings")
@@ -5552,6 +5675,10 @@ def main():
     ballistics_enabled = args.ballistics
     battery_provider = args.battery
     profile_store = ProfileStore(args.profiles_path)
+    app.config["OFFLINE_IMPACT_ARCHIVE_PATH"] = (
+        resolve_profiles_path(args.profiles_path).with_suffix(".face-impact.sqlite3")
+        if args.mock and args.host in ("127.0.0.1", "localhost", "::1") else None
+    )
     startup_status = StartupStatusReporter(
         args.startup_status_file,
         configured_startup_components(
@@ -5876,6 +6003,9 @@ def main():
     print(f"Server starting at http://{args.host}:{args.web_port}")
     print()
     startup_status.start("server", "Starting OpenFlight server")
+
+    if args.mock and os.environ.get("OPENFLIGHT_DESKTOP_INSTANCE"):
+        threading.Thread(target=_watch_desktop_parent, daemon=True).start()
 
     try:
         # Note: Flask debug mode (reloader) is disabled to prevent duplicate processes

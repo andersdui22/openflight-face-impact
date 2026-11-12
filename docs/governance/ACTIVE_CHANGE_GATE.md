@@ -1,3 +1,42 @@
+# Active software completion and camera readiness (2026-11-13)
+
+The user authorized software-only implementation for Gates 20–28 on draft PR #45. The audited starting HEAD was `7624ccdd6ed8a89297fe9ec48dd7e0971c5e4b3a` with all nine latest workflows green. Exercise the existing single-camera buffer, trigger, marker and calibrated geometry chain with synthetic input, and verify the packaged Windows application. Keep physical acquisition and formal Gate closure pending. Review the [Gate evidence](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md).
+
+---
+
+# Active software foundation — Gates 20–24 and 26–28 (2026-11-12)
+
+The user authorized software-only work on repeated synthetic shots, history, statistics, export, Windows lifecycle and USB capture interfaces on draft PR #45. The audited starting HEAD was `91a99d08fb7deacdde8f84f9ff8e0fef3d9b9ce4`; all nine latest workflows passed. Keep the six-panel dashboard and the existing single camera owner. The [acceptance review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md) records the remaining work per Gate. Formal closure requires separate approval.
+
+---
+
+# Active Windows lifecycle repair — Gates 26–28 (2026-11-12)
+
+- The user authorized repair of the Windows portable backend connection and both shutdown paths after a desktop test, plus startup, disconnect, restart, persistence and export verification on draft PR #45.
+- Baseline `e9c24fe1e05a61920da2f003c91d375039e791be` passed all nine latest workflows. Keep the six-panel dashboard layout. Use the existing mock backend and SQLite archive for the regression checks.
+- Verify the packaged application exits after both UI confirmation and native window close, the owned backend and port 8080 are released, and saved accepted and rejected evidence can be reopened and exported after graceful close and forced backend loss.
+- Physical ELP validation is deferred. Gates remain open and no merge, release, upstream change or ConnectorNext change is authorized.
+
+---
+
+# Active Gates 27–28 software scope — session analysis (2026-11-12)
+
+- Authorization: user requested autonomous implementation of archived-shot statistics, session and club filtering, diagnostics, Gate 20–24 and 26 evidence review, and Windows restart/export verification on draft PR #45.
+- Baseline: `6bc11e2b799b2121b21b84a305cc2db87e9b904a` on `mdp-v1.2/phase5-gates20-24-parallel`. All nine latest GitHub workflows passed.
+- Scope: synthetic fixture and archive analysis, existing offline dashboard review, JSON export, corresponding tests, and portable EXE smoke. Acceptance evidence includes per-club counts, means and spread, diagnostic rejection of incomplete records, and restart followed by export using the embedded mock backend.
+- Stop before physical ELP testing, upstream or ConnectorNext changes, merges, releases or formal Gate closure. The [software evidence review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md) records current gaps.
+
+---
+
+# Active Gate 26 software scope — synthetic session history (2026-11-12)
+
+- Authorization: user requested autonomous implementation of persistent Face Impact shots, session history, provenance, export and hardware-free integration tests after auditing PR #45.
+- Repository baseline: `c55d92acf76172995d2cbf1f8e32aea0ed9e4d36` on `mdp-v1.2/phase5-gates20-24-parallel`. All nine latest workflows passed on that SHA. Work continues on draft PR #45.
+- Scope: existing synthetic capture/replay path, local Python session archive and read/export routes, offline React review, matching tests, and mock Windows EXE verification. Acceptance for this software batch requires saving accepted and rejected results with provenance, reopening and exporting them, and restoring a result after a packaged mock backend restart.
+- Physical capture, physical accuracy and broader Gate acceptance remain pending. Preserve the existing camera owner and Project Law boundaries for upstream, ConnectorNext, merges and releases.
+
+---
+
 # USER-APPROVED TECHNICAL CLOSEOUT — GATE 14/15 INTEGRATION (2026-11-11)
 
 The user explicitly approved technical closeout of the Gate 14/15 integration after reviewing the exact-SHA automated CI evidence for code commit `1420b782aa742ee3ebeb531bcb19707b617da0a5`.

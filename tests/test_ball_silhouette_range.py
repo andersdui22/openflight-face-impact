@@ -94,3 +94,83 @@ def test_rejects_too_few_duplicate_and_unnormalized_rays(angles):
                                (rays * 2, "unit length")):
         with pytest.raises(ValueError, match=message):
             estimate_ball_position(malformed, radius_mm=RADIUS, max_residual_rad=1e-6)
+
+
+@pytest.mark.parametrize("bad_radius", [
+    None, True, False, "21.35", [], {}, np.array([21.35]),
+])
+def test_gate20_malformed_radius_fails_closed(angles, bad_radius):
+    rays = tangent_rim([0, 0, 500], angles)
+    with pytest.raises(ValueError, match="ball radius"):
+        estimate_ball_position(rays, radius_mm=bad_radius, max_residual_rad=1e-6)
+
+
+@pytest.mark.parametrize("bad_budget", [
+    None, True, False, "0.001", [], {}, np.array([0.001]),
+    0., -0.1, float("nan"), float("inf"), np.pi / 2,
+])
+def test_gate20_malformed_residual_budget_fails_closed(angles, bad_budget):
+    rays = tangent_rim([0, 0, 500], angles)
+    with pytest.raises(ValueError, match="angular residual limit"):
+        estimate_ball_position(rays, radius_mm=RADIUS, max_residual_rad=bad_budget)
+
+
+def test_gate20_ball_position_centre_is_immutable_and_not_aliased(angles):
+    rays = tangent_rim([0, 0, 500], angles)
+    result = estimate_ball_position(rays, radius_mm=RADIUS, max_residual_rad=1e-6)
+    original = result.center_camera_mm.copy()
+    with pytest.raises(ValueError):
+        result.center_camera_mm[0] = 900
+    np.testing.assert_array_equal(result.center_camera_mm, original)
+
+
+@pytest.mark.parametrize("invalid_center", [
+    [1, 2], [1, 2, float("nan")], ["x", "y", "z"],
+])
+def test_gate20_position_rejects_invalid_centre(invalid_center):
+    from openflight.camera.ball_silhouette_range import BallSilhouettePosition
+
+    with pytest.raises(ValueError, match="ball centre"):
+        BallSilhouettePosition(np.asarray(invalid_center), 1., 0.1, 0.001)
+
+
+def test_gate20_position_copies_external_centre_array():
+    from openflight.camera.ball_silhouette_range import BallSilhouettePosition
+
+    centre = np.array([1., 2., 500.])
+    result = BallSilhouettePosition(centre, 500., 0.1, 0.001)
+    centre[0] = 999.
+    assert result.center_camera_mm[0] == 1.
+
+
+@pytest.mark.parametrize(("range_mm", "angular_radius_rad", "residual_rad"), [
+    (0., 0.1, 0.001),
+    (-1., 0.1, 0.001),
+    (float("nan"), 0.1, 0.001),
+    (True, 0.1, 0.001),
+    (500., 0., 0.001),
+    (500., float("inf"), 0.001),
+    (500., 0.1, -0.001),
+    (500., 0.1, 0.1),
+    (500., 0.1, "0.001"),
+])
+def test_gate20_rejects_invalid_ball_range_diagnostics(
+    range_mm, angular_radius_rad, residual_rad,
+):
+    from openflight.camera.ball_silhouette_range import BallSilhouettePosition
+
+    with pytest.raises(ValueError, match="ball range diagnostics"):
+        BallSilhouettePosition(
+            np.array([0., 0., 500.]), range_mm, angular_radius_rad, residual_rad,
+        )
+
+
+def test_gate20_valid_ball_range_diagnostics_preserved():
+    from openflight.camera.ball_silhouette_range import BallSilhouettePosition
+
+    result = BallSilhouettePosition(
+        np.array([0., 0., 500.]), 500., 0.1, 0.001,
+    )
+    assert result.range_mm == 500.
+    assert result.angular_radius_rad == 0.1
+    assert result.max_residual_rad == 0.001
