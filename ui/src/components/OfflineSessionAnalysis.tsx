@@ -12,6 +12,12 @@ function ImpactDistribution({ club }: { club: ClubStatistics }) {
   const top = Math.max(...ys);
   const width = Math.max(...xs) - left;
   const height = top - Math.min(...ys);
+  const hits = new Map<string, { x: number; y: number; count: number }>();
+  for (const [x, y] of club.points_mm) {
+    const key = `${x},${y}`;
+    const previous = hits.get(key);
+    hits.set(key, { x, y, count: (previous?.count ?? 0) + 1 });
+  }
   return (
     <svg
       role="img"
@@ -20,9 +26,25 @@ function ImpactDistribution({ club }: { club: ClubStatistics }) {
       style={{ display: 'block', width: '100%', maxHeight: '12rem' }}
     >
       <polygon points={club.outline_mm.map(([x, y]) => `${x},${-y}`).join(' ')} fill="none" stroke="currentColor" />
-      {club.points_mm.map(([x, y], index) => (
-        <circle key={index} cx={x} cy={-y} r="1.5" fill="var(--color-accent)" />
+      {Array.from(hits, ([key, { x, y, count }]) => (
+        <circle key={key} cx={x} cy={-y} r={Math.min(4, 1.5 * Math.sqrt(count))} fill="var(--color-accent)">
+          <title>
+            {count} synthetic {count === 1 ? 'shot' : 'shots'} · {formatPair([x, y])}
+          </title>
+        </circle>
       ))}
+      {club.mean_mm && (
+        <circle
+          cx={club.mean_mm[0]}
+          cy={-club.mean_mm[1]}
+          r="5"
+          fill="none"
+          stroke="currentColor"
+          strokeDasharray="2 1"
+        >
+          <title>Mean impact · {formatPair(club.mean_mm)}</title>
+        </circle>
+      )}
     </svg>
   );
 }

@@ -38,7 +38,8 @@ for ($launch = 1; $launch -le $closeModes.Count; $launch++) {
     if (!$result.ok) { throw "Packaged Electron smoke failed: $($result.error)" }
     if ($result.panels -ne 6 -or $result.backend_ready -ne $WithBackend.IsPresent -or
         $result.restored_session -ne ($launch -gt 1) -or $result.exported_session -ne ($launch -gt 1) -or
-        $result.restored_rejection -ne ($launch -eq 4) -or $result.close_mode -ne $closeMode) {
+        $result.restored_rejection -ne ($launch -eq 4) -or $result.close_mode -ne $closeMode -or
+        $result.reconnected -ne ($WithBackend -and $launch -eq 1)) {
       throw 'Unexpected dashboard or backend state'
     }
     if (!(Test-Path -LiteralPath $env:OPENFLIGHT_GATE11_SCREENSHOT)) { throw 'Missing dashboard screenshot' }
@@ -50,7 +51,7 @@ for ($launch = 1; $launch -le $closeModes.Count; $launch++) {
       if (Get-Process -Id $result.backend_pid -ErrorAction SilentlyContinue) { throw 'Owned backend process still running' }
     }
     Wait-BackendPortReleased
-    Write-Host "Packaged Electron launch ${launch}: six panels, mock backend ready=$($result.backend_ready), $($result.camera), restored session=$($result.restored_session), exported session=$($result.exported_session), close=$closeMode, backend shutdown=$($result.backend_shutdown), port 8080 released."
+    Write-Host "Packaged Electron launch ${launch}: six panels, mock backend ready=$($result.backend_ready), $($result.camera), restored session=$($result.restored_session), exported session=$($result.exported_session), reconnected=$($result.reconnected), close=$closeMode, backend shutdown=$($result.backend_shutdown), port 8080 released."
   } finally {
     if (!$process.HasExited) { taskkill.exe /PID $process.Id /T /F }
     $process.Dispose()

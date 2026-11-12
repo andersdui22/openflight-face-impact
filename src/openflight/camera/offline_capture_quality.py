@@ -55,6 +55,8 @@ def require_usable_offline_capture(
     intervals = []
     expected_shape = None
     for index, frame in enumerate(frames):
+        if frame.sensor_timestamp_is_host_alias is not False:
+            raise ValueError("independent sensor timestamp unavailable")
         for name in ("sensor_timestamp_ns", "host_timestamp_ns", "exposure_us"):
             value = getattr(frame, name)
             if not isinstance(value, int) or isinstance(value, bool) or value < 0:

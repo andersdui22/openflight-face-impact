@@ -49,6 +49,13 @@ class OfflineSessionArchive:
             ).fetchone()
             return json.loads(row[0])["evidence"]
 
+    def contains_session(self, session_id: str) -> bool:
+        """Check session identity without reading or decoding shot documents."""
+        with self._connection() as connection:
+            return connection.execute(
+                "SELECT 1 FROM offline_shots WHERE session_id = ? LIMIT 1", (session_id,),
+            ).fetchone() is not None
+
     def list_sessions(self) -> list[dict]:
         """Return the 100 most recently recorded sessions."""
         with self._connection() as connection:

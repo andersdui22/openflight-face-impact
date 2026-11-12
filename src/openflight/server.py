@@ -10,6 +10,7 @@ import math
 import os
 import queue
 import random
+import re
 import sqlite3
 import statistics
 import sys
@@ -1915,21 +1916,28 @@ def offline_impact_history(session_id=None):
 @socketio.on("request_offline_impact_demo")
 def handle_request_offline_impact_demo(data=None):
     """Replay a fixed synthetic scene for the requesting client."""
-    if (not isinstance(data, dict) or set(data) not in ({"case_id"}, {"case_id", "session_id"})
-            or not isinstance(data["case_id"], str)):
+    if (not isinstance(data, dict) or data.keys() - {"case_id", "session_id", "request_id"}
+            or not isinstance(data.get("case_id"), str)):
         return {"ok": False, "error": "Unknown synthetic replay case"}
+    request_id = data.get("request_id")
+    if "request_id" in data and (
+        not isinstance(request_id, str) or re.fullmatch(r"[0-9a-f]{32}", request_id) is None
+    ):
+        return {"ok": False, "error": "Invalid synthetic replay request ID"}
     try:
         from .camera.synthetic_offline_impact_demo import publish_synthetic_offline_impact_demo
 
         archive = _local_offline_archive()
-        options = {"save": archive.save} if archive is not None else {}
+        options = {"request_id": request_id}
+        if archive is not None:
+            options["save"] = archive.save
         if "session_id" in data:
             session_id = data["session_id"]
             if archive is None:
                 return {"ok": False, "error": "Offline session history unavailable"}
             if session_id is None:
-                session_id = f"synthetic-{uuid4().hex}"
-            elif not isinstance(session_id, str) or not archive.load(session_id):
+                session_id = f"synthetic-{request_id or uuid4().hex}"
+            elif not isinstance(session_id, str) or not archive.contains_session(session_id):
                 return {"ok": False, "error": "Offline session not found"}
             options["session_id"] = session_id
         payload = publish_synthetic_offline_impact_demo(
@@ -1940,7 +1948,10 @@ def handle_request_offline_impact_demo(data=None):
         return {"ok": False, "error": "Synthetic offline replay unavailable"}
     if payload is None:
         return {"ok": False, "error": "Unknown synthetic replay case"}
-    return {"ok": True, "shot_id": payload["shot_id"]}
+    ack = {"ok": True, "shot_id": payload["shot_id"]}
+    if request_id is not None:
+        ack.update(session_id=payload["session_id"], archived=archive is not None)
+    return ack
 
 
 @socketio.on("get_camera_capture_settings")

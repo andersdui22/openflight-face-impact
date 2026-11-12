@@ -1,3 +1,13 @@
+# Repeated synthetic shots and capture timing provenance (2026-11-12)
+
+- Read-only audit confirmed the branch `mdp-v1.2/phase5-gates20-24-parallel` and [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45) at `91a99d08fb7deacdde8f84f9ff8e0fef3d9b9ce4`, with all nine workflows green. The user's test of that Windows build confirmed terminal-free startup, the connected backend message, synthetic results and internal shutdown. The user still needs to retest saved sessions after restarting the latest build on their PC.
+- Each replay action now has a distinct request identity. Repeating a case intentionally adds a shot. Resending the same request for the same case and session retains one record, including on a retry of new-session creation. Legacy request bodies keep their existing identifiers. SQLite commits before the targeted Socket.IO event. The review refreshes the active session's statistics and diagnostics after save, and JSON retains each shot and its provenance. The chart counts coincident points and marks the mean.
+- The portable smoke adds two identical accepted shots on launch one, restarts the embedded Python process while Electron stays open and verifies automatic Socket.IO recovery. The next launches verify native window close, persisted history and export, a forced backend stop after a rejected shot is saved, and restart with all three records. Check the runner's backend exit and port 8080 checks on the current SHA.
+- The Windows USB adapter tags host-clock aliases explicitly. Independent sensor spacing and offline preflight fail closed on these frames. The synthetic evidence path retains the existing calibrated geometry, quality and storage contracts. Test data now covers a noisy gradient, clipped ball rim and extra fiducial.
+- Next open work is listed in the [Gate acceptance review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md). Physical ELP work remains deferred, and no Golden physical baseline exists.
+
+---
+
 # Windows connection and shutdown recovery (2026-11-12)
 
 - Read-only GitHub audit confirmed [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45) on `mdp-v1.2/phase5-gates20-24-parallel` at `e9c24fe1e05a61920da2f003c91d375039e791be`. All nine latest baseline workflows passed. [Baseline checks](https://github.com/andersdui22/openflight-face-impact/commit/e9c24fe1e05a61920da2f003c91d375039e791be/checks)

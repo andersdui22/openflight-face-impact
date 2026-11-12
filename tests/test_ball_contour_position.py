@@ -60,3 +60,23 @@ def test_rejects_ambiguous_bright_components_before_sphere_fit():
 def test_rejects_invalid_radius():
     with pytest.raises(ValueError):
         estimate(disk_image(), ball_radius_mm=-1.)
+
+
+def test_offset_disk_on_seeded_noisy_gradient_recovers_lateral_position():
+    rng = np.random.default_rng(2026)
+    background = np.linspace(20, 75, 320) + rng.normal(0, 4, (240, 320))
+    image = background.clip(0, 95).astype(np.uint8)
+    cv.circle(image, (180, 108), 20, 220, thickness=-1)
+    image[14, 20] = image[205, 275] = 255
+
+    result = estimate(image)
+    pixel_position = result.center_camera_mm[:2] * 260 / result.center_camera_mm[2] + [160, 120]
+    np.testing.assert_allclose(pixel_position, [180, 108], atol=1)
+
+
+def test_partial_contour_with_nearby_glare_has_no_ball_position():
+    image = np.zeros((240, 320), dtype=np.uint8)
+    cv.circle(image, (3, 120), 20, 220, thickness=-1)
+    cv.circle(image, (200, 80), 3, 255, thickness=-1)
+    with pytest.raises(ValueError, match="border|exactly one"):
+        estimate(image)

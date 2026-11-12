@@ -24,6 +24,7 @@ _CASES = {
 def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
     case_id: str, emit: Callable, *, recipient: str,
     session_id: str = "synthetic-offline-demo-v1", save: Callable | None = None,
+    request_id: str | None = None,
 ) -> dict | None:
     """Publish one fixed synthetic case through the actual offline runner."""
     if case_id not in _CASES:
@@ -78,6 +79,8 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
 
     shot_id = (f"synthetic-{case_id}" if session_id == "synthetic-offline-demo-v1"
                else f"{session_id}-{case_id}")
+    if request_id is not None:
+        shot_id = f"{shot_id}-{request_id}"
     capture = TriggeredCapture(
         (CameraFrame(before, 8_000_000, 16_000_000, 1_000, 1.),
          CameraFrame(after, 16_000_000, 24_000_000, 1_000, 1.)),

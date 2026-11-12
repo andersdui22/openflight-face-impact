@@ -37,6 +37,8 @@ def capture_fingerprint(capture: TriggeredCapture) -> str:
                     frame.exposure_us, frame.analogue_gain,
                     image.shape, image.dtype.str)
         digest.update(repr(metadata).encode("utf-8"))
+        if frame.sensor_timestamp_is_host_alias is not False:
+            digest.update(b"host-arrival-alias")
         digest.update(np.ascontiguousarray(image).tobytes())
     return digest.hexdigest()
 

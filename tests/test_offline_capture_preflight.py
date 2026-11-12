@@ -60,6 +60,15 @@ def test_changed_frame_timing_rejected():
         )
 
 
+def test_host_arrival_alias_changes_capture_provenance():
+    capture = _capture()
+    evidence = preflight_offline_capture(capture)
+    frame = replace(capture.frames[0], sensor_timestamp_is_host_alias=True)
+    aliased = replace(capture, frames=(frame, capture.frames[1]))
+    with pytest.raises(ValueError, match="differs"):
+        require_matching_preflight(aliased, evidence)
+
+
 def test_invalid_capture_cannot_generate_preflight():
     capture = _capture()
     capture.frames[1].image[:] = 0

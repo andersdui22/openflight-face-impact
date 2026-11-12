@@ -7,7 +7,7 @@
 import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import { fileURLToPath } from 'node:url';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { resolveTargetUrl } from './resolveTargetUrl.js';
 import { probeBackendHealth, resolveBackendExecutable, startBackend, stopBackend, waitForBackendReady } from './backendProcess.js';
 
@@ -72,10 +72,12 @@ async function verifySessionDownload(win, path, expectsRejectedShot) {
   }
   const exported = JSON.parse(readFileSync(path, 'utf8'));
   if (exported.source !== 'offline_synthetic_analysis' ||
-      !exported.shots.some(({ evidence }) => evidence.shot_id === 'synthetic-contact' && evidence.accepted) ||
+      exported.shots.filter(({ evidence }) => evidence.shot_id.startsWith('synthetic-contact-') &&
+        evidence.accepted).length !== 2 ||
       (expectsRejectedShot && !exported.shots.some(({ evidence }) =>
-        evidence.shot_id === 'synthetic-missing-ball' && !evidence.accepted)) ||
-      !exported.analysis.clubs.some((club) => club.points_mm.length === 1 && club.mean_mm.length === 2)) {
+        evidence.shot_id.startsWith('synthetic-missing-ball-') && !evidence.accepted)) ||
+      !exported.analysis.clubs.some((club) => club.points_mm.length === 2 && club.mean_mm.length === 2 &&
+        club.spread_mm?.every((axis) => axis === 0))) {
     throw new Error('Downloaded session lacks the archived shot and statistics');
   }
 }
@@ -137,6 +139,10 @@ async function runDashboardSmoke(win) {
             const replay = button('Run synthetic replay');
             if (!replay) throw new Error('Offline replay button not rendered');
             replay.click();
+            await waitFor(() => !replay.disabled &&
+              review.textContent.includes('Saved shots 1 · Accepted 1 · Rejected 0'),
+              'First replay did not update the saved analysis');
+            replay.click();
           }
           if (expectsRejectedShot) {
             await waitFor(() => review.textContent.includes('REJECTED:'),
@@ -152,19 +158,16 @@ async function runDashboardSmoke(win) {
             review.textContent.includes('Selected shot: synthetic-contact') &&
             review.querySelector('[data-testid="synthetic-impact-marker"]'),
             'Mock backend did not deliver offline raster evidence');
-          if (expectsSavedSession) {
-            const analysis = await waitFor(() => {
-              const section = review.querySelector('[aria-label="Saved synthetic session analysis"]');
-              const summary = expectsRejectedShot
-                ? 'Saved shots 2 · Accepted 1 · Rejected 1'
-                : 'Saved shots 1 · Accepted 1 · Rejected 0';
-              return section?.textContent.includes(summary) && section;
-            }, 'Restored session statistics did not render');
-            analysis.querySelector('details').open = true;
-            analysis.scrollIntoView({ block: 'start' });
-          } else {
-            review.scrollIntoView({ block: 'start' });
-          }
+          const analysis = await waitFor(() => {
+            const section = review.querySelector('[aria-label="Saved synthetic session analysis"]');
+            const summary = expectsRejectedShot
+              ? 'Saved shots 3 · Accepted 2 · Rejected 1'
+              : 'Saved shots 2 · Accepted 2 · Rejected 0';
+            return section?.textContent.includes(summary) &&
+              section.textContent.includes('Spread (standard deviation) X 0.00 mm · Y 0.00 mm') && section;
+          }, 'Repeated shots and their statistics did not render');
+          analysis.querySelector('details').open = true;
+          analysis.scrollIntoView({ block: 'start' });
         } else {
           await waitFor(() => dashboard.textContent.includes('OpenFlight backend is disconnected'),
             'UI did not report the disconnected backend');
@@ -176,9 +179,11 @@ async function runDashboardSmoke(win) {
       })(${JSON.stringify(expectsBackend)}, ${JSON.stringify(expectsSavedSession)}, ${JSON.stringify(expectsRejectedShot)})
     `);
     if (expectsSavedSession) {
-      await verifySessionDownload(win, join(dirname(resultPath), 'exported-session-' + closeMode + '.json'), expectsRejectedShot);
+      await verifySessionDownload(win, join(dirname(resultPath), 'exported-session-' + basename(resultPath)), expectsRejectedShot);
     }
     result.exported_session = expectsSavedSession;
+    result.reconnected = expectsBackend && !expectsSavedSession;
+    if (result.reconnected) await verifyRendererReconnect(win);
     const shot = await win.webContents.capturePage();
     const { width, height } = shot.getSize();
     if (width < 800 || height < 400) {
@@ -219,6 +224,26 @@ async function runDashboardSmoke(win) {
   }
 }
 
+async function verifyRendererReconnect(win) {
+  const expectConnection = (message) => win.webContents.executeJavaScript(`
+    (async () => {
+      const status = document.querySelector('[aria-label="Replay connection"]');
+      for (let attempt = 0; attempt < 150; attempt++) {
+        if (status.textContent === ${JSON.stringify(message)}) return;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      throw new Error('Expected Socket.IO state: ' + ${JSON.stringify(message)});
+    })()
+  `);
+  if (await stopBackend(backendChild) !== 'graceful') {
+    throw new Error('Owned backend did not exit gracefully before restart');
+  }
+  await expectConnection('Synthetic replay requires a backend connection');
+  await launchOptInBackend();
+  if (!backendReady) throw new Error('Owned backend did not restart');
+  await expectConnection('Python backend connected for replay');
+}
+
 function replayBeforeBackendLoss(win) {
   return win.webContents.executeJavaScript(`
     (async () => {
@@ -245,7 +270,7 @@ function waitForRendererDisconnect(win) {
       const review = document.querySelector('[aria-label="Offline synthetic impact review"]');
       for (let attempt = 0; attempt < 100; attempt++) {
         if (review.querySelector('[aria-label="Replay connection"]').textContent.includes('requires a backend connection') &&
-            review.textContent.includes('OFFLINE RESULTS: 2 · SYNTHETIC ACCEPTED: 1')) return;
+            review.textContent.includes('OFFLINE RESULTS: 3 · SYNTHETIC ACCEPTED: 2')) return;
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
       throw new Error('Backend loss did not update the connection status while retaining replay evidence');

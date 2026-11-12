@@ -51,6 +51,7 @@ def test_offline_raster_demo_emits_validated_contact_and_rejection_to_requester(
 
 @pytest.mark.parametrize("data", [
     "contact", {}, {"case_id": "unknown"}, {"case_id": ["contact"]},
+    {"case_id": "contact", "request_id": "INVALID"}, {"case_id": "contact", "request_id": None},
     {"case_id": "contact", "x_mm": 999}, {"case_id": "contact", "recipient": "other-client"},
 ])
 def test_offline_raster_demo_rejects_untrusted_inputs_without_emitting(clients, data):
@@ -140,3 +141,33 @@ def test_concurrent_writes_keep_first_evidence_and_provenance_together(tmp_path)
     shot, = archive.load("session")["shots"]
     assert shot["evidence"] == first
     assert shot["provenance"]["attempt"] == first["reason"]
+
+
+def test_repeated_fixture_is_a_new_shot_but_retry_is_idempotent(tmp_path, monkeypatch, clients):
+    path = tmp_path / "offline.sqlite3"
+    monkeypatch.setattr(server, "_local_offline_archive", lambda: OfflineSessionArchive(path))
+    requesting, observing = clients
+    first_id, second_id = "a" * 32, "b" * 32
+    events = []
+    for request_id, session_id in ((first_id, None), (first_id, None), (second_id, f"synthetic-{first_id}")):
+        ack = requesting.emit(
+            "request_offline_impact_demo",
+            {"case_id": "contact", "session_id": session_id, "request_id": request_id},
+            callback=True,
+        )
+        assert ack["ok"] is True
+        evidence, = _offline_events(requesting)
+        assert ack["shot_id"] == evidence["shot_id"]
+        assert ack["session_id"] == evidence["session_id"] == f"synthetic-{first_id}"
+        assert ack["archived"] is True
+        events.append(evidence)
+
+    assert events[0] == events[1]
+    assert events[0]["shot_id"] != events[2]["shot_id"]
+    assert _offline_events(observing) == []
+
+    export = server.app.test_client().get(f"/api/face-impact/sessions/synthetic-{first_id}?download=1").json
+    assert [shot["evidence"] for shot in export["shots"]] == [events[0], events[2]]
+    club, = export["analysis"]["clubs"]
+    assert len(club["points_mm"]) == 2
+    assert club["spread_mm"] == [0., 0.]

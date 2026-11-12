@@ -256,24 +256,43 @@ class SocketService {
     });
   }
 
-  requestOfflineImpactDemo(caseId: OfflineReplayCase, sessionId?: string | null): Promise<string> {
+  requestOfflineImpactDemo(
+    caseId: OfflineReplayCase,
+    sessionId?: string | null
+  ): Promise<{ shot_id: string; session_id: string; archived: boolean }> {
     return new Promise((resolve, reject) => {
       if (!this.socket?.connected) {
         reject(new Error('OpenFlight backend is disconnected'));
         return;
       }
+      const requestId = Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) =>
+        byte.toString(16).padStart(2, '0')
+      ).join('');
       this.socket
         .timeout(5000)
         .emit(
           'request_offline_impact_demo',
-          { case_id: caseId, session_id: sessionId },
+          { case_id: caseId, session_id: sessionId, request_id: requestId },
           (error: Error | null, response: unknown) => {
-            const ack = response as { ok?: unknown; shot_id?: unknown } | null;
-            if (error || ack?.ok !== true || typeof ack.shot_id !== 'string' || !ack.shot_id.trim()) {
+            const ack = response as {
+              ok?: unknown;
+              shot_id?: unknown;
+              session_id?: unknown;
+              archived?: unknown;
+            } | null;
+            if (
+              error ||
+              ack?.ok !== true ||
+              typeof ack.shot_id !== 'string' ||
+              !ack.shot_id.trim() ||
+              typeof ack.session_id !== 'string' ||
+              !ack.session_id.trim() ||
+              typeof ack.archived !== 'boolean'
+            ) {
               reject(new Error('Synthetic offline replay unavailable'));
               return;
             }
-            resolve(ack.shot_id);
+            resolve({ shot_id: ack.shot_id, session_id: ack.session_id, archived: ack.archived });
           }
         );
     });

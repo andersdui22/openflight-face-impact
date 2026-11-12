@@ -28,7 +28,6 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
   const [demoError, setDemoError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Awaited<ReturnType<typeof listOfflineSessions>>>([]);
   const [savedSession, setSavedSession] = useState('');
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [historyBusy, setHistoryBusy] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<SessionReport | null>(null);
@@ -51,10 +50,17 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
         : sessionId === 'synthetic-offline-demo-v1'
           ? undefined
           : (sessionId ?? undefined);
-      setSelectedShotId(await socketService.requestOfflineImpactDemo(demoCase, target));
-      setAnalysis(null);
-      if (historyOpen) {
-        await refreshSessions(newSession ? useOfflineImpactStore.getState().sessionId : null);
+      const replay = await socketService.requestOfflineImpactDemo(demoCase, target);
+      setSelectedShotId(replay.shot_id);
+      if (replay.archived) {
+        setHistoryError(null);
+        try {
+          setAnalysis(await loadOfflineSession(replay.session_id));
+        } catch (error) {
+          setAnalysis(null);
+          setHistoryError(error instanceof Error ? error.message : 'Saved session analysis unavailable');
+        }
+        await refreshSessions(replay.session_id, false);
       }
     } catch (error) {
       if (socketService.isConnected()) {
@@ -65,9 +71,9 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
     }
   }
 
-  async function refreshSessions(preferredSession: string | null = null) {
+  async function refreshSessions(preferredSession = sessionId, clearError = true) {
     setHistoryBusy(true);
-    setHistoryError(null);
+    if (clearError) setHistoryError(null);
     try {
       const available = await listOfflineSessions();
       setSessions(available);
@@ -128,8 +134,7 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
       {connected && demoError && <p role="alert">{demoError}</p>}
       <details
         onToggle={(event) => {
-          setHistoryOpen(event.currentTarget.open);
-          if (event.currentTarget.open) void refreshSessions();
+          if (event.currentTarget.open) void refreshSessions(savedSession || sessionId);
         }}
       >
         <summary>Saved synthetic sessions</summary>
@@ -152,7 +157,11 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
               ))}
             </select>
           </label>
-          <button type="button" disabled={historyBusy || loadingDemo} onClick={() => void refreshSessions()}>
+          <button
+            type="button"
+            disabled={historyBusy || loadingDemo}
+            onClick={() => void refreshSessions(savedSession || sessionId)}
+          >
             Refresh
           </button>
           <button
@@ -167,8 +176,8 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
             Run in new session
           </button>
         </div>
-        {historyError && <p role="alert">{historyError}</p>}
       </details>
+      {historyError && <p role="alert">{historyError}</p>}
       <p role="status">
         OFFLINE RESULTS: {entries.length} · SYNTHETIC ACCEPTED: {accepted.length}
       </p>

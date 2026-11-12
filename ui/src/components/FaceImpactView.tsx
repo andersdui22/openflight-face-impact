@@ -149,7 +149,7 @@ export function FaceImpactView({ polygon, result }: FaceImpactViewProps) {
       {validImpact && result.status === 'ok' && (
         <p style={{ margin: 'var(--space-sm) 0 0' }} aria-live="polite">
           X: {result.x_mm.toFixed(1)} mm · Y: {result.y_mm.toFixed(1)} mm · {result.horizontal_region} /{' '}
-          {result.vertical_region}
+          {result.vertical_region} · From synthetic face origin: {Math.hypot(result.x_mm, result.y_mm).toFixed(1)} mm
         </p>
       )}
       {rejection && (

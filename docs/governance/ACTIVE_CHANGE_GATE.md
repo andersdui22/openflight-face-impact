@@ -1,3 +1,9 @@
+# Active software foundation — Gates 20–24 and 26–28 (2026-11-12)
+
+The user authorized software-only work on repeated synthetic shots, history, statistics, export, Windows lifecycle and USB capture interfaces on draft PR #45. The audited starting HEAD was `91a99d08fb7deacdde8f84f9ff8e0fef3d9b9ce4`; all nine latest workflows passed. Keep the six-panel dashboard and the existing single camera owner. The [acceptance review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md) records the remaining work per Gate. Formal closure requires separate approval.
+
+---
+
 # Active Windows lifecycle repair — Gates 26–28 (2026-11-12)
 
 - The user authorized repair of the Windows portable backend connection and both shutdown paths after a desktop test, plus startup, disconnect, restart, persistence and export verification on draft PR #45.

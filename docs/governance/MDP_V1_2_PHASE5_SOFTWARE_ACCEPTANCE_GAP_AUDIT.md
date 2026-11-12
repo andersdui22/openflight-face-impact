@@ -13,6 +13,21 @@ Updated 2026-11-12 for branch `mdp-v1.2/phase5-gates20-24-parallel`, draft PR #4
 | 24 | `test_offline_frame_quality.py`, `test_offline_temporal_evidence.py` and `test_offline_session_analysis.py` cover unusable frames, bad timing and incomplete archived evidence. Rejected results stay outside point statistics. | Characterize physical measurement uncertainty and false acceptance under ELP noise and occlusion. |
 | 26 | `test_offline_impact_demo_socket.py`, the browser session test and portable EXE smoke cover save, reopen and export for synthetic evidence. Archive preserves shot, club, calibration, calculation and quality data. | The capture record identifies the image sequence by hashes and timing. Physical frame retention and retrieval need a validated ELP capture path. Formal closeout awaits user approval. |
 
+## Current acceptance evidence and remaining work
+
+The source is the approved [MDP V1.2](https://github.com/andersdui22/openflight-face-impact/blob/1c36e1b13142a09f17e0daa6d9799341ddbf1eb1/docs/governance/MASTER_DEVELOPMENT_PLAN.md). The Gates below are open. Verify the exact-SHA checks and Windows artifact before submitting this batch for approval.
+
+| Gate | Evidence exercised in software | Outstanding evidence |
+| --- | --- | --- |
+| 20 | Known sphere/raster positions with one-pixel tolerance, noisy gradient, clipped rim and competing bright components. | ELP recordings with labelled ball positions and representative reflections, blur and occlusion. |
+| 21 | Labelled fiducial pipeline, pose ambiguity and incomplete or extra marker rejection. | Physical landmark association and observability against a known club pose. The current supported model is planar. |
+| 22 | Independent clock continuity, bounded frame selection and explicit rejection of USB host-clock aliases. | Contact-time estimator and independent timing reference. Frame selection only identifies a candidate image. |
+| 23 | Known geometry, polygon boundaries, coordinates, display distance from synthetic origin and image-to-export regression. | Validate physical face origin, geometry and coordinates against an independent reference. |
+| 24 | Fail-closed preflight, ambiguous/invalid observations, rejected coordinates withheld, invalid records excluded from calculations. | Physical uncertainty, repeatability and false-acceptance rates. |
+| 26 | Repeated shots are saved separately. A retried request is idempotent. Archive reopens after multiple process launches and exports accepted and rejected records with provenance. | Retest archive reopening with this EXE on the user's PC. Retention of real camera frames is pending the ELP acquisition path. |
+| 27 | Per-club filtering, coincident point counts, mean and population spread refreshed from persisted records, with exported values checked independently. | Physical sample analysis after an independently validated coordinate path exists. |
+| 28 | Browser disconnect/reconnect, embedded Python restart, normal and forced-stop Windows scenarios, plus diagnostics for frame quality, timing, calibration and invalid records. | Hardware-specific settings and failure modes remain to be verified with the ELP adapter. |
+
 ## Evidence available
 
 - Gate 20: synthetic bright-contour ball extraction, circularity/ambiguity/border checks and calibrated-ray sphere estimation; synthetic image regressions. Real golf-ball identity remains unproven.

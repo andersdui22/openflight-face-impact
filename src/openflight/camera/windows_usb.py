@@ -129,6 +129,7 @@ class WindowsUsbCamera:
                     host_timestamp_ns=host_ns,
                     exposure_us=0,  # unknown until hardware controls are validated
                     analogue_gain=0.0,  # unknown
+                    sensor_timestamp_is_host_alias=True,
                 ))
                 with self._arrival_lock:
                     self._arrival_times_ns.append(host_ns)

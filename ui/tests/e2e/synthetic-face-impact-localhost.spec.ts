@@ -122,30 +122,32 @@ test('synthetic session can be reopened and exported with provenance', async ({ 
   await reopened.getByRole('button', { name: new RegExp(`${sessionId}-contact`) }).click();
   await expect(reopened.getByTestId('synthetic-impact-marker')).toHaveCount(1);
   for (const [replayCase, count] of [
-    ['heel-contact', 3],
-    ['compact-contact', 4],
+    ['contact', 3],
+    ['heel-contact', 4],
+    ['compact-contact', 5],
   ] as const) {
     await reopened.getByLabel('Synthetic replay case').selectOption(replayCase);
     await reopened.getByRole('button', { name: 'Run synthetic replay' }).click();
     await expect(reopened.getByText(`OFFLINE RESULTS: ${count} · SYNTHETIC ACCEPTED: ${count - 1}`)).toBeVisible();
   }
-  await reopened.getByRole('button', { name: 'Load session' }).click();
-  await expect(reopened.getByText('Loaded from saved session')).toBeVisible();
   const analysis = reopened.getByRole('region', { name: 'Saved synthetic session analysis' });
   await expect(analysis.getByRole('img', { name: /Synthetic impact distribution/ })).toHaveCount(2);
   await analysis.getByLabel('Club model', { exact: true }).selectOption('synthetic-planar-face-v1');
-  await expect(analysis.getByText('Saved shots 3 · Accepted 2 · Rejected 1')).toBeVisible();
+  await expect(analysis.getByText('Saved shots 4 · Accepted 3 · Rejected 1')).toBeVisible();
   await expect(analysis.getByText(/Spread \(standard deviation\) X \d/)).toBeVisible();
+  await expect(analysis.locator('svg title').filter({ hasText: '2 synthetic shots' })).toHaveCount(1);
+  await expect(analysis.locator('svg title').filter({ hasText: 'Mean impact' })).toHaveCount(1);
   await analysis.getByText('Session diagnostics', { exact: true }).click();
   await expect(analysis.getByText('Synthetic rejected', { exact: true })).toBeVisible();
-  await expect(analysis.getByText(/Sensor intervals/)).toHaveCount(3);
+  await expect(analysis.getByText(/Sensor intervals/)).toHaveCount(4);
 
   const downloadPromise = page.waitForEvent('download');
   await reopened.getByRole('link', { name: 'Export session JSON' }).click();
   const download = await downloadPromise;
   const archive = JSON.parse(await readFile(await download.path(), 'utf8'));
   expect(archive.session_id).toBe(sessionId);
-  expect(archive.shots).toHaveLength(4);
+  expect(archive.shots).toHaveLength(5);
+  expect(new Set(archive.shots.map((shot: { evidence: { shot_id: string } }) => shot.evidence.shot_id)).size).toBe(5);
   const [accepted, rejected] = archive.shots;
   expect(accepted.evidence.accepted).toBe(true);
   expect(accepted.provenance.calibration.id).toBe('synthetic-brown-five-v1');
@@ -153,5 +155,18 @@ test('synthetic session can be reopened and exported with provenance', async ({ 
   expect(rejected.evidence.accepted).toBe(false);
   expect(rejected.evidence).not.toHaveProperty('x_mm');
   expect(archive.analysis.clubs).toHaveLength(2);
+  const planar = archive.analysis.clubs.find(
+    (club: { club_id: string }) => club.club_id === 'synthetic-planar-face-v1'
+  );
+  const points = archive.shots
+    .filter((shot: typeof accepted) => shot.evidence.accepted && shot.provenance.club.model_id === planar.club_id)
+    .map((shot: typeof accepted) => [shot.evidence.x_mm, shot.evidence.y_mm]);
+  for (const axis of [0, 1]) {
+    const mean = points.reduce((sum: number, point: number[]) => sum + point[axis], 0) / points.length;
+    const variance =
+      points.reduce((sum: number, point: number[]) => sum + (point[axis] - mean) ** 2, 0) / points.length;
+    expect(planar.mean_mm[axis]).toBeCloseTo(mean, 8);
+    expect(planar.spread_mm[axis]).toBeCloseTo(Math.sqrt(variance), 8);
+  }
   expect(archive.analysis.diagnostics.map((shot: { status: string }) => shot.status)).toContain('rejected');
 });

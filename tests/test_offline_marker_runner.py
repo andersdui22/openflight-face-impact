@@ -128,3 +128,11 @@ def test_marker_input_images_are_not_modified_by_extraction():
     before = image.copy()
     _run({0: image})
     np.testing.assert_array_equal(image, before)
+
+
+def test_extra_plausible_marker_rejects_entire_raster_batch():
+    image, *_ = _inputs()
+    ambiguous = image.copy()
+    cv.circle(ambiguous, (110, 120), 5, 255, -1)
+    with pytest.raises(ValueError, match="unexpected blob count"):
+        _run({0: image, 1: ambiguous})

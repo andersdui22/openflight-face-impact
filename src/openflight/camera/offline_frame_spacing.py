@@ -50,6 +50,8 @@ def assess_offline_frame_spacing(
         return OfflineFrameSpacing(
             False, f"invalid trigger timing: {timing.reason}", (), (),
         )
+    if any(frame.sensor_timestamp_is_host_alias is not False for frame in capture.frames):
+        return OfflineFrameSpacing(False, "independent sensor timestamp unavailable", (), ())
     sensor = tuple(
         b.sensor_timestamp_ns - a.sensor_timestamp_ns
         for a, b in zip(capture.frames, capture.frames[1:])
