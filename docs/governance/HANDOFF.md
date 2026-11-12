@@ -1,3 +1,11 @@
+# PHASE 6 PREPARATORY SOFTWARE START (2026-11-12)
+
+- Following user approval to advance in parallel, added isolated offline grayscale frame quality diagnostics and fail-closed checks with deterministic tests; documented the work in `PHASE6_SOFTWARE_FIRST_START.md`.
+- **No Gate 25–30 closure claimed**: canonical MDP V1.2 Gate definitions must be reconciled; no real ELP capture or accuracy validation. Gates 20–24 remain open while their CI and PR evidence is resolved.
+- No upstream edits, merge, release or physical tests.
+
+---
+
 # WINDOWS BACKEND PYINSTALLER ROOT CAUSE AND FIX (2026-11-12)
 
 - On CI run 43192473352 the PyInstaller build itself succeeded, but launching the EXE failed at Flask-SocketIO initialization with `ValueError: Invalid async_mode specified`. This is consistent with PyInstaller omitting the dynamically imported `engineio.async_drivers.threading` driver.
