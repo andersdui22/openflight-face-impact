@@ -1,3 +1,14 @@
+# Windows connection and shutdown recovery (2026-11-12)
+
+- Read-only GitHub audit confirmed [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45) on `mdp-v1.2/phase5-gates20-24-parallel` at `e9c24fe1e05a61920da2f003c91d375039e791be`. All nine latest baseline workflows passed. [Baseline checks](https://github.com/andersdui22/openflight-face-impact/commit/e9c24fe1e05a61920da2f003c91d375039e791be/checks)
+- The user's Windows EXE opened without a terminal and displayed the dashboard, synthetic Contact replay and marker, saved sessions, statistics and diagnostics. The user reported a disconnected backend message and a failed shutdown confirmation. The report is desktop software evidence with the synthetic fixture.
+- The synthetic calculation panel now waits for Socket.IO, drops the live result on disconnect and automatically requests it when the connection returns. The replay review reports the current connection and labels loaded archive evidence separately from replay events. Running a new replay requires the live backend. A previously loaded result remains available for review during a disconnect.
+- The packaged shutdown dialog calls Electron via a scoped preload. Window close uses the same cleanup. Electron closes the owned mock backend's private input pipe, waits for cleanup and terminates that child if it exceeds the grace period. Startup checks the identity of the specific child before connecting. The browser shutdown path remains available over HTTP.
+- Local Electron and Python smoke covered normal internal shutdown, native window close, forced backend loss followed by internal shutdown, and archive reopen and export after restart. It checked committed accepted and rejected evidence, statistics, and port 8080 after each exit. Windows Actions runs the same flow against the packaged backend and checks the child process has exited.
+- Review the new SHA's Windows evidence before handing over its portable download. Retest the status, both shutdown paths and archived sessions on the user's Windows PC. Gates 26–28 remain open. Follow the Phase 6 evidence requirements for the remaining software and defer physical ELP work.
+
+---
+
 # Archived synthetic statistics, diagnostics and EXE export (2026-11-12)
 
 - Read-only GitHub audit confirmed draft PR #45 and branch HEAD `6bc11e2b799b2121b21b84a305cc2db87e9b904a`. All nine latest baseline workflows passed. Python 3.12 reported 3,006 passed and seven skipped, UI reported 282 React, 17 Electron and 58 browser tests passed. [Baseline checks](https://github.com/andersdui22/openflight-face-impact/commit/6bc11e2b799b2121b21b84a305cc2db87e9b904a/checks)

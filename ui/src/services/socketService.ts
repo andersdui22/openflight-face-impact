@@ -32,13 +32,17 @@ class SocketService {
   private sessionClearedListeners = new Set<() => void>();
 
   connect() {
-    if (this.socket) return;
+    if (this.socket || (typeof window !== 'undefined' && window.openFlightDesktop?.backendAvailable === false)) return;
 
     this.socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
     });
 
     this.setupListeners();
+  }
+
+  isConnected() {
+    return this.socket?.connected === true;
   }
 
   disconnect() {

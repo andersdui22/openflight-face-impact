@@ -9,7 +9,7 @@ describe('SyntheticFaceImpactDemo', () => {
     expect(html).toContain('Synthetic Face Impact test case');
     expect(html).toContain('Request synthetic result');
     expect(html).toContain('Not a camera measurement');
-    expect(html).toContain('Waiting for synthetic backend result');
+    expect(html).toContain('OpenFlight backend is disconnected');
     expect(html).not.toContain('synthetic-impact-marker');
     expect(html).not.toContain('X:');
   });

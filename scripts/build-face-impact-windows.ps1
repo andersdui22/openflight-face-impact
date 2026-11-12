@@ -51,6 +51,7 @@ New-Item -ItemType Directory -Force -Path (Join-Path $appDir 'electron') | Out-N
 Copy-Item (Join-Path $ui 'electron/main.js') (Join-Path $appDir 'electron/main.js')
 Copy-Item (Join-Path $ui 'electron/resolveTargetUrl.js') (Join-Path $appDir 'electron/resolveTargetUrl.js')
 Copy-Item (Join-Path $ui 'electron/backendProcess.js') (Join-Path $appDir 'electron/backendProcess.js')
+Copy-Item (Join-Path $ui 'electron/desktopPreload.cjs') (Join-Path $appDir 'electron/desktopPreload.cjs')
 Copy-Item (Join-Path $ui 'dist') (Join-Path $appDir 'dist') -Recurse
 @'
 {"name":"openflight-face-impact-portable","version":"0.0.0-gate10","private":true,"type":"module","main":"electron/main.js"}

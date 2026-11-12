@@ -1,4 +1,8 @@
 export function getServerOrigin(): string {
+  if (typeof window !== 'undefined' && window.openFlightDesktop?.backendAvailable === false) {
+    return window.location.href;
+  }
+
   if (import.meta.env.VITE_SOCKET_URL) {
     return import.meta.env.VITE_SOCKET_URL;
   }

@@ -11,8 +11,6 @@ async function openSyntheticDebug(page: import('@playwright/test').Page) {
   await expect(page.getByLabel('Server connected')).toBeVisible();
   await page.getByRole('button', { name: 'Debug' }).click();
   await expect(page.getByLabel('Synthetic Face Impact test case')).toBeVisible();
-  // The demo can mount before the asynchronous Socket.IO handshake completes.
-  await page.getByRole('button', { name: 'Request synthetic result' }).click();
 }
 
 test('real React Socket.IO client receives synthetic successes and rejections from Python', async ({ page }) => {
@@ -43,13 +41,13 @@ test('real React client reports offline errors and recovers after reconnection',
 
   await context.setOffline(true);
   await expect(page.getByLabel('Server disconnected')).toBeVisible();
-  await page.getByRole('button', { name: 'Request synthetic result' }).click();
-  await expect(page.getByRole('alert').getByText('OpenFlight backend is disconnected')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Request synthetic result' })).toBeDisabled();
+  await expect(page.getByText('OpenFlight backend is disconnected')).toBeVisible();
   await expect(preview).toHaveCount(0);
 
   await context.setOffline(false);
   await expect(page.getByLabel('Server connected')).toBeVisible();
-  await page.getByRole('button', { name: 'Request synthetic result' }).click();
+  await expect(page.getByText('OpenFlight backend is disconnected')).toHaveCount(0);
   await expect(preview.getByText('X: 12.0 mm')).toBeVisible();
   await expect(preview.getByTestId('synthetic-impact-marker')).toHaveCount(1);
 });
@@ -77,6 +75,7 @@ test('server-owned raster replay reaches only the requesting dashboard history',
 
   await run.click();
   await expect(review.getByText('Selected shot: synthetic-contact')).toBeVisible();
+  await expect(review.getByText('Received from Python replay')).toBeVisible();
   await expect(review.getByTestId('synthetic-impact-marker')).toHaveCount(1);
   await expect(observer.getByText('OFFLINE RESULTS: 0')).toBeVisible();
 
@@ -118,6 +117,7 @@ test('synthetic session can be reopened and exported with provenance', async ({ 
   await expect(reopened.getByText('OFFLINE RESULTS: 0')).toBeVisible();
   await reopened.getByLabel('Saved session', { exact: true }).selectOption(sessionId!);
   await reopened.getByRole('button', { name: 'Load session' }).click();
+  await expect(reopened.getByText('Loaded from saved session')).toBeVisible();
   await expect(reopened.getByText('OFFLINE RESULTS: 2 · SYNTHETIC ACCEPTED: 1')).toBeVisible();
   await reopened.getByRole('button', { name: new RegExp(`${sessionId}-contact`) }).click();
   await expect(reopened.getByTestId('synthetic-impact-marker')).toHaveCount(1);
@@ -130,6 +130,7 @@ test('synthetic session can be reopened and exported with provenance', async ({ 
     await expect(reopened.getByText(`OFFLINE RESULTS: ${count} · SYNTHETIC ACCEPTED: ${count - 1}`)).toBeVisible();
   }
   await reopened.getByRole('button', { name: 'Load session' }).click();
+  await expect(reopened.getByText('Loaded from saved session')).toBeVisible();
   const analysis = reopened.getByRole('region', { name: 'Saved synthetic session analysis' });
   await expect(analysis.getByRole('img', { name: /Synthetic impact distribution/ })).toHaveCount(2);
   await analysis.getByLabel('Club model', { exact: true }).selectOption('synthetic-planar-face-v1');

@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { isAbsolute, join } from 'node:path';
 import { request } from 'node:http';
+import { randomUUID } from 'node:crypto';
 
 export function resolveBackendExecutable(env = process.env, resourcesPath = null) {
   const explicit = env.OPENFLIGHT_BACKEND_EXECUTABLE;
@@ -17,29 +18,56 @@ export function resolveBackendExecutable(env = process.env, resourcesPath = null
 
 export function startBackend(executable, options = {}) {
   if (!executable) return null;
+  const instance = randomUUID();
   const child = spawn(executable, ['--mock', '--host', '127.0.0.1',
     '--web-port', '8080', '--no-logging'], {
     cwd: options.cwd,
     windowsHide: true,
     shell: false,
-    stdio: 'ignore',
+    env: { ...process.env, OPENFLIGHT_DESKTOP_INSTANCE: instance },
+    stdio: ['pipe', 'ignore', 'ignore'],
   });
+  child.openFlightInstance = instance;
+  // The pipe can close when a child exits during startup.
+  child.stdin.on('error', () => {});
   child.on('error', (error) => {
     options.onError?.(error);
   });
   return child;
 }
 
-export function stopBackend(child) {
-  if (child && child.exitCode === null && !child.killed) {
-    child.kill();
-  }
+function hasExited(child) {
+  return !child?.pid || child.exitCode !== null || child.signalCode !== null;
+}
+
+function waitForExit(child, timeoutMs) {
+  if (hasExited(child)) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const finish = (exited) => {
+      clearTimeout(timer);
+      child.removeListener('exit', onExit);
+      resolve(exited);
+    };
+    const onExit = () => finish(true);
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    child.once('exit', onExit);
+  });
+}
+
+export async function stopBackend(child, { graceMs = 4500, forceMs = 2500 } = {}) {
+  if (hasExited(child)) return 'already-exited';
+  const gracefulExit = waitForExit(child, graceMs);
+  child.stdin?.end();
+  if (await gracefulExit) return 'graceful';
+  const forcedExit = waitForExit(child, forceMs);
+  if (!hasExited(child)) child.kill('SIGKILL');
+  return (await forcedExit) ? 'forced' : 'timeout';
 }
 
 
 export function probeBackendHealth({
   host = '127.0.0.1', port = 8080,
-  path = '/api/face-impact/health', timeoutMs = 1000,
+  path = '/api/face-impact/health', timeoutMs = 1000, instance,
 } = {}) {
   if (host !== '127.0.0.1' && host !== 'localhost') {
     return Promise.reject(new Error('Backend health probe requires loopback host'));
@@ -65,7 +93,7 @@ export function probeBackendHealth({
           resolve(response.statusCode === 200 &&
             data.service === 'openflight-face-impact' &&
             data.protocol_version === 1 && data.status === 'ready' &&
-            data.camera_validated === false);
+            data.camera_validated === false && (instance === undefined || data.desktop_instance === instance));
         } catch {
           resolve(false);
         }
@@ -86,7 +114,7 @@ export async function waitForBackendReady({
   }
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     if (!isRunning()) return false;
-    if (await probe()) return true;
+    if (await probe()) return isRunning();
     if (attempt + 1 < attempts) {
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }

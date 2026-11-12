@@ -7,6 +7,10 @@ export function useSocket() {
   }, []);
 
   const shutdown = useCallback(async () => {
+    if (window.openFlightDesktop) {
+      window.openFlightDesktop.quit();
+      return;
+    }
     const response = await fetch('/api/shutdown', { method: 'POST' });
     if (!response.ok) {
       throw new Error(`Shutdown request failed (${response.status})`);

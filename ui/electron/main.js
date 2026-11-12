@@ -4,20 +4,26 @@
 // scripts/start-kiosk.sh's old system-browser detection (chromium-browser /
 // chromium / google-chrome / firefox) with one pinned Chromium version.
 
-import { app, BrowserWindow, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import { fileURLToPath } from 'node:url';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { resolveTargetUrl } from './resolveTargetUrl.js';
-import { resolveBackendExecutable, startBackend, stopBackend, waitForBackendReady } from './backendProcess.js';
+import { probeBackendHealth, resolveBackendExecutable, startBackend, stopBackend, waitForBackendReady } from './backendProcess.js';
 
 const targetUrl = resolveTargetUrl(process.env, process.argv);
+const portableIndex = new URL('../dist/index.html', import.meta.url);
+const portable = app.isPackaged || process.env.OPENFLIGHT_PORTABLE === '1' ||
+  (!process.defaultApp && existsSync(fileURLToPath(portableIndex)));
 
 Menu.setApplicationMenu(null);
 
 let backendChild = null;
 let backendStartupError = null;
 let backendReady = false;
+let quitting = false;
+let backendStopped = false;
+let smokeResult = null;
 
 async function launchOptInBackend() {
   try {
@@ -27,7 +33,9 @@ async function launchOptInBackend() {
     });
     if (backendChild) {
       backendReady = await waitForBackendReady({
-        isRunning: () => backendChild.exitCode === null && !backendChild.killed && !backendStartupError,
+        probe: () => probeBackendHealth({ instance: backendChild.openFlightInstance }),
+        isRunning: () => !!backendChild.pid && backendChild.exitCode === null &&
+          backendChild.signalCode === null && !backendStartupError && !quitting,
       });
       if (!backendReady) console.error("Face Impact backend readiness check failed");
     }
@@ -39,7 +47,7 @@ async function launchOptInBackend() {
 
 // Exercise the real portable renderer in CI with either the mock backend or
 // the UI-only bundle. The club picker must be closed before taking a screenshot.
-async function verifySessionDownload(win, path) {
+async function verifySessionDownload(win, path, expectsRejectedShot) {
   const session = win.webContents.session;
   let onDownload;
   let timer;
@@ -65,6 +73,8 @@ async function verifySessionDownload(win, path) {
   const exported = JSON.parse(readFileSync(path, 'utf8'));
   if (exported.source !== 'offline_synthetic_analysis' ||
       !exported.shots.some(({ evidence }) => evidence.shot_id === 'synthetic-contact' && evidence.accepted) ||
+      (expectsRejectedShot && !exported.shots.some(({ evidence }) =>
+        evidence.shot_id === 'synthetic-missing-ball' && !evidence.accepted)) ||
       !exported.analysis.clubs.some((club) => club.points_mm.length === 1 && club.mean_mm.length === 2)) {
     throw new Error('Downloaded session lacks the archived shot and statistics');
   }
@@ -73,13 +83,15 @@ async function verifySessionDownload(win, path) {
 async function runDashboardSmoke(win) {
   const expectsBackend = process.env.OPENFLIGHT_GATE11_EXPECT_BACKEND === '1';
   const expectsSavedSession = process.env.OPENFLIGHT_GATE11_EXPECT_SAVED_SESSION === '1';
+  const expectsRejectedShot = process.env.OPENFLIGHT_GATE11_EXPECT_REJECTED_SHOT === '1';
+  const closeMode = process.env.OPENFLIGHT_GATE11_CLOSE_MODE ?? 'internal';
   const resultPath = process.env.OPENFLIGHT_GATE11_RESULT;
   try {
     if (backendReady !== expectsBackend) {
       throw new Error(`Expected mock backend ready=${expectsBackend}, got ${backendReady}`);
     }
     const result = await win.webContents.executeJavaScript(`
-      (async (expectsBackend, expectsSavedSession) => {
+      (async (expectsBackend, expectsSavedSession, expectsRejectedShot) => {
         const waitFor = async (predicate, message) => {
           for (let attempt = 0; attempt < 100; attempt++) {
             const value = predicate();
@@ -126,13 +138,27 @@ async function runDashboardSmoke(win) {
             if (!replay) throw new Error('Offline replay button not rendered');
             replay.click();
           }
-          await waitFor(() => review.textContent.includes('synthetic-contact') &&
+          if (expectsRejectedShot) {
+            await waitFor(() => review.textContent.includes('REJECTED:'),
+              'Rejected evidence did not survive backend loss');
+            if (review.querySelector('[data-testid="synthetic-impact-marker"]')) {
+              throw new Error('Restored rejected evidence displayed an impact marker');
+            }
+            Array.from(review.querySelectorAll('button'))
+              .find((item) => item.textContent.includes('synthetic-contact'))?.click();
+          }
+          await waitFor(() => review.textContent.includes(
+            expectsSavedSession ? 'Loaded from saved session' : 'Received from Python replay') &&
+            review.textContent.includes('Selected shot: synthetic-contact') &&
             review.querySelector('[data-testid="synthetic-impact-marker"]'),
             'Mock backend did not deliver offline raster evidence');
           if (expectsSavedSession) {
             const analysis = await waitFor(() => {
               const section = review.querySelector('[aria-label="Saved synthetic session analysis"]');
-              return section?.textContent.includes('Saved shots 1 · Accepted 1 · Rejected 0') && section;
+              const summary = expectsRejectedShot
+                ? 'Saved shots 2 · Accepted 1 · Rejected 1'
+                : 'Saved shots 1 · Accepted 1 · Rejected 0';
+              return section?.textContent.includes(summary) && section;
             }, 'Restored session statistics did not render');
             analysis.querySelector('details').open = true;
             analysis.scrollIntoView({ block: 'start' });
@@ -147,10 +173,10 @@ async function runDashboardSmoke(win) {
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         return { ok: true, panels: panels.length, backend_ready: expectsBackend,
           camera: cameraStatus, restored_session: expectsSavedSession };
-      })(${JSON.stringify(expectsBackend)}, ${JSON.stringify(expectsSavedSession)})
+      })(${JSON.stringify(expectsBackend)}, ${JSON.stringify(expectsSavedSession)}, ${JSON.stringify(expectsRejectedShot)})
     `);
     if (expectsSavedSession) {
-      await verifySessionDownload(win, join(dirname(resultPath), 'exported-session.json'));
+      await verifySessionDownload(win, join(dirname(resultPath), 'exported-session-' + closeMode + '.json'), expectsRejectedShot);
     }
     result.exported_session = expectsSavedSession;
     const shot = await win.webContents.capturePage();
@@ -159,12 +185,72 @@ async function runDashboardSmoke(win) {
       throw new Error(`Dashboard capture has invalid dimensions ${width}x${height}`);
     }
     writeFileSync(process.env.OPENFLIGHT_GATE11_SCREENSHOT, shot.toPNG());
-    writeFileSync(resultPath, JSON.stringify(result));
+    if (closeMode === 'backend-loss') {
+      await replayBeforeBackendLoss(win);
+      backendChild.kill('SIGKILL');
+      await waitForRendererDisconnect(win);
+    }
+    smokeResult = { ...result, close_mode: closeMode, restored_rejection: expectsRejectedShot };
+    writeFileSync(resultPath, JSON.stringify(smokeResult));
+    if (closeMode === 'window') {
+      win.close();
+    } else {
+      await win.webContents.executeJavaScript(`
+        (async () => {
+          document.querySelector('.panel-footer__power').click();
+          for (let attempt = 0; attempt < 100; attempt++) {
+            const confirm = document.querySelector('.shutdown-dialog__confirm');
+            if (confirm) {
+              confirm.click();
+              return;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+          throw new Error('In-app shutdown confirmation did not render');
+        })()
+      `);
+    }
   } catch (error) {
+    // IPC can destroy the renderer while its confirmation script returns.
+    if (smokeResult && (quitting || win.isDestroyed())) return;
+    smokeResult = null;
     writeFileSync(resultPath, JSON.stringify({ ok: false, error: String(error) }));
-  } finally {
     app.quit();
   }
+}
+
+function replayBeforeBackendLoss(win) {
+  return win.webContents.executeJavaScript(`
+    (async () => {
+      const review = document.querySelector('[aria-label="Offline synthetic impact review"]');
+      const select = review.querySelector('select');
+      select.value = 'missing-ball';
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      const replay = Array.from(review.querySelectorAll('button'))
+        .find((button) => button.textContent === 'Run synthetic replay');
+      replay.click();
+      for (let attempt = 0; attempt < 100; attempt++) {
+        if (review.textContent.includes('Selected shot: synthetic-missing-ball') &&
+            review.textContent.includes('REJECTED:') && !replay.disabled) return;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      throw new Error('Rejected replay was not committed before backend loss');
+    })()
+  `);
+}
+
+function waitForRendererDisconnect(win) {
+  return win.webContents.executeJavaScript(`
+    (async () => {
+      const review = document.querySelector('[aria-label="Offline synthetic impact review"]');
+      for (let attempt = 0; attempt < 100; attempt++) {
+        if (review.querySelector('[aria-label="Replay connection"]').textContent.includes('requires a backend connection') &&
+            review.textContent.includes('OFFLINE RESULTS: 2 · SYNTHETIC ACCEPTED: 1')) return;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      throw new Error('Backend loss did not update the connection status while retaining replay evidence');
+    })()
+  `);
 }
 
 function createWindow() {
@@ -176,6 +262,11 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       sandbox: true,
+      ...(portable && {
+        preload: fileURLToPath(new URL('./desktopPreload.cjs', import.meta.url)),
+        additionalArguments: !backendReady && (backendChild || backendStartupError)
+          ? ['--openflight-backend-unavailable'] : [],
+      }),
     },
   });
 
@@ -186,10 +277,14 @@ function createWindow() {
   if (process.env.OPENFLIGHT_GATE11_SMOKE === '1') {
     win.webContents.once('did-finish-load', () => void runDashboardSmoke(win));
   }
-  if (app.isPackaged || process.env.OPENFLIGHT_PORTABLE === '1' || (!process.defaultApp && existsSync(fileURLToPath(new URL('../dist/index.html', import.meta.url))))) {
-    // The portable Windows bundle starts its bundled UI without a terminal or server.
-    // Hardware/backend features remain unavailable until a supported service is connected.
-    win.loadFile(fileURLToPath(new URL('../dist/index.html', import.meta.url)));
+  if (portable) {
+    const quitFromRenderer = (event) => {
+      if (event.sender === win.webContents && event.senderFrame === win.webContents.mainFrame &&
+          event.senderFrame?.url === portableIndex.href) app.quit();
+    };
+    ipcMain.on('openflight:quit', quitFromRenderer);
+    win.once('closed', () => ipcMain.removeListener('openflight:quit', quitFromRenderer));
+    win.loadFile(fileURLToPath(portableIndex));
   } else {
     win.loadURL(targetUrl);
   }
@@ -204,10 +299,28 @@ app.whenReady().then(async () => {
   if (backendStartupError || (backendChild && !backendReady)) {
     console.error("Backend unavailable; UI opens without it");
   }
-  createWindow();
+  if (!quitting) createWindow();
 });
 
-app.on("before-quit", () => stopBackend(backendChild));
+app.on('before-quit', (event) => {
+  if (backendStopped || !backendChild) return;
+  event.preventDefault();
+  if (quitting) return;
+  quitting = true;
+  void stopBackend(backendChild).then((outcome) => {
+    backendStopped = true;
+    if (smokeResult) {
+      writeFileSync(process.env.OPENFLIGHT_GATE11_RESULT, JSON.stringify({
+        ...smokeResult, backend_shutdown: outcome, backend_pid: backendChild.pid,
+      }));
+    }
+    if (outcome === 'timeout') app.exit(1);
+    else app.quit();
+  }).catch((error) => {
+    console.error('Could not stop the owned OpenFlight backend', error);
+    app.exit(1);
+  });
+});
 
 app.on('window-all-closed', () => {
   app.quit();

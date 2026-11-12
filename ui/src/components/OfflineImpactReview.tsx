@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import { socketService } from '../services/socketService';
 import { listOfflineSessions, loadOfflineSession, offlineSessionUrl } from '../services/offlineImpactHistory';
+import { useSystemStore } from '../stores/useSystemStore';
 import { useOfflineImpactStore } from '../stores/useOfflineImpactStore';
 import type { OfflineImpactEvidence, OfflineReplayCase } from '../types/offlineImpactEvidence';
 import type { OfflineSessionAnalysis as SessionReport } from '../types/offlineSessionAnalysis';
@@ -16,6 +17,8 @@ const referenceFace: [number, number][] = [
 ];
 
 export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvidence[] } = {}) {
+  const connected = useSystemStore((state) => state.connected);
+  const archivedEntries = useOfflineImpactStore((state) => state.archivedEntries);
   const liveEntries = useOfflineImpactStore((state) => state.entries);
   const sessionId = useOfflineImpactStore((state) => state.sessionId);
   const entries = evidence ?? liveEntries;
@@ -54,7 +57,9 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
         await refreshSessions(newSession ? useOfflineImpactStore.getState().sessionId : null);
       }
     } catch (error) {
-      setDemoError(error instanceof Error ? error.message : 'Synthetic offline replay unavailable');
+      if (socketService.isConnected()) {
+        setDemoError(error instanceof Error ? error.message : 'Synthetic offline replay unavailable');
+      }
     } finally {
       setLoadingDemo(false);
     }
@@ -99,12 +104,15 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
         Only versioned Python offline evidence appears here. The clubface outline is an illustrative reference, not
         calibrated camera geometry.
       </p>
+      <p role="status" aria-label="Replay connection">
+        {connected ? 'Python backend connected for replay' : 'Synthetic replay requires a backend connection'}
+      </p>
       <div className="impact-controls__fields">
         <label>
           Synthetic replay case
           <select
             value={demoCase}
-            disabled={loadingDemo || historyBusy}
+            disabled={!connected || loadingDemo || historyBusy}
             onChange={(event) => setDemoCase(event.target.value as OfflineReplayCase)}
           >
             <option value="contact">Contact</option>
@@ -113,11 +121,11 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
             <option value="missing-ball">Missing ball</option>
           </select>
         </label>
-        <button type="button" onClick={() => void runDemo()} disabled={loadingDemo || historyBusy}>
+        <button type="button" onClick={() => void runDemo()} disabled={!connected || loadingDemo || historyBusy}>
           {loadingDemo ? 'Running synthetic replay…' : 'Run synthetic replay'}
         </button>
       </div>
-      {demoError && <p role="alert">{demoError}</p>}
+      {connected && demoError && <p role="alert">{demoError}</p>}
       <details
         onToggle={(event) => {
           setHistoryOpen(event.currentTarget.open);
@@ -155,7 +163,7 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
             Load session
           </button>
           {savedSession && <a href={offlineSessionUrl(savedSession, true)}>Export session JSON</a>}
-          <button type="button" disabled={historyBusy || loadingDemo} onClick={() => void runDemo(true)}>
+          <button type="button" disabled={!connected || historyBusy || loadingDemo} onClick={() => void runDemo(true)}>
             Run in new session
           </button>
         </div>
@@ -169,6 +177,9 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
           <p>
             Selected shot: {selected.shot_id} · Session: {selected.session_id}
           </p>
+          {!evidence && (
+            <p>{archivedEntries.includes(selected) ? 'Loaded from saved session' : 'Received from Python replay'}</p>
+          )}
           {validSelection && selected.accepted ? (
             <FaceImpactView
               polygon={archivedOutline ?? referenceFace}

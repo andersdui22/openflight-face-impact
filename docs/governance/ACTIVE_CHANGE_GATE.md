@@ -1,3 +1,12 @@
+# Active Windows lifecycle repair — Gates 26–28 (2026-11-12)
+
+- The user authorized repair of the Windows portable backend connection and both shutdown paths after a desktop test, plus startup, disconnect, restart, persistence and export verification on draft PR #45.
+- Baseline `e9c24fe1e05a61920da2f003c91d375039e791be` passed all nine latest workflows. Keep the six-panel dashboard layout. Use the existing mock backend and SQLite archive for the regression checks.
+- Verify the packaged application exits after both UI confirmation and native window close, the owned backend and port 8080 are released, and saved accepted and rejected evidence can be reopened and exported after graceful close and forced backend loss.
+- Physical ELP validation is deferred. Gates remain open and no merge, release, upstream change or ConnectorNext change is authorized.
+
+---
+
 # Active Gates 27–28 software scope — session analysis (2026-11-12)
 
 - Authorization: user requested autonomous implementation of archived-shot statistics, session and club filtering, diagnostics, Gate 20–24 and 26 evidence review, and Windows restart/export verification on draft PR #45.

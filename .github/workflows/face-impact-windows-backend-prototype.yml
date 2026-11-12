@@ -82,7 +82,7 @@ jobs:
           if (!(Test-Path 'out/OpenFlight-Face-Impact-Windows/resources/backend/_internal' -PathType Container)) {
             throw 'Packaged Electron resources missing Python backend dependencies'
           }
-      - name: Start packaged Electron with its staged mock backend, close and restart
+      - name: Verify packaged connection, shutdown, backend loss and archive recovery
         shell: pwsh
         run: ./tests/windows_packaged_smoke.ps1 -WithBackend -EvidenceDirectory "$env:RUNNER_TEMP/packaged-backend"
       - name: Upload packaged Electron renderer evidence
@@ -93,7 +93,7 @@ jobs:
           path: |
             ${{ runner.temp }}/packaged-backend/dashboard-*.png
             ${{ runner.temp }}/packaged-backend/result-*.json
-            ${{ runner.temp }}/packaged-backend/exported-session.json
+            ${{ runner.temp }}/packaged-backend/exported-session-*.json
           if-no-files-found: warn
       - name: Upload development-only backend folder
         if: success()

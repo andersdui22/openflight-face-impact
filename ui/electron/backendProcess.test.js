@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { spawn } from 'node:child_process';
+import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -22,8 +24,27 @@ test('missing absolute executable rejected', () => {
     /existing absolute path/,
   );
 });
-test('shutdown is safe when no backend started', () => {
-  assert.doesNotThrow(() => stopBackend(null));
+test('shutdown is safe when no backend started', async () => {
+  assert.equal(await stopBackend(null), 'already-exited');
+});
+
+test('shutdown waits for an owned process to handle the parent pipe closing', async () => {
+  const child = spawn(process.execPath, ['-e', "process.stdin.resume(); process.stdin.on('end', () => process.exit(0));"],
+    { stdio: ['pipe', 'ignore', 'ignore'] });
+  assert.equal(await stopBackend(child), 'graceful');
+  assert.equal(child.exitCode, 0);
+});
+
+test('shutdown terminates an owned child that ignores the parent pipe', async () => {
+  const child = spawn(process.execPath, ['-e', "setInterval(() => {}, 1000); process.stdout.write('ready');"],
+    { stdio: ['pipe', 'pipe', 'ignore'] });
+  try {
+    await once(child.stdout, 'data');
+    assert.equal(await stopBackend(child, { graceMs: 20 }), 'forced');
+    assert.equal(child.signalCode, 'SIGKILL');
+  } finally {
+    if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+  }
 });
 
 
@@ -82,10 +103,12 @@ async function withHealthServer(reply, callback) {
 test('health accepts matching Face Impact service identity', async () => {
   const valid = {
     service: 'openflight-face-impact', protocol_version: 1,
-    status: 'ready', camera_validated: false,
+    status: 'ready', camera_validated: false, desktop_instance: 'owned-backend',
   };
   await withHealthServer({ body: valid }, async (port) => {
     assert.equal(await probeBackendHealth({ port }), true);
+    assert.equal(await probeBackendHealth({ port, instance: 'owned-backend' }), true);
+    assert.equal(await probeBackendHealth({ port, instance: 'another-backend' }), false);
   });
 });
 

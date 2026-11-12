@@ -492,6 +492,13 @@ def _shutdown_process_after_delay(delay_s: float = 0.5) -> None:
     os._exit(0)
 
 
+def _watch_desktop_parent() -> None:
+    """Use Electron's private pipe to stop the owned mock backend on parent exit."""
+    if sys.stdin is not None:
+        sys.stdin.read()
+        _shutdown_process_after_delay(0)
+
+
 # Max smash factor adjustment in degrees (clamped to prevent floor-dependence)
 _MAX_SMASH_ADJ_LOW = -3.0  # max degrees to subtract for thin/toe hits
 _MAX_SMASH_ADJ_HIGH = 2.0  # max degrees to add for high-face hits
@@ -1002,8 +1009,11 @@ def shot_to_dict(shot: Shot) -> dict:
 @app.route("/api/face-impact/health", methods=["GET"])
 def face_impact_backend_health():
     """Identify the local Face Impact backend without probing camera hardware."""
-    return {"service": "openflight-face-impact", "protocol_version": 1,
-            "status": "ready", "camera_validated": False}
+    health = {"service": "openflight-face-impact", "protocol_version": 1,
+              "status": "ready", "camera_validated": False}
+    if instance := os.environ.get("OPENFLIGHT_DESKTOP_INSTANCE"):
+        health["desktop_instance"] = instance
+    return health
 
 
 @app.route("/")
@@ -5976,6 +5986,9 @@ def main():
     print(f"Server starting at http://{args.host}:{args.web_port}")
     print()
     startup_status.start("server", "Starting OpenFlight server")
+
+    if args.mock and os.environ.get("OPENFLIGHT_DESKTOP_INSTANCE"):
+        threading.Thread(target=_watch_desktop_parent, daemon=True).start()
 
     try:
         # Note: Flask debug mode (reloader) is disabled to prevent duplicate processes

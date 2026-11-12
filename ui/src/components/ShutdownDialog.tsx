@@ -7,7 +7,7 @@ interface ShutdownDialogProps {
   state: ShutdownState;
   onConfirm: () => void;
   onCancel: () => void;
-  onSleep: () => void;
+  onSleep?: () => void;
 }
 
 export function ShutdownDialog({ state, onConfirm, onCancel, onSleep }: ShutdownDialogProps) {
@@ -38,9 +38,11 @@ export function ShutdownDialog({ state, onConfirm, onCancel, onSleep }: Shutdown
         {hasError ? <span className="shutdown-dialog__error">{t('shutdown.errorDetail')}</span> : null}
 
         <div className="shutdown-dialog__buttons">
-          <button type="button" className="shutdown-dialog__cancel" onClick={onSleep} disabled={hasError}>
-            Sleep Screen
-          </button>
+          {onSleep && (
+            <button type="button" className="shutdown-dialog__cancel" onClick={onSleep} disabled={hasError}>
+              Sleep Screen
+            </button>
+          )}
 
           <button className="shutdown-dialog__confirm" onClick={onConfirm} autoFocus>
             {hasError ? t('shutdown.tryAgain') : t('shutdown.shutDown')}

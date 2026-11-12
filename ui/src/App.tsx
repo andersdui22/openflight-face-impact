@@ -508,7 +508,7 @@ function AppContent() {
           state={shutdownState}
           onConfirm={handleShutdown}
           onCancel={closeShutdown}
-          onSleep={handleSleepScreen}
+          onSleep={typeof window !== 'undefined' && window.openFlightDesktop ? undefined : handleSleepScreen}
         />
       ) : null}
 

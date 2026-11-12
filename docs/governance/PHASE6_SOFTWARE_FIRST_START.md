@@ -18,3 +18,15 @@ The [approved MDP V1.2 archive](https://github.com/andersdui22/openflight-face-i
 - To try the workflow, open **Saved synthetic sessions** under offline review. **Run in new session** starts a new session with the selected replay case. Use the normal replay button to add heel contact, compact club contact or a missing ball. Repeating a case in a session preserves the original record.
 - Load a session to view counts, impact distribution, mean X/Y and population standard deviation in millimetres for each club model. The **Club model** filter scopes the charts and shot diagnostics. Two accepted points on the same club model are required for spread. Export JSON includes the archived records plus the analysis and validation status.
 - Keep acquisition under the existing single camera owner. Preserve explicit capture, club and calibration provenance when preparing session persistence and statistics. Gates 29–30 require physical data and remain deferred. Define the independent reference, sampling and error tolerances before those tests.
+
+## Windows lifecycle and archive evidence
+
+The user verified the six-panel dashboard, synthetic replay marker, session history, statistics and diagnostics on a Windows PC. The test exposed stale Socket.IO messaging and a failure in the in-app shutdown flow. The portable renderer now follows the current Socket.IO connection, identifies archive results and delegates desktop shutdown to Electron.
+
+| Gate | Regression evidence in the portable smoke |
+| --- | --- |
+| 26 | Accepted evidence is restored and exported after normal shutdown. A rejected shot saved before a forced backend exit survives the restart and appears in the export. SQLite commits each evidence record before publication. |
+| 27 | The restored report retains one accepted point and one rejected result after the forced exit. The rejected shot has no marker and contributes no point to the saved club statistics. |
+| 28 | The renderer connects to its own backend, reports loss of connection while keeping previously loaded evidence visible, and exits via both the power dialog and native close. The runner checks for backend exit and release of port 8080. |
+
+This evidence uses mock capture. A shutdown during an unfinished write can discard the unfinished transaction. Physical capture and its acceptance work remain deferred.
