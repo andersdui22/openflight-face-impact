@@ -1,3 +1,11 @@
+# WINDOWS BACKEND — FIRST PYINSTALLER BUILD RECIPE (2026-11-12)
+
+- Added a separate, opt-in Windows PyInstaller backend build script and minimal Python entry point that invokes the existing OpenFlight server `main()`. Uses Python 3.12 venv, explicitly installs mock-server dependencies, packages a one-file `OpenFlightFaceImpactBackend.exe` into `out/face-impact-backend`; staging into Electron portable bundle remains a separate opt-in step.
+- **Unverified prototype**: Windows compilation, PyInstaller hidden imports, runtime and real USB camera behavior have NOT been tested. This inherits the upstream server's mock-mode implementation and is NOT a camera-only backend. The default CI does not execute this recipe. Do not release or claim EXE success until Windows CI/runtime evidence exists.
+- On exact preceding SHA, foundation, Python, Windows portable and USB checks were green; UI format (13 files) and PR screenshot checks remained red. CI for this SHA pending; Gates OPEN.
+
+---
+
 # CI REPAIR — SEPARATE NODE AND VITEST TEST RUNNERS (2026-11-12)
 
 - Root cause confirmed from GitHub logs: Vitest included `electron/backendProcess.test.js` despite that file using `node:test`, resulting in `No test suite found`. Restricted Vitest include to TypeScript UI tests; added `npm run test:electron` as explicit Node test runner. Existing Windows Gate 10 CI invokes Node tests directly.
