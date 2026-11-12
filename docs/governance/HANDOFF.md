@@ -1,3 +1,10 @@
+# OPT-IN PREFLIGHT WIRED TO OFFLINE ANALYSIS (2026-11-12)
+
+- Added optional typed `preflight` argument to the trusted offline analysis/publish runner. It checks capture provenance before assessment and immediately before targeted event publication; mismatch fails closed. Default `None` preserves existing synthetic fixture semantics. Regression tests cover invalid preflight and altered capture preventing assessment/publication.
+- Exact prior SHA `86a9df9e` CI was running when inspected. No physical validation or Gate 25–30 closure; Gates 20–24 OPEN; UI/PR checks unresolved; no merge/release.
+
+---
+
 # OFFLINE CAPTURE PREFLIGHT AND PROVENANCE (2026-11-12)
 
 - Added opt-in `preflight_offline_capture` and `require_matching_preflight` composing quality checks with capture fingerprints, detecting changed image bytes/metadata after validation; synthetic regression tests and scope document included.

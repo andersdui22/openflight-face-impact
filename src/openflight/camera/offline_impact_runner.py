@@ -7,6 +7,7 @@ detection, physical contact measurement, or background capture is implied.
 from __future__ import annotations
 
 from .offline_capture_batch import assess_offline_capture_batch
+from .offline_capture_preflight import require_matching_preflight
 from .offline_impact_handoff import prepare_offline_impact_handoff
 from .offline_impact_transport import publish_offline_impact_handoff
 
@@ -32,6 +33,7 @@ def analyze_and_publish_offline_capture(  # pylint: disable=too-many-arguments
     recipient,
     min_circularity=0.0,
     max_candidates=32,
+    preflight=None,
 ):
     """Run actual offline assessments and emit only audited typed evidence.
 
@@ -42,6 +44,8 @@ def analyze_and_publish_offline_capture(  # pylint: disable=too-many-arguments
         raise ValueError("offline event emitter must be callable")
     if not isinstance(recipient, str) or not recipient.strip():
         raise ValueError("offline event requires explicit recipient")
+    if preflight is not None:
+        require_matching_preflight(capture, preflight)
     batch = assess_offline_capture_batch(
         calibration, capture, candidates, landmarks_face_mm, polygon,
         ball_radius_mm=ball_radius_mm,
@@ -61,4 +65,6 @@ def analyze_and_publish_offline_capture(  # pylint: disable=too-many-arguments
         max_host_gap_ns=max_host_gap_ns,
         max_frames=max_candidates,
     )
+    if preflight is not None:
+        require_matching_preflight(capture, preflight)
     return publish_offline_impact_handoff(handoff, emit, recipient=recipient)
