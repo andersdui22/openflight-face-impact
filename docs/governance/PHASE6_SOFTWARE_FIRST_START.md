@@ -14,5 +14,5 @@ The [approved MDP V1.2 archive](https://github.com/andersdui22/openflight-face-i
 ## Current software preparation
 
 - The capture preflight checks grayscale quality, frame continuity and metadata. The analysis runner can bind the preflight to capture bytes before analysis and publication. Thresholds are provisional until measured with ELP frames.
-- Continue Gates 20–24 evidence with a server-owned synthetic replay into the existing dashboard. Use that result contract to exercise downstream history and diagnostics while retaining the synthetic source and quality flags.
+- The server-owned replay exercises the dashboard and offline review with accepted and rejected synthetic evidence. Review entries are bounded and in memory. Prepare persistent session history and export with shot, capture, club, calibration, calculation and quality provenance next.
 - Keep acquisition under the existing single camera owner. Preserve explicit capture, club and calibration provenance when preparing session persistence and statistics. Gates 29–30 require physical data and remain deferred. Define the independent reference, sampling and error tolerances before those tests.

@@ -14,7 +14,7 @@ if (!(Test-Path $python)) {
 if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 # The inherited OpenFlight project includes optional and legacy hardware drivers.
 # Install from source with explicit dependencies for this mock-only backend.
-& $python -m pip install pyinstaller flask flask-cors flask-socketio numpy scipy pyserial
+& $python -m pip install pyinstaller flask flask-cors flask-socketio numpy scipy pyserial opencv-python-headless
 if ($LASTEXITCODE -ne 0) { throw 'Python backend dependency installation failed' }
 $env:PYTHONPATH = Join-Path $root 'src'
 # A one-directory backend runs directly as the process owned by Electron.

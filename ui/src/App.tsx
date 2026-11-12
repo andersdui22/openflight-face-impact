@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useSocket } from './hooks/useSocket';
 import { useSystemStore } from './stores/useSystemStore';
@@ -8,6 +8,7 @@ import { useDebugStore } from './stores/useDebugStore';
 import { useProfileStore } from './stores/useProfileStore';
 import { useHeroMetricStore } from './stores/useHeroMetricStore';
 import { useCameraReplayController } from './hooks/useCameraReplayController';
+import { useDragScroll } from './hooks/useDragScroll';
 import { socketService } from './services/socketService';
 import { DebugPanel } from './components/DebugPanel';
 import { SyntheticFaceImpactDemo } from './components/SyntheticFaceImpactDemo';
@@ -59,6 +60,8 @@ function FaceImpactDashboard({
   onNavigate: (view: PanelView) => void;
   shotCount: number;
 }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const contentDragScroll = useDragScroll(contentRef);
   const syntheticMotion = useSyntheticMotionStore((state) => state.payload);
   const [demoEnabled, setDemoEnabled] = useState(false);
   const [demoShots, setDemoShots] = useState<DemoShot[]>([]);
@@ -102,7 +105,7 @@ function FaceImpactDashboard({
           SHOT HISTORY
         </button>
       </aside>
-      <div className="impact-workspace__content">
+      <div ref={contentRef} className="impact-workspace__content" {...contentDragScroll}>
         <header className="impact-workspace__topbar">
           <nav aria-label="Dashboard sections">
             <span className="impact-workspace__active">SUMMARY</span>

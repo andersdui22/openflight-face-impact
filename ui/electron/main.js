@@ -78,11 +78,21 @@ async function runDashboardSmoke(win) {
         const marker = () => dashboard.querySelector('[data-testid="synthetic-impact-marker"]');
         if (expectsBackend) {
           await waitFor(marker, 'Mock backend did not render a synthetic impact marker');
+          const review = dashboard.querySelector('[aria-label="Offline synthetic impact review"]');
+          const replay = Array.from(review?.querySelectorAll('button') ?? [])
+            .find((button) => button.textContent === 'Run synthetic replay');
+          if (!replay) throw new Error('Offline replay button not rendered');
+          replay.click();
+          await waitFor(() => review.textContent.includes('synthetic-contact') &&
+            review.querySelector('[data-testid="synthetic-impact-marker"]'),
+            'Mock backend did not deliver offline raster evidence');
+          review.scrollIntoView({ block: 'start' });
         } else {
           await waitFor(() => dashboard.textContent.includes('OpenFlight backend is disconnected'),
             'UI did not report the disconnected backend');
           if (marker()) throw new Error('Disconnected dashboard displayed a synthetic marker');
         }
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         return { ok: true, panels: panels.length, backend_ready: expectsBackend, camera: cameraStatus };
       })(${JSON.stringify(expectsBackend)})
     `);

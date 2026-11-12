@@ -1861,6 +1861,23 @@ def publish_completed_offline_impact(handoff, *, recipient: str):
     return publish_offline_impact_handoff(handoff, socketio.emit, recipient=recipient)
 
 
+@socketio.on("request_offline_impact_demo")
+def handle_request_offline_impact_demo(data=None):
+    """Replay a fixed synthetic scene for the requesting client."""
+    if not isinstance(data, dict) or set(data) != {"case_id"} or not isinstance(data["case_id"], str):
+        return {"ok": False, "error": "Unknown synthetic replay case"}
+    try:
+        from .camera.synthetic_offline_impact_demo import publish_synthetic_offline_impact_demo
+
+        payload = publish_synthetic_offline_impact_demo(data["case_id"], socketio.emit, recipient=request.sid)
+    except (ImportError, ValueError):
+        logger.exception("[SERVER] Synthetic offline impact replay failed")
+        return {"ok": False, "error": "Synthetic offline replay unavailable"}
+    if payload is None:
+        return {"ok": False, "error": "Unknown synthetic replay case"}
+    return {"ok": True, "shot_id": payload["shot_id"]}
+
+
 @socketio.on("get_camera_capture_settings")
 def handle_get_camera_capture_settings():
     """Send current high-speed capture settings to the requesting UI."""

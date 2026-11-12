@@ -52,3 +52,41 @@ test('real React client reports offline errors and recovers after reconnection',
   await expect(preview.getByText('X: 12.0 mm')).toBeVisible();
   await expect(preview.getByTestId('synthetic-impact-marker')).toHaveCount(1);
 });
+
+test('server-owned raster replay reaches only the requesting dashboard history', async ({ page, context }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  const openReview = async (view: import('@playwright/test').Page) => {
+    await gotoApp(view);
+    await view.getByRole('button', { name: 'Close Select club' }).click();
+    await expect(view.getByLabel('Server connected')).toBeVisible();
+    await view.getByRole('button', { name: 'Open Face Impact dashboard' }).click();
+    return view.getByRole('region', { name: 'Offline synthetic impact review' });
+  };
+  const review = await openReview(page);
+  const observer = await openReview(await context.newPage());
+  const run = review.getByRole('button', { name: 'Run synthetic replay' });
+  const content = page.locator('.impact-workspace__content');
+  const side = await page.getByRole('region', { name: 'Side Impact' }).boundingBox();
+  expect(side!.height).toBeGreaterThan(100);
+  await page.mouse.move(side!.x + 10, side!.y + 30);
+  await page.mouse.down();
+  await page.mouse.move(side!.x + 10, side!.y + 5, { steps: 4 });
+  await page.mouse.up();
+  await expect.poll(() => content.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+
+  await run.click();
+  await expect(review.getByText('Selected shot: synthetic-contact')).toBeVisible();
+  await expect(review.getByTestId('synthetic-impact-marker')).toHaveCount(1);
+  await expect(observer.getByText('OFFLINE RESULTS: 0')).toBeVisible();
+
+  await review.getByLabel('Synthetic replay case').selectOption('missing-ball');
+  await run.click();
+  await expect(review.getByText('Selected shot: synthetic-missing-ball')).toBeVisible();
+  await expect(review.getByText('REJECTED:')).toBeVisible();
+  await expect(review.getByTestId('synthetic-impact-marker')).toHaveCount(0);
+  await expect(review.getByText('OFFLINE RESULTS: 2 · SYNTHETIC ACCEPTED: 1')).toBeVisible();
+  await expect(observer.getByText('OFFLINE RESULTS: 0')).toBeVisible();
+
+  await review.getByRole('button', { name: /synthetic-contact/ }).click();
+  await expect(review.getByTestId('synthetic-impact-marker')).toHaveCount(1);
+});

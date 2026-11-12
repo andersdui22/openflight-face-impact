@@ -29,3 +29,22 @@ It is not Gate acceptance or evidence of real ELP OV9281 measurements.
   before any Gate closure is proposed.
 - No upstream OpenFlight or ConnectorNext modifications, merges, releases
   or physical tests are authorized by this handoff.
+
+## Offline raster replay in the dashboard
+
+The existing **Offline synthetic impact review** offers **Contact** and
+**Missing ball**. `request_offline_impact_demo` accepts only one of those case
+identifiers. The server renders a small grayscale capture and a separate
+controlled fiducial raster with known reference labels. It runs capture preflight,
+marker association, ball contour and pose estimation, and the existing temporal
+and export checks. `offline_impact_evidence` is delivered to the requesting
+session. The acknowledgement supplies the shot ID used to select the received
+result. Repeating a case uses the same fixture identity and is deduplicated.
+
+The accepted fixture produces a marker and bounded synthetic face coordinates.
+The missing-ball fixture produces a review entry with a rejection reason and no
+coordinates. Socket tests verify both results, requester isolation, and rejection
+of client-supplied coordinates or recipients. The browser test follows the real
+Socket.IO path into review history. Fixture timing and the controlled reference
+labels describe a synthetic scene. Physical timing and unmarked face recognition
+remain open.
