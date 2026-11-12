@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createServer } from 'node:http';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { resolveBackendExecutable, stopBackend, waitForBackendReady, probeBackendHealth } from './backendProcess.js';
 
 test('backend disabled by default', () => {
@@ -108,4 +111,35 @@ test('health rejects server error even with matching JSON', async () => {
   }, async (port) => {
     assert.equal(await probeBackendHealth({ port }), false);
   });
+});
+
+
+test('bundled backend is discovered only when executable exists', () => {
+  const root = mkdtempSync(join(tmpdir(), 'face-impact-backend-'));
+  try {
+    assert.equal(resolveBackendExecutable({}, root), null);
+    const directory = join(root, 'backend');
+    mkdirSync(directory);
+    const executable = join(directory, 'OpenFlightFaceImpactBackend.exe');
+    writeFileSync(executable, '');
+    assert.equal(resolveBackendExecutable({}, root), executable);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('explicit backend executable overrides bundled candidate', () => {
+  const root = mkdtempSync(join(tmpdir(), 'face-impact-backend-'));
+  try {
+    const directory = join(root, 'backend');
+    mkdirSync(directory);
+    writeFileSync(join(directory, 'OpenFlightFaceImpactBackend.exe'), '');
+    const explicit = join(root, 'explicit.exe');
+    writeFileSync(explicit, '');
+    assert.equal(resolveBackendExecutable({
+      OPENFLIGHT_BACKEND_EXECUTABLE: explicit,
+    }, root), explicit);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });

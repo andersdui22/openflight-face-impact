@@ -1,3 +1,10 @@
+# BATCH B — OPTIONAL BUNDLED BACKEND DISCOVERY (2026-11-12)
+
+- Electron now checks `process.resourcesPath/backend/OpenFlightFaceImpactBackend.exe` for packaged Windows deployments, falling back to no backend if absent. Explicit `OPENFLIGHT_BACKEND_EXECUTABLE` takes priority and still must be an existing absolute path. Added temporary-directory Node tests for bundled discovery and override.
+- **This does not create or ship the Python executable.** It establishes a stable packaging location for a later independently validated backend build. Portable UI-only EXE remains supported, with no camera claims. CI for exact SHA pending; no merge/release; Gates OPEN.
+
+---
+
 # BATCH B — REAL HTTP READINESS CONTRACT TESTS (2026-11-12)
 
 - Added Node HTTP loopback fixture tests that exercise actual `probeBackendHealth` request/response handling, not merely injected mock callbacks: valid Face Impact identity accepted; unrelated server, incompatible protocol, false physical-validation claim and HTTP 503 rejected.

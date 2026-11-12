@@ -1,11 +1,13 @@
 // Opt-in Windows backend lifecycle. Never spawn an implicit shell command.
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { isAbsolute } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 import { request } from 'node:http';
 
-export function resolveBackendExecutable(env = process.env) {
-  const candidate = env.OPENFLIGHT_BACKEND_EXECUTABLE;
+export function resolveBackendExecutable(env = process.env, resourcesPath = null) {
+  const explicit = env.OPENFLIGHT_BACKEND_EXECUTABLE;
+  const bundled = resourcesPath ? join(resourcesPath, 'backend', 'OpenFlightFaceImpactBackend.exe') : null;
+  const candidate = explicit || (bundled && existsSync(bundled) ? bundled : null);
   if (!candidate) return null;
   if (!isAbsolute(candidate) || !existsSync(candidate)) {
     throw new Error('Backend executable must be an existing absolute path');

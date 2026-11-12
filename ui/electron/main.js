@@ -20,7 +20,7 @@ let backendReady = false;
 
 async function launchOptInBackend() {
   try {
-    const executable = resolveBackendExecutable();
+    const executable = resolveBackendExecutable(process.env, app.isPackaged ? process.resourcesPath : null);
     backendChild = startBackend(executable, {
       onError: (error) => { backendStartupError = error; console.error(error); },
     });
