@@ -1,14 +1,18 @@
-# Preparatory software work for Gates 25–30
+# Preparatory work for software integration and physical validation
 
-This is **not** an assertion of the canonical Gate 25–30 names or acceptance criteria. The canonical MDP V1.2 file has not been located in the inspected GitHub tree. Reconcile gate definitions before marking any Gate completed.
+The [approved MDP V1.2 archive](https://github.com/andersdui22/openflight-face-impact/blob/1c36e1b13142a09f17e0daa6d9799341ddbf1eb1/docs/governance/MASTER_DEVELOPMENT_PLAN.md) matches the plan on `docs/master-development-plan-v1.2-20261111` at `3ae8769363814e9dc9c8007927c0438ab0f2c811`.
 
-## Parallel tracks
-- Track A: continue outstanding Gates 20–24 acceptance evidence, UI formatting, authentic screenshot, Windows Python backend startup and packaging CI.
-- Track B: implement isolated, testable software prerequisites for subsequent camera/impact gates. Do not infer camera accuracy or contact location from synthetic frame statistics.
-- Track C: defer real ELP OV9281 physical capture, exposure/fps characterization, club calibration and accuracy tests until software gates are as complete as possible.
+| Gate | Approved objective | Acceptance evidence still needed |
+| --- | --- | --- |
+| 25 | Camera measurements in the existing dashboard | Actual camera data in the dashboard while preserving its layout |
+| 26 | Shot history, sessions and storage | Save, reload and export with shot, capture, model, calibration, calculation and quality provenance |
+| 27 | Statistics, distribution and club analysis | Consistent and labelled calculations |
+| 28 | Settings, diagnostics, errors and integration tests | Integrated workflow and safe degraded states |
+| 29 | Physical ELP/IR testing with several clubs | Documented hardware setup and raw recordings |
+| 30 | Independent impact reference | Millimetre error measured against that reference |
 
-## First preparatory deliverable
-`offline_frame_quality.py` reports basic 8-bit grayscale frame dimensions, brightness, saturation, darkness and robust contrast. `require_usable_offline_frame` rejects obviously unusable frames without producing face impact measurements. Tests use synthetic arrays only. No live camera connection, gate closure, UI integration, merge or release is implied.
+## Current software preparation
 
-## Remaining acceptance blockers
-The frame quality thresholds are provisional software safeguards, not calibrated physical limits. Validate with actual ELP frames later. Confirm canonical MDP Gate 25–30 criteria and ensure dependencies are satisfied before any gate-specific sign-off.
+- The capture preflight checks grayscale quality, frame continuity and metadata. The analysis runner can bind the preflight to capture bytes before analysis and publication. Thresholds are provisional until measured with ELP frames.
+- Continue Gates 20–24 evidence with a server-owned synthetic replay into the existing dashboard. Use that result contract to exercise downstream history and diagnostics while retaining the synthetic source and quality flags.
+- Keep acquisition under the existing single camera owner. Preserve explicit capture, club and calibration provenance when preparing session persistence and statistics. Gates 29–30 require physical data and remain deferred. Define the independent reference, sampling and error tolerances before those tests.

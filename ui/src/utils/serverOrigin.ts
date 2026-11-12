@@ -9,6 +9,10 @@ export function getServerOrigin(): string {
 
   const { protocol, hostname, port, origin } = window.location;
 
+  if (protocol === 'file:') {
+    return 'http://127.0.0.1:8080';
+  }
+
   if (port === '5173') {
     return `${protocol}//${hostname}:8080`;
   }

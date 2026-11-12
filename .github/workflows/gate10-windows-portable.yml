@@ -9,6 +9,8 @@ on:
       - ui/electron/backendProcess.js
       - ui/electron/backendProcess.test.js
       - ui/vite.config.ts
+      - ui/src/utils/serverOrigin.ts
+      - tests/windows_packaged_smoke.ps1
       - .github/workflows/gate10-windows-portable.yml
 
 jobs:
@@ -24,8 +26,8 @@ jobs:
           cache: npm
           cache-dependency-path: ui/package-lock.json
       - name: Test Electron backend lifecycle helpers
-        shell: pwsh
-        run: node --test ui/electron/backendProcess.test.js
+        working-directory: ui
+        run: npm run test:electron
       - name: Build portable EXE
         shell: pwsh
         run: ./scripts/build-face-impact-windows.ps1
@@ -40,31 +42,15 @@ jobs:
           Write-Host 'Bundle file structure verified (not a GUI runtime or hardware test).'
       - name: Gate 11 packaged EXE renderer smoke
         shell: pwsh
-        run: |
-          $env:OPENFLIGHT_GATE11_SMOKE = '1'
-          $env:OPENFLIGHT_GATE11_SCREENSHOT = "$env:RUNNER_TEMP/gate11-dashboard.png"
-          $env:OPENFLIGHT_GATE11_RESULT = "$env:RUNNER_TEMP/gate11-result.json"
-          $exe = Resolve-Path 'out/OpenFlight-Face-Impact-Windows/OpenFlight Face Impact.exe'
-          $process = Start-Process -FilePath $exe -PassThru
-          try {
-            $process.WaitForExit(90000) | Out-Null
-            if (!$process.HasExited) { throw 'Packaged EXE did not finish smoke within 90s' }
-            if (!(Test-Path $env:OPENFLIGHT_GATE11_RESULT)) { throw 'Missing renderer result' }
-            $result = Get-Content $env:OPENFLIGHT_GATE11_RESULT -Raw | ConvertFrom-Json
-            if (!$result.ok) { throw "Renderer smoke failed: $($result.error)" }
-            if (!(Test-Path $env:OPENFLIGHT_GATE11_SCREENSHOT)) { throw 'Missing dashboard screenshot' }
-            Write-Host "Six-panel packaged dashboard verified: $($result.panels) panels"
-          } finally {
-            if (!$process.HasExited) { Stop-Process -Id $process.Id -Force }
-          }
+        run: ./tests/windows_packaged_smoke.ps1 -EvidenceDirectory "$env:RUNNER_TEMP/gate11"
       - name: Upload Gate 11 screenshot evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: gate11-windows-dashboard-screenshot
           path: |
-            ${{ runner.temp }}/gate11-dashboard.png
-            ${{ runner.temp }}/gate11-result.json
+            ${{ runner.temp }}/gate11/dashboard-*.png
+            ${{ runner.temp }}/gate11/result-*.json
           if-no-files-found: warn
       - name: Upload development-only portable bundle
         uses: actions/upload-artifact@v7

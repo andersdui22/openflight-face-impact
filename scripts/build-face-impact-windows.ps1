@@ -41,6 +41,10 @@ if ($backendSource) {
   $backendDir = Join-Path $output 'resources/backend'
   New-Item -ItemType Directory -Force -Path $backendDir | Out-Null
   Copy-Item -LiteralPath $backendSource -Destination (Join-Path $backendDir 'OpenFlightFaceImpactBackend.exe')
+  $dependencies = Join-Path (Split-Path -Parent $backendSource) '_internal'
+  if (Test-Path -LiteralPath $dependencies -PathType Container) {
+    Copy-Item -LiteralPath $dependencies -Destination $backendDir -Recurse
+  }
 }
 
 New-Item -ItemType Directory -Force -Path (Join-Path $appDir 'electron') | Out-Null
@@ -56,6 +60,7 @@ Gate 10 development-only Windows portable bundle.
 Double-click OpenFlight Face Impact.exe.
 The UI runs locally. An optional separately-built backend may be staged via
 OPENFLIGHT_BACKEND_BUILD_EXE; no Python backend is included by default.
+Keep any backend _internal folder beside its EXE.
 This bundle does NOT validate real ELP camera
 capture, measurement validation, or an installer. Keep all files in this folder.
 Do not distribute as a validated release.
