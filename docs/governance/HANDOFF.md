@@ -1,3 +1,11 @@
+# WINDOWS BACKEND PYINSTALLER ROOT CAUSE AND FIX (2026-11-12)
+
+- On CI run 43192473352 the PyInstaller build itself succeeded, but launching the EXE failed at Flask-SocketIO initialization with `ValueError: Invalid async_mode specified`. This is consistent with PyInstaller omitting the dynamically imported `engineio.async_drivers.threading` driver.
+- Added explicit `--hidden-import engineio.async_drivers.threading` to the isolated Windows backend PyInstaller command. The exact-SHA Windows CI must now confirm startup, Face Impact health identity, and Electron staging. This commit does NOT claim a passing runtime test.
+- Physical ELP tests deferred, Gates OPEN, no merge or release. UI format and PR screenshot checks still outstanding.
+
+---
+
 # WINDOWS PYINSTALLER RUNTIME FAILURE — DIAGNOSTICS (2026-11-12)
 
 - First automatically triggered Python backend prototype workflow on `e1b77427` built the EXE but failed during mock startup: process exited with code 1 before health response. Actual traceback was missing because Windows workflow used a hidden process without redirected stdout/stderr.

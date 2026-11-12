@@ -17,7 +17,7 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 & $python -m pip install pyinstaller flask flask-cors flask-socketio numpy scipy pyserial
 if ($LASTEXITCODE -ne 0) { throw 'Python backend dependency installation failed' }
 $env:PYTHONPATH = Join-Path $root 'src'
-& $python -m PyInstaller --noconfirm --clean --onefile --name OpenFlightFaceImpactBackend --paths (Join-Path $root 'src') --distpath $dist --workpath $work --specpath $work (Join-Path $root 'scripts/face-impact-backend-entry.py')
+& $python -m PyInstaller --noconfirm --clean --onefile --name OpenFlightFaceImpactBackend --paths (Join-Path $root 'src') --hidden-import engineio.async_drivers.threading --distpath $dist --workpath $work --specpath $work (Join-Path $root 'scripts/face-impact-backend-entry.py')
 if ($LASTEXITCODE -ne 0) { throw 'PyInstaller backend build failed' }
 $exe = Join-Path $dist 'OpenFlightFaceImpactBackend.exe'
 if (!(Test-Path $exe -PathType Leaf)) { throw 'Missing backend EXE' }
