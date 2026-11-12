@@ -1,3 +1,10 @@
+# WINDOWS BACKEND — AUTOMATIC PR VALIDATION (2026-11-12)
+
+- Expanded the Python backend prototype workflow to run automatically on PRs changing the backend build recipe, entry point or workflow itself, while retaining manual dispatch. On Windows CI it will build PyInstaller EXE, launch mock server, verify exact health contract, and build an Electron portable bundle with the backend staged in resources. This is the first automated integration evidence path; **not yet run on this SHA**.
+- Python backend still uses inherited OpenFlight mock server, not dedicated ELP capture; no physical tests, no merge/release. Existing UI Prettier and PR screenshot issues remain.
+
+---
+
 # WINDOWS PYINSTALLER PROTOTYPE — OPT-IN CI VALIDATION (2026-11-12)
 
 - Added manually triggered `Face Impact Windows Python backend prototype` workflow. It compiles the backend with the experimental PowerShell/PyInstaller recipe, launches it in mock mode on loopback, checks exact Face Impact health identity, kills the process, and uploads a development-only EXE artifact on success. Bounded CI job (35 min) and probe attempts.
