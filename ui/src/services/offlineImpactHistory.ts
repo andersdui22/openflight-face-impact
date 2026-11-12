@@ -1,4 +1,4 @@
-import { isOfflineImpactEvidence, type OfflineImpactEvidence } from '../types/offlineImpactEvidence';
+import { isOfflineSessionAnalysis, type OfflineSessionAnalysis } from '../types/offlineSessionAnalysis';
 import { getServerOrigin } from '../utils/serverOrigin';
 
 type SessionSummary = { session_id: string; shot_count: number; saved_at_utc: string };
@@ -27,25 +27,10 @@ export async function listOfflineSessions(): Promise<SessionSummary[]> {
   return data.sessions;
 }
 
-export async function loadOfflineSession(sessionId: string): Promise<OfflineImpactEvidence[]> {
-  const response = await fetch(offlineSessionUrl(sessionId), { cache: 'no-store' });
+export async function loadOfflineSession(sessionId: string): Promise<OfflineSessionAnalysis> {
+  const response = await fetch(`${offlineSessionUrl(sessionId)}?analysis=1`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Saved session could not be loaded');
-  const data = await response.json();
-  if (
-    data?.schema_version !== 1 ||
-    data.source !== 'offline_synthetic_analysis' ||
-    data.session_id !== sessionId ||
-    !Array.isArray(data.shots) ||
-    !data.shots.length
-  )
-    throw new Error('Saved session is invalid');
-
-  const entries: unknown[] = data.shots.map((shot: { evidence?: unknown } | null) => shot?.evidence);
-  if (!entries.every(isOfflineImpactEvidence) || entries.some((entry) => entry.session_id !== sessionId)) {
-    throw new Error('Saved shot evidence is invalid');
-  }
-  if (new Set(entries.map((entry) => entry.shot_id)).size !== entries.length) {
-    throw new Error('Saved shot identities are duplicated');
-  }
-  return entries;
+  const data: unknown = await response.json();
+  if (!isOfflineSessionAnalysis(data, sessionId)) throw new Error('Saved session analysis is invalid');
+  return data;
 }

@@ -100,6 +100,12 @@ def test_saved_sessions_round_trip_and_export(tmp_path, monkeypatch, clients):
     assert len(contact["provenance"]["capture"]["sha256"]) == 64
     assert contact["provenance"]["quality"]["preflight"]["frame_count"] == 2
     assert missing["provenance"]["quality"]["impact_status"] == "rejected"
+    analysis = http.get(f"{root}/{session_id}?analysis=1").json
+    assert analysis["evidence"] == [accepted, rejected]
+    assert analysis["clubs"][0]["mean_mm"] == [accepted["x_mm"], accepted["y_mm"]]
+    assert analysis["clubs"][0]["spread_mm"] is None
+    assert analysis["clubs"][0]["rejected_count"] == 1
+    assert response.json["analysis"]["diagnostics"] == analysis["diagnostics"]
     assert http.get(f"{root}/missing").status_code == 404
 
 

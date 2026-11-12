@@ -2,8 +2,10 @@ import { useId, useState } from 'react';
 import { socketService } from '../services/socketService';
 import { listOfflineSessions, loadOfflineSession, offlineSessionUrl } from '../services/offlineImpactHistory';
 import { useOfflineImpactStore } from '../stores/useOfflineImpactStore';
-import type { OfflineImpactEvidence } from '../types/offlineImpactEvidence';
+import type { OfflineImpactEvidence, OfflineReplayCase } from '../types/offlineImpactEvidence';
+import type { OfflineSessionAnalysis as SessionReport } from '../types/offlineSessionAnalysis';
 import { FaceImpactView } from './FaceImpactView';
+import { OfflineSessionAnalysis } from './OfflineSessionAnalysis';
 
 // Reference outline is synthetic and illustrative, never a camera-calibrated face.
 const referenceFace: [number, number][] = [
@@ -18,7 +20,7 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
   const sessionId = useOfflineImpactStore((state) => state.sessionId);
   const entries = evidence ?? liveEntries;
   const [selectedShotId, setSelectedShotId] = useState<string | null>(null);
-  const [demoCase, setDemoCase] = useState<'contact' | 'missing-ball'>('contact');
+  const [demoCase, setDemoCase] = useState<OfflineReplayCase>('contact');
   const [loadingDemo, setLoadingDemo] = useState(false);
   const [demoError, setDemoError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Awaited<ReturnType<typeof listOfflineSessions>>>([]);
@@ -26,11 +28,16 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyBusy, setHistoryBusy] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<SessionReport | null>(null);
   const savedSessionLabelId = useId();
   const selected = entries.find((entry) => entry.shot_id === selectedShotId) ?? entries[entries.length - 1];
   const accepted = entries.filter((entry) => entry.accepted);
+  const report = analysis?.session_id === sessionId ? analysis : null;
+  const selectedClub = report?.diagnostics.find((shot) => shot.shot_id === selected?.shot_id)?.club_id;
+  const archivedOutline = report?.clubs.find((club) => club.club_id === selectedClub)?.outline_mm;
   const validSelection =
-    selected?.accepted && selected.x_mm >= -45 && selected.x_mm <= 45 && selected.y_mm >= -25 && selected.y_mm <= 25;
+    selected?.accepted &&
+    (archivedOutline || (selected.x_mm >= -45 && selected.x_mm <= 45 && selected.y_mm >= -25 && selected.y_mm <= 25));
 
   async function runDemo(newSession = false) {
     setLoadingDemo(true);
@@ -42,6 +49,7 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
           ? undefined
           : (sessionId ?? undefined);
       setSelectedShotId(await socketService.requestOfflineImpactDemo(demoCase, target));
+      setAnalysis(null);
       if (historyOpen) {
         await refreshSessions(newSession ? useOfflineImpactStore.getState().sessionId : null);
       }
@@ -74,7 +82,8 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
     setHistoryError(null);
     try {
       const restored = await loadOfflineSession(savedSession);
-      useOfflineImpactStore.getState().restore(savedSession, restored);
+      useOfflineImpactStore.getState().restore(savedSession, restored.evidence);
+      setAnalysis(restored);
       setSelectedShotId(null);
     } catch (error) {
       setHistoryError(error instanceof Error ? error.message : 'Saved session could not be loaded');
@@ -96,9 +105,11 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
           <select
             value={demoCase}
             disabled={loadingDemo || historyBusy}
-            onChange={(event) => setDemoCase(event.target.value === 'missing-ball' ? 'missing-ball' : 'contact')}
+            onChange={(event) => setDemoCase(event.target.value as OfflineReplayCase)}
           >
             <option value="contact">Contact</option>
+            <option value="heel-contact">Heel contact</option>
+            <option value="compact-contact">Compact club contact</option>
             <option value="missing-ball">Missing ball</option>
           </select>
         </label>
@@ -160,7 +171,7 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
           </p>
           {validSelection && selected.accepted ? (
             <FaceImpactView
-              polygon={referenceFace}
+              polygon={archivedOutline ?? referenceFace}
               result={{
                 status: 'ok',
                 x_mm: selected.x_mm,
@@ -190,6 +201,7 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
           </li>
         ))}
       </ol>
+      {report && <OfflineSessionAnalysis key={report.session_id} report={report} />}
     </section>
   );
 }

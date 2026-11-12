@@ -93,6 +93,7 @@ jobs:
           path: |
             ${{ runner.temp }}/packaged-backend/dashboard-*.png
             ${{ runner.temp }}/packaged-backend/result-*.json
+            ${{ runner.temp }}/packaged-backend/exported-session.json
           if-no-files-found: warn
       - name: Upload development-only backend folder
         if: success()

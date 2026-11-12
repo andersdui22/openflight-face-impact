@@ -6,7 +6,8 @@
 
 import { app, BrowserWindow, Menu } from 'electron';
 import { fileURLToPath } from 'node:url';
-import { existsSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { resolveTargetUrl } from './resolveTargetUrl.js';
 import { resolveBackendExecutable, startBackend, stopBackend, waitForBackendReady } from './backendProcess.js';
 
@@ -38,6 +39,37 @@ async function launchOptInBackend() {
 
 // Exercise the real portable renderer in CI with either the mock backend or
 // the UI-only bundle. The club picker must be closed before taking a screenshot.
+async function verifySessionDownload(win, path) {
+  const session = win.webContents.session;
+  let onDownload;
+  let timer;
+  const downloaded = new Promise((resolve, reject) => {
+    timer = setTimeout(() => reject(new Error('Session export did not complete')), 10000);
+    onDownload = (_event, item) => {
+      item.setSavePath(path);
+      item.once('done', (_doneEvent, state) => {
+        if (state === 'completed') resolve();
+        else reject(new Error(`Session export ended with ${state}`));
+      });
+    };
+    session.once('will-download', onDownload);
+  });
+  try {
+    await Promise.all([downloaded, win.webContents.executeJavaScript(`
+      document.querySelector('[aria-label="Offline synthetic impact review"] a[href$="?download=1"]').click()
+    `)]);
+  } finally {
+    clearTimeout(timer);
+    session.removeListener('will-download', onDownload);
+  }
+  const exported = JSON.parse(readFileSync(path, 'utf8'));
+  if (exported.source !== 'offline_synthetic_analysis' ||
+      !exported.shots.some(({ evidence }) => evidence.shot_id === 'synthetic-contact' && evidence.accepted) ||
+      !exported.analysis.clubs.some((club) => club.points_mm.length === 1 && club.mean_mm.length === 2)) {
+    throw new Error('Downloaded session lacks the archived shot and statistics');
+  }
+}
+
 async function runDashboardSmoke(win) {
   const expectsBackend = process.env.OPENFLIGHT_GATE11_EXPECT_BACKEND === '1';
   const expectsSavedSession = process.env.OPENFLIGHT_GATE11_EXPECT_SAVED_SESSION === '1';
@@ -97,7 +129,16 @@ async function runDashboardSmoke(win) {
           await waitFor(() => review.textContent.includes('synthetic-contact') &&
             review.querySelector('[data-testid="synthetic-impact-marker"]'),
             'Mock backend did not deliver offline raster evidence');
-          review.scrollIntoView({ block: 'start' });
+          if (expectsSavedSession) {
+            const analysis = await waitFor(() => {
+              const section = review.querySelector('[aria-label="Saved synthetic session analysis"]');
+              return section?.textContent.includes('Saved shots 1 · Accepted 1 · Rejected 0') && section;
+            }, 'Restored session statistics did not render');
+            analysis.querySelector('details').open = true;
+            analysis.scrollIntoView({ block: 'start' });
+          } else {
+            review.scrollIntoView({ block: 'start' });
+          }
         } else {
           await waitFor(() => dashboard.textContent.includes('OpenFlight backend is disconnected'),
             'UI did not report the disconnected backend');
@@ -108,6 +149,10 @@ async function runDashboardSmoke(win) {
           camera: cameraStatus, restored_session: expectsSavedSession };
       })(${JSON.stringify(expectsBackend)}, ${JSON.stringify(expectsSavedSession)})
     `);
+    if (expectsSavedSession) {
+      await verifySessionDownload(win, join(dirname(resultPath), 'exported-session.json'));
+    }
+    result.exported_session = expectsSavedSession;
     const shot = await win.webContents.capturePage();
     const { width, height } = shot.getSize();
     if (width < 800 || height < 400) {

@@ -1,3 +1,5 @@
+export type OfflineReplayCase = 'contact' | 'heel-contact' | 'compact-contact' | 'missing-ball';
+
 /** Version 1 Python offline synthetic impact export. No physical impact claim. */
 export type OfflineImpactEvidence =
   | {

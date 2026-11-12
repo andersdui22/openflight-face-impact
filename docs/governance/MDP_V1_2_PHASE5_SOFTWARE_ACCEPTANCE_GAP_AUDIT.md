@@ -2,6 +2,17 @@
 
 Updated 2026-11-12 for branch `mdp-v1.2/phase5-gates20-24-parallel`, draft PR #45. Gate acceptance remains open under Project Law V1.
 
+## Acceptance review against MDP V1.2
+
+| Gate | Software evidence | Remaining acceptance work |
+| --- | --- | --- |
+| 20 | `test_ball_contour_position.py` bounds image-to-position error using a known centred raster and a one-pixel rim tolerance. `test_ball_silhouette_range.py` measures error against known 3D centres and rejects partial rims. | Expand raster coverage for noise, occlusion and realistic backgrounds. Verify ELP segmentation and calibration against known references. |
+| 21 | `test_offline_marker_runner.py` exercises controlled fiducial pixels, missing markers and untrusted reference displacement. Pose coverage is confined to supported planar geometry with known label correspondence. | Extend ambiguity and non-planar coverage. Validate marker observations and pose against independent ELP reference data. |
+| 22 | `test_offline_temporal_evidence.py` covers bounded synthetic frame selection, excessive gaps and ambiguous candidates. Archive diagnostics compare sensor and host intervals independently and check the host trigger boundary. | Document and validate a method that estimates physical contact time against an independent reference. A selected synthetic frame supplies a frame index. |
+| 23 | `test_offline_positive_synthetic_image_export.py` checks rendered geometry against known X/Y coordinates and carries frame and session IDs. `test_synthetic_ball_face_contact.py` covers contact geometry. | Verify the physical coordinate reference, centre distance and usable face boundary for actual club models. |
+| 24 | `test_offline_frame_quality.py`, `test_offline_temporal_evidence.py` and `test_offline_session_analysis.py` cover unusable frames, bad timing and incomplete archived evidence. Rejected results stay outside point statistics. | Characterize physical measurement uncertainty and false acceptance under ELP noise and occlusion. |
+| 26 | `test_offline_impact_demo_socket.py`, the browser session test and portable EXE smoke cover save, reopen and export for synthetic evidence. Archive preserves shot, club, calibration, calculation and quality data. | The capture record identifies the image sequence by hashes and timing. Physical frame retention and retrieval need a validated ELP capture path. Formal closeout awaits user approval. |
+
 ## Evidence available
 
 - Gate 20: synthetic bright-contour ball extraction, circularity/ambiguity/border checks and calibrated-ray sphere estimation; synthetic image regressions. Real golf-ball identity remains unproven.

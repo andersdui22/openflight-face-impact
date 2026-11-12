@@ -13,14 +13,23 @@ from .offline_marker_runner import analyze_marker_observed_offline_capture
 from .synthetic_face_polygon import SyntheticFacePolygon
 from .triggered_buffer import CameraFrame, TriggeredCapture
 
+_CASES = {
+    "contact": (1., (12., 5.)),
+    "heel-contact": (1., (-12., -5.)),
+    "compact-contact": (0.9, (7., -3.)),
+    "missing-ball": (1., None),
+}
+
 
 def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
     case_id: str, emit: Callable, *, recipient: str,
     session_id: str = "synthetic-offline-demo-v1", save: Callable | None = None,
 ) -> dict | None:
     """Publish one fixed synthetic case through the actual offline runner."""
-    if case_id not in ("contact", "missing-ball"):
+    if case_id not in _CASES:
         return None
+    face_scale, impact = _CASES[case_id]
+    model_id = "synthetic-compact-face-v1" if face_scale < 1 else "synthetic-planar-face-v1"
 
     width, height = 640, 400
     radius = 21.35
@@ -31,8 +40,9 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
     )
     landmarks = np.array([
         [-44., -19.], [42., -17.], [36., 22.], [-35., 18.], [8., 12.], [-9., -4.],
-    ])
-    polygon = SyntheticFacePolygon(np.array([[-45., -25.], [45., -25.], [45., 25.], [-45., 25.]]))
+    ]) * face_scale
+    outline = np.array([[-45., -25.], [45., -25.], [45., 25.], [-45., 25.]]) * face_scale
+    polygon = SyntheticFacePolygon(outline)
     rotation = cv.Rodrigues(np.array([0.29, -0.32, 0.2]))[0] @ np.diag([1., -1., -1.])
     translation = np.array([64., -22., 420.])
 
@@ -49,11 +59,11 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
         cv.circle(marker_image, (int(x), int(y)), 4, 245, -1)
 
     # Keep the synthetic background below the ball threshold, with enough
-    # contrast to pass the same quality checks in both replay cases.
+    # contrast to pass the same quality checks in all replay cases.
     before = np.tile(np.linspace(16, 64, width, dtype=np.uint8), (height, 1))
     after = before.copy()
-    if case_id == "contact":
-        centre = rotation @ np.array([12., 5., radius]) + translation
+    if impact is not None:
+        centre = rotation @ np.array([*impact, radius]) + translation
         direction = centre / np.linalg.norm(centre)
         across = np.cross(direction, [0., 1., 0.])
         across /= np.linalg.norm(across)
@@ -85,7 +95,7 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
     def publish(event, evidence, *, to):
         if save is not None:
             evidence = save(evidence, {
-                "club": {"model_id": "synthetic-planar-face-v1", "kind": "synthetic",
+                "club": {"model_id": model_id, "kind": "synthetic",
                          "outline_mm": polygon.vertices_face_mm.tolist(),
                          "landmarks_mm": landmarks.tolist()},
                 "calibration": {"id": "synthetic-brown-five-v1", "image_size_px": [width, height],

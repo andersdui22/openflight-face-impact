@@ -91,6 +91,12 @@ def _contains(vertices: np.ndarray, point: np.ndarray) -> bool:
     return inside
 
 
+def contains_synthetic_face_point(outline, point) -> bool:
+    """Validate a synthetic polygon and test a point in its local plane."""
+    vertices = _validated_vertices(SyntheticFacePolygon(np.asarray(outline, dtype=float)))
+    return _contains(vertices, np.asarray(point, dtype=float))
+
+
 def synthetic_polygon_face_contact(
     ball_center_world_mm: np.ndarray,
     ball_radius_mm: float,

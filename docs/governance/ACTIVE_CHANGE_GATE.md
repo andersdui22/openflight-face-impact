@@ -1,3 +1,12 @@
+# Active Gates 27–28 software scope — session analysis (2026-11-12)
+
+- Authorization: user requested autonomous implementation of archived-shot statistics, session and club filtering, diagnostics, Gate 20–24 and 26 evidence review, and Windows restart/export verification on draft PR #45.
+- Baseline: `6bc11e2b799b2121b21b84a305cc2db87e9b904a` on `mdp-v1.2/phase5-gates20-24-parallel`. All nine latest GitHub workflows passed.
+- Scope: synthetic fixture and archive analysis, existing offline dashboard review, JSON export, corresponding tests, and portable EXE smoke. Acceptance evidence includes per-club counts, means and spread, diagnostic rejection of incomplete records, and restart followed by export using the embedded mock backend.
+- Stop before physical ELP testing, upstream or ConnectorNext changes, merges, releases or formal Gate closure. The [software evidence review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md) records current gaps.
+
+---
+
 # Active Gate 26 software scope — synthetic session history (2026-11-12)
 
 - Authorization: user requested autonomous implementation of persistent Face Impact shots, session history, provenance, export and hardware-free integration tests after auditing PR #45.

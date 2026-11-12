@@ -1,4 +1,5 @@
 import { useOfflineImpactStore } from '../stores/useOfflineImpactStore';
+import type { OfflineReplayCase } from '../types/offlineImpactEvidence';
 import { io, type Socket } from 'socket.io-client';
 import { ingestOfflineImpactSocketEvent } from './offlineImpactSocketIngestion';
 import { useSyntheticMotionStore } from '../stores/useSyntheticMotionStore';
@@ -251,7 +252,7 @@ class SocketService {
     });
   }
 
-  requestOfflineImpactDemo(caseId: 'contact' | 'missing-ball', sessionId?: string | null): Promise<string> {
+  requestOfflineImpactDemo(caseId: OfflineReplayCase, sessionId?: string | null): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!this.socket?.connected) {
         reject(new Error('OpenFlight backend is disconnected'));

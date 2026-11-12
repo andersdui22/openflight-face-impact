@@ -31,12 +31,18 @@ def estimate(image, **overrides):
     return estimate_bright_ball_position(calibration(), image, **options)
 
 
-def test_synthetic_disk_produces_finite_forward_candidate():
+def test_synthetic_disk_recovers_known_position_within_one_raster_pixel():
     result = estimate(disk_image())
     assert result.center_camera_mm.shape == (3,)
     assert np.all(np.isfinite(result.center_camera_mm))
     assert result.center_camera_mm[2] > 0
     assert result.range_mm > 0
+    # The apparent tangent rim obeys z = R sqrt(1 + (f / r)^2).
+    # A one-pixel rim error bounds the depth recovered from the rasterized disk.
+    expected_depth = 21.35 * np.sqrt(1 + (260 / 20) ** 2)
+    depth_budget = 21.35 * np.sqrt(1 + (260 / 19) ** 2) - expected_depth
+    np.testing.assert_allclose(result.center_camera_mm[:2], [0, 0], atol=expected_depth / 260)
+    assert result.center_camera_mm[2] == pytest.approx(expected_depth, abs=depth_budget)
 
 
 def test_rejects_mismatched_calibrated_image_dimensions():

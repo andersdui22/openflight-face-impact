@@ -1,3 +1,14 @@
+# Archived synthetic statistics, diagnostics and EXE export (2026-11-12)
+
+- Read-only GitHub audit confirmed draft PR #45 and branch HEAD `6bc11e2b799b2121b21b84a305cc2db87e9b904a`. All nine latest baseline workflows passed. Python 3.12 reported 3,006 passed and seven skipped, UI reported 282 React, 17 Electron and 58 browser tests passed. [Baseline checks](https://github.com/andersdui22/openflight-face-impact/commit/6bc11e2b799b2121b21b84a305cc2db87e9b904a/checks)
+- Loading a saved session now returns backend-validated synthetic evidence, per-model counts, X/Y means and population standard deviations, and shot diagnostics. Standard deviation is available from two accepted points. Each club has its own face outline and distribution. Invalid rows are excluded from markers and calculations. Reports remain scoped to the selected session and can be filtered by club.
+- Diagnostics inspect archived frame brightness, contrast, saturation and dark fractions, optics metadata, independent sensor and host intervals, and calculation status. Export preserves the archival record and includes its current analysis and validation status. The analysis uses saved metadata and does not recompute raster hashes without the original raster bytes.
+- The browser flow exercises accepted and rejected replay, multiple positions and club geometries, reopening, filtering, diagnostics and JSON download. The portable smoke saves on the first launch, restores the record and downloads its export on the second. Both builds continue to run against the mock backend with acquisition disabled.
+- Local Electron opened the saved session on the second launch and downloaded JSON with its validated analysis. Both launches released port 8080. [Statistics and diagnostics after restart](../evidence/gate27-28-session-analysis-electron.png)
+- [Gates 20–24 and 26 evidence review](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md) records what is verified and what is deferred. Gates remain open. Verify final workflow results on the new exact SHA before using the build as software evidence.
+
+---
+
 # Synthetic session persistence and restart evidence (2026-11-12)
 
 - Startup audit confirmed branch and [draft PR #45](https://github.com/andersdui22/openflight-face-impact/pull/45) at `c55d92acf76172995d2cbf1f8e32aea0ed9e4d36`. All nine latest workflows passed on the baseline. Python 3.12 reported 3,002 passed and seven skipped. UI CI reported 282 React, 17 Electron helper and 57 browser tests passed. [Baseline Python](https://github.com/andersdui22/openflight-face-impact/actions/runs/43202649338) · [Baseline Windows](https://github.com/andersdui22/openflight-face-impact/actions/runs/43202649271)

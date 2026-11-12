@@ -34,12 +34,12 @@ for ($launch = 1; $launch -le $launches; $launch++) {
     $result = Get-Content -LiteralPath $env:OPENFLIGHT_GATE11_RESULT -Raw | ConvertFrom-Json
     if (!$result.ok) { throw "Packaged Electron smoke failed: $($result.error)" }
     if ($result.panels -ne 6 -or $result.backend_ready -ne $WithBackend.IsPresent -or
-        $result.restored_session -ne ($launch -eq 2)) {
+        $result.restored_session -ne ($launch -eq 2) -or $result.exported_session -ne ($launch -eq 2)) {
       throw 'Unexpected dashboard or backend state'
     }
     if (!(Test-Path -LiteralPath $env:OPENFLIGHT_GATE11_SCREENSHOT)) { throw 'Missing dashboard screenshot' }
     Wait-BackendPortReleased
-    Write-Host "Packaged Electron launch ${launch}: six panels, mock backend ready=$($result.backend_ready), $($result.camera), restored session=$($result.restored_session), port 8080 released."
+    Write-Host "Packaged Electron launch ${launch}: six panels, mock backend ready=$($result.backend_ready), $($result.camera), restored session=$($result.restored_session), exported session=$($result.exported_session), port 8080 released."
   } finally {
     if (!$process.HasExited) { taskkill.exe /PID $process.Id /T /F }
     $process.Dispose()

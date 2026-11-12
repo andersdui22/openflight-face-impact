@@ -1879,17 +1879,25 @@ def offline_impact_history(session_id=None):
     archive = _local_offline_archive()
     if archive is None:
         return {"error": "Offline session history unavailable"}, 404
+    download = request.args.get("download") == "1"
     try:
         if session_id is None:
             return jsonify(schema_version=1, sessions=archive.list_sessions())
         session = archive.load(session_id)
+        if session is not None and (download or request.args.get("analysis") == "1"):
+            from .camera.offline_session_analysis import analyze_offline_session
+
+            analysis = analyze_offline_session(session)
+            if not download:
+                return jsonify(analysis)
+            session["analysis"] = {key: analysis[key] for key in ("clubs", "diagnostics")}
     except (OSError, sqlite3.Error, ValueError):
         logger.exception("[SERVER] Could not read offline impact history")
         return {"error": "Offline session history could not be read"}, 503
     if session is None:
         return {"error": "Offline session not found"}, 404
     response = jsonify(session)
-    if request.args.get("download") == "1":
+    if download:
         response.headers.set("Content-Disposition", "attachment", filename="face-impact-session.json")
     return response
 

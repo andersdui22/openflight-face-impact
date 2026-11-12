@@ -121,17 +121,36 @@ test('synthetic session can be reopened and exported with provenance', async ({ 
   await expect(reopened.getByText('OFFLINE RESULTS: 2 · SYNTHETIC ACCEPTED: 1')).toBeVisible();
   await reopened.getByRole('button', { name: new RegExp(`${sessionId}-contact`) }).click();
   await expect(reopened.getByTestId('synthetic-impact-marker')).toHaveCount(1);
+  for (const [replayCase, count] of [
+    ['heel-contact', 3],
+    ['compact-contact', 4],
+  ] as const) {
+    await reopened.getByLabel('Synthetic replay case').selectOption(replayCase);
+    await reopened.getByRole('button', { name: 'Run synthetic replay' }).click();
+    await expect(reopened.getByText(`OFFLINE RESULTS: ${count} · SYNTHETIC ACCEPTED: ${count - 1}`)).toBeVisible();
+  }
+  await reopened.getByRole('button', { name: 'Load session' }).click();
+  const analysis = reopened.getByRole('region', { name: 'Saved synthetic session analysis' });
+  await expect(analysis.getByRole('img', { name: /Synthetic impact distribution/ })).toHaveCount(2);
+  await analysis.getByLabel('Club model', { exact: true }).selectOption('synthetic-planar-face-v1');
+  await expect(analysis.getByText('Saved shots 3 · Accepted 2 · Rejected 1')).toBeVisible();
+  await expect(analysis.getByText(/Spread \(standard deviation\) X \d/)).toBeVisible();
+  await analysis.getByText('Session diagnostics', { exact: true }).click();
+  await expect(analysis.getByText('Synthetic rejected', { exact: true })).toBeVisible();
+  await expect(analysis.getByText(/Sensor intervals/)).toHaveCount(3);
 
   const downloadPromise = page.waitForEvent('download');
   await reopened.getByRole('link', { name: 'Export session JSON' }).click();
   const download = await downloadPromise;
   const archive = JSON.parse(await readFile(await download.path(), 'utf8'));
   expect(archive.session_id).toBe(sessionId);
-  expect(archive.shots).toHaveLength(2);
+  expect(archive.shots).toHaveLength(4);
   const [accepted, rejected] = archive.shots;
   expect(accepted.evidence.accepted).toBe(true);
   expect(accepted.provenance.calibration.id).toBe('synthetic-brown-five-v1');
   expect(accepted.provenance.capture.frames).toHaveLength(2);
   expect(rejected.evidence.accepted).toBe(false);
   expect(rejected.evidence).not.toHaveProperty('x_mm');
+  expect(archive.analysis.clubs).toHaveLength(2);
+  expect(archive.analysis.diagnostics.map((shot: { status: string }) => shot.status)).toContain('rejected');
 });
