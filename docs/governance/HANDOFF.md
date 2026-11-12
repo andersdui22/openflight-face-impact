@@ -1,3 +1,10 @@
+# CI REPAIR — SEPARATE NODE AND VITEST TEST RUNNERS (2026-11-12)
+
+- Root cause confirmed from GitHub logs: Vitest included `electron/backendProcess.test.js` despite that file using `node:test`, resulting in `No test suite found`. Restricted Vitest include to TypeScript UI tests; added `npm run test:electron` as explicit Node test runner. Existing Windows Gate 10 CI invokes Node tests directly.
+- No tests removed: Electron Node tests remain in Windows workflow; UI tests remain in Vitest. CI exact SHA pending; 13 Prettier files and genuine PR screenshot remain unresolved. Gates OPEN; no merge/release.
+
+---
+
 # BATCH B — OPTIONAL BACKEND STAGING FOR PORTABLE WINDOWS BUNDLE (2026-11-12)
 
 - Portable Windows builder now accepts an explicit `OPENFLIGHT_BACKEND_BUILD_EXE` path to a separately produced Windows backend binary, validates it is an existing .exe and copies it to `resources/backend/OpenFlightFaceImpactBackend.exe`, matching Electron's packaged discovery convention. Default build stays UI-only; invalid input fails closed.
