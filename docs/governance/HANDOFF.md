@@ -1,3 +1,10 @@
+# END-TO-END OFFLINE PREFLIGHT REGRESSION (2026-11-12)
+
+- Added unmocked positive synthetic capture preflight -> real offline assessment -> targeted event regression. Separately injects a mutation during real assessment and verifies no event can be published after the post-assessment fingerprint check.
+- No physical ELP or real impact acceptance. Exact previous SHA `8bc7ea59` CI still in progress at inspection; Gates 20–24 OPEN; UI format and PR screenshot outstanding; no merge/release.
+
+---
+
 # OPT-IN PREFLIGHT WIRED TO OFFLINE ANALYSIS (2026-11-12)
 
 - Added optional typed `preflight` argument to the trusted offline analysis/publish runner. It checks capture provenance before assessment and immediately before targeted event publication; mismatch fails closed. Default `None` preserves existing synthetic fixture semantics. Regression tests cover invalid preflight and altered capture preventing assessment/publication.

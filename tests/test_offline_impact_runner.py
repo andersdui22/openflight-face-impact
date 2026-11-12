@@ -117,3 +117,81 @@ def test_opt_in_preflight_checks_capture_identity_before_assessment(monkeypatch)
             recipient="test-client", preflight=evidence,
         )
     assert called == []
+
+
+def _quality_approved_capture(capture):
+    """Provide nonblank, high-contrast synthetic frames without physical claims."""
+    checker = np.tile(np.array([20, 60, 120, 200], dtype=np.uint8), (240, 80))
+    frames = tuple(
+        CameraFrame(checker.copy(), frame.sensor_timestamp_ns,
+                    frame.host_timestamp_ns, frame.exposure_us, frame.analogue_gain)
+        for frame in capture.frames
+    )
+    return TriggeredCapture(
+        frames, capture.pre_trigger_count, capture.trigger_host_timestamp_ns,
+        shot_id=capture.shot_id, session_id=capture.session_id,
+    )
+
+
+def test_quality_approved_preflight_reaches_real_runner_and_targeted_event():
+    calibration, capture, landmarks = _fixture()
+    capture = _quality_approved_capture(capture)
+    evidence = preflight_offline_capture(capture)
+    messages = []
+    result = analyze_and_publish_offline_capture(
+        calibration, capture,
+        (SyntheticFrameCandidate(0, landmarks),
+         SyntheticFrameCandidate(1, np.zeros((4, 2)))),
+        landmarks, SyntheticFacePolygon(landmarks),
+        ball_radius_mm=21.35, max_ball_residual_rad=0.02,
+        max_face_rms_px=0.5, min_face_margin_px=0.1,
+        contact_tolerance_mm=0.01, threshold=100,
+        min_area_px=100., ball_border_margin_px=2.,
+        min_circularity=0.8, max_sensor_gap_ns=100,
+        max_host_gap_ns=1000,
+        emit=lambda event, payload, **kwargs: messages.append(
+            (event, payload, kwargs)
+        ),
+        recipient="approved-client",
+        preflight=evidence,
+    )
+    assert result["source"] == "offline_synthetic_analysis"
+    assert result["physically_validated"] is False
+    assert messages == [
+        ("offline_impact_evidence", result, {"to": "approved-client"})
+    ]
+
+
+def test_capture_mutation_during_analysis_aborts_before_event(monkeypatch):
+    from openflight.camera import offline_impact_runner as runner
+
+    calibration, capture, landmarks = _fixture()
+    capture = _quality_approved_capture(capture)
+    evidence = preflight_offline_capture(capture)
+    original_assess = runner.assess_offline_capture_batch
+    events = []
+
+    def mutating_assessment(*args, **kwargs):
+        batch = original_assess(*args, **kwargs)
+        capture.frames[0].image[0, 0] = 21
+        return batch
+
+    monkeypatch.setattr(runner, "assess_offline_capture_batch",
+                        mutating_assessment)
+    with pytest.raises(ValueError, match="differs from offline preflight"):
+        runner.analyze_and_publish_offline_capture(
+            calibration, capture,
+            (SyntheticFrameCandidate(0, landmarks),
+             SyntheticFrameCandidate(1, np.zeros((4, 2)))),
+            landmarks, SyntheticFacePolygon(landmarks),
+            ball_radius_mm=21.35, max_ball_residual_rad=0.02,
+            max_face_rms_px=0.5, min_face_margin_px=0.1,
+            contact_tolerance_mm=0.01, threshold=100,
+            min_area_px=100., ball_border_margin_px=2.,
+            min_circularity=0.8, max_sensor_gap_ns=100,
+            max_host_gap_ns=1000,
+            emit=lambda *args, **kwargs: events.append((args, kwargs)),
+            recipient="approved-client",
+            preflight=evidence,
+        )
+    assert events == []
