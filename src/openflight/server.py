@@ -89,8 +89,11 @@ FRONTEND_DIST_DIR = REPO_ROOT / "ui" / "dist"
 FRONTEND_SOURCE_DIR = REPO_ROOT / "ui"
 
 
+from .camera.offline_recording_routes import recording_routes
+
 app = Flask(__name__, static_folder=str(FRONTEND_DIST_DIR), static_url_path="")
 CORS(app)
+app.register_blueprint(recording_routes)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # Global state
@@ -1892,6 +1895,7 @@ def _local_offline_archive():
     from .camera.offline_session_archive import OfflineSessionArchive
 
     return OfflineSessionArchive(path)
+
 
 
 @app.route("/api/face-impact/sessions")
