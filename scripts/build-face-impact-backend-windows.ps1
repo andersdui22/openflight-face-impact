@@ -22,8 +22,13 @@ if ($LASTEXITCODE -ne 0) { throw 'Python backend dependency installation failed'
 & $python -m pip check
 if ($LASTEXITCODE -ne 0) { throw 'Pinned backend dependency check failed' }
 $env:PYTHONPATH = Join-Path $root 'src'
+New-Item -ItemType Directory -Force -Path $work | Out-Null
+$sourceSha = git -C $root rev-parse HEAD
+if ($LASTEXITCODE -ne 0) { throw 'Cannot identify backend source revision' }
+$sourceFile = Join-Path $venv 'face-impact-source-sha.txt'
+Set-Content -LiteralPath $sourceFile -Value $sourceSha -Encoding ascii
 # A one-directory backend runs directly as the process owned by Electron.
-& $python -m PyInstaller --noconfirm --clean --onedir --name OpenFlightFaceImpactBackend --paths (Join-Path $root 'src') --hidden-import engineio.async_drivers.threading --distpath $dist --workpath $work --specpath $work (Join-Path $root $entry)
+& $python -m PyInstaller --noconfirm --clean --onedir --name OpenFlightFaceImpactBackend --paths (Join-Path $root 'src') --add-data "$sourceFile;." --hidden-import engineio.async_drivers.threading --distpath $dist --workpath $work --specpath $work (Join-Path $root $entry)
 if ($LASTEXITCODE -ne 0) { throw 'PyInstaller backend build failed' }
 $exe = Join-Path $dist 'OpenFlightFaceImpactBackend/OpenFlightFaceImpactBackend.exe'
 if (!(Test-Path $exe -PathType Leaf)) { throw 'Missing backend EXE' }

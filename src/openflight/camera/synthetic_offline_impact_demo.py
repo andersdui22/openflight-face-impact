@@ -48,6 +48,7 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
     recording_path: Path | None = None,
     recording_directory: Path | None = None,
     app_sha: str | None = None,
+    register_fixture: Callable | None = None,
 ) -> dict | None:
     """Publish one fixed synthetic case through the actual offline runner."""
     if case_id not in _CASES:
@@ -178,6 +179,24 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
             "quality": {"preflight": asdict(preflight.quality),
                         "impact_status": "accepted" if evidence["accepted"] else "rejected"},
         }
+
+    if register_fixture is not None:
+        mode = "fixture:brown-five-640x400-v1"
+        profile = CameraCalibrationProfile(replace(calibration, validation_rms_px=(0.,)), mode)
+        club = ClubFaceModel(ClubFamily.IRON, model_id, FaceSurface.PLANAR,
+                             90. * face_scale, 50. * face_scale, evidence_source="synthetic fixture")
+        binding = CalibrationClubBinding(calibration_revision(profile), model_id, club_geometry_revision(club))
+        register_fixture(capture, {
+            "camera_identity": "fixture:offline-raster-v1", "camera_mode_id": mode,
+            "profile": profile.to_json(), "club": asdict(club), "binding": asdict(binding),
+            "observations": {str(index): image.tobytes().hex() for index, image in marker_images.items()},
+            "observation_sha256": {str(index): sha256(image.tobytes()).hexdigest()
+                                   for index, image in marker_images.items()},
+            "reference_pixels": reference_pixels.tolist(), "landmarks": landmarks.tolist(),
+            "outline": outline.tolist(), "parameters": parameters,
+            "session_provenance": provenance({"accepted": False}),
+        })
+        return None
 
     # Collect the single targeted event before crossing the persistence boundary,
     # so archive/transport failures cannot be mistaken for invalid observations.
