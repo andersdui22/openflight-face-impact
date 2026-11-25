@@ -324,6 +324,36 @@ async function runDashboardSmoke(win) {
       `);
       if (!result.recording_import) throw new Error('Imported recording was lost after backend restart');
     }
+    if (expectsBackend && !expectsSavedSession && !usbFixture) {
+      await win.webContents.executeJavaScript(`
+        (async () => {
+          const endpoint = 'http://127.0.0.1:8080/api/face-impact/camera-setup/';
+          const call = (action, body) => fetch(endpoint + action, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-OpenFlight-Camera-Setup': '1' },
+            body: JSON.stringify(body),
+          });
+          const inventory = await call('inventory', {});
+          if (!inventory.ok || !Array.isArray((await inventory.json()).devices)) {
+            throw new Error('Packaged Windows PnP inventory unavailable');
+          }
+          const setup = document.querySelector('[aria-label="Face Impact camera setup"]');
+          setup.querySelector('summary').click();
+          const start = [...setup.querySelectorAll('button')].find(button => button.textContent.trim() === 'Start or reconnect fixture');
+          start.click();
+          for (let attempt = 0; attempt < 100; attempt++) {
+            if (setup.textContent.includes('320 × 200')) {
+              const response = await call('record', {});
+              if (!response.ok || (await response.blob()).size < 1000) throw new Error('Packaged diagnostic ZIP unavailable');
+              const stopped = await call('stop', {});
+              if (!stopped.ok) throw new Error('Packaged fixture did not stop');
+              return;
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+          throw new Error('Packaged camera setup did not deliver fixture frames');
+        })()
+      `);
+    }
     const shot = await win.webContents.capturePage();
     const { width, height } = shot.getSize();
     if (width < 800 || height < 400) {

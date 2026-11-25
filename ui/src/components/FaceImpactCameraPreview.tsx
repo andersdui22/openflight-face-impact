@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { CameraDiagnostics } from './FaceImpactCameraSetup';
 import { getServerOrigin } from '../utils/serverOrigin';
 
 type CameraState = 'checking' | 'disabled' | 'starting' | 'running' | 'stopped' | 'error' | 'offline';
@@ -21,7 +22,7 @@ interface CalibrationStatus {
   validation_rms_px: number[] | null;
 }
 
-interface UsbStatus {
+interface UsbStatus extends CameraDiagnostics {
   enabled: boolean;
   state: 'disabled' | 'starting' | 'running' | 'stopped' | 'error';
   last_error?: string | null;
@@ -49,7 +50,9 @@ function calibrationLabel(status: CalibrationStatus | null): string {
   }
 }
 
-export function FaceImpactCameraPreview() {
+export function FaceImpactCameraPreview({
+  onDiagnostics,
+}: { onDiagnostics?: (value: CameraDiagnostics | null) => void } = {}) {
   const origin = getServerOrigin();
   const [state, setState] = useState<CameraState>('checking');
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +83,7 @@ export function FaceImpactCameraPreview() {
         }
         const nextState: CameraState = status.enabled ? status.state : 'disabled';
         setState(nextState);
+        onDiagnostics?.(status.enabled ? status : null);
         setCalibration(status.calibration ?? null);
         setError(nextState === 'error' ? (status.last_error ?? 'Camera error') : null);
         setPreviewFailed(false);
@@ -89,6 +93,7 @@ export function FaceImpactCameraPreview() {
       } catch {
         if (mounted && !controller.signal.aborted) {
           setState('offline');
+          onDiagnostics?.(null);
           setCalibration(null);
           setError(null);
         }
@@ -103,7 +108,7 @@ export function FaceImpactCameraPreview() {
       controller.abort();
       window.clearInterval(timer);
     };
-  }, [origin]);
+  }, [origin, onDiagnostics]);
 
   const active = state === 'running' && !previewFailed;
   return (

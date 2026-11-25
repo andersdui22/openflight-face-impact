@@ -48,3 +48,17 @@ def test_independent_receipts_multiple_sessions_and_reopen(tmp_path, monkeypatch
     result = client.post(PREFIX + "/replay", json={"digest": digest}, headers=HEADERS)
     assert result.status_code == 422
     assert "receipt changed" in result.json["error"]
+
+
+def test_removing_import_retains_receipt_and_saved_session(tmp_path, monkeypatch):
+    monkeypatch.setitem(server.app.config, "OFFLINE_IMPACT_ARCHIVE_PATH", tmp_path / "sessions.sqlite")
+    monkeypatch.setattr("openflight.camera.offline_recording_routes._producer_sha", lambda: HEAD)
+    client = server.app.test_client()
+    digest = client.post(PREFIX + "/fixtures", json={"case": "contact"}, headers=HEADERS).json["digest"]
+    raw = client.get(f"{PREFIX}/{digest}", headers=HEADERS).data
+    session = client.post(PREFIX, data=raw, headers=HEADERS).json["recording"]["session_id"]
+    assert client.post(PREFIX + "/replay", json={"digest": digest}, headers=HEADERS).status_code == 200
+    assert client.post(PREFIX + "/remove-import", json={"digest": digest}, headers=HEADERS).json["removed"]
+    assert client.get(PREFIX, headers=HEADERS).json["recordings"] == []
+    assert client.get(f"/api/face-impact/sessions/{session}?download=1").status_code == 200
+    assert client.post(PREFIX, data=raw, headers=HEADERS).status_code == 200

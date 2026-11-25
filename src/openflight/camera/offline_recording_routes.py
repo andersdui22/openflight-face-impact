@@ -52,6 +52,8 @@ def recording_request(action):
             return jsonify(digest=digest)
         if request.method == "GET" and re.fullmatch(r"[0-9a-f]{64}", action):
             return Response(register.fixture_zip(action), mimetype="application/zip")
+        if action == "remove-import" and request.method == "POST":
+            return jsonify(removed=register.remove_import(data.get("digest")))
         if action == "replay" and request.method == "POST":
             return jsonify(result=register.replay(data.get("digest")))
     except (ValueError, KeyError, TypeError) as error:

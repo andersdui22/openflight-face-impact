@@ -124,6 +124,14 @@ class OfflineRecordingRegister:
             db.execute("INSERT OR IGNORE INTO offline_recording_imports VALUES (?, ?)", (digest, payload))
         return self._summary(receipt)
 
+    def remove_import(self, digest):
+        """Release imported bytes while retaining the receipt and saved history."""
+        with self.archive._connection() as db:  # pylint: disable=protected-access
+            self._schema(db)
+            return bool(db.execute(
+                "DELETE FROM offline_recording_imports WHERE zip_sha = ?", (digest,),
+            ).rowcount)
+
     def replay(self, digest):
         receipt, _, payload = self._read(digest)
         if payload is None or sha256(payload).hexdigest() != digest:
