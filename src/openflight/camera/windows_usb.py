@@ -10,6 +10,7 @@ import threading
 import time
 from collections import deque
 from dataclasses import dataclass
+from statistics import fmean, pstdev
 from typing import Callable
 
 import numpy as np
@@ -33,9 +34,18 @@ class WindowsUsbCamera:
     """Single reader owns a USB device and feeds the existing ring buffer."""
 
     def __init__(self, settings: UsbCameraSettings | None = None, *,
-                 camera_factory: Callable | None = None):
+                 camera_factory: Callable | None = None, selected_identity: str | None = None,
+                 identity_factory: Callable | None = None):
         self.settings = settings or UsbCameraSettings()
+        if identity_factory is not None and (camera_factory is not None or not selected_identity):
+            raise ValueError("identity factory requires one selected device identity")
+        if selected_identity is not None and identity_factory is None:
+            raise ValueError("selected identity requires an identity-capable capture provider")
         self._factory = camera_factory
+        self._identity_factory = identity_factory
+        self._selected_identity = selected_identity
+        self._opened_identity = None
+        self._identity_status = "not_opened" if selected_identity else "unverified_index"
         self.ring = TriggeredFrameBuffer(self.settings.pre_frames, self.settings.post_frames)
         self._camera = None
         self._thread = None
@@ -133,6 +143,31 @@ class WindowsUsbCamera:
         return width, height
 
     @property
+    def identity_diagnostics(self) -> dict:
+        """Report selected identity and identity read from the actual open handle."""
+        return {
+            "selected": self._selected_identity,
+            "opened": self._opened_identity,
+            "status": self._identity_status,
+            "backend": ("fixture" if (self._selected_identity or "").startswith("fixture:") else
+                        "identity_provider" if self._identity_factory else
+                        "injected_fixture" if self._factory else "opencv_directshow"),
+        }
+
+    @property
+    def host_frame_intervals_ms(self) -> dict | None:
+        """Describe the rolling delivery window without inferring exposure times."""
+        with self._arrival_lock:
+            samples = tuple(self._arrival_times_ns)
+        intervals = [(later - earlier) / 1_000_000 for earlier, later in zip(samples, samples[1:])]
+        if not intervals:
+            return None
+        return {
+            "count": len(intervals), "min": min(intervals), "max": max(intervals),
+            "mean": fmean(intervals), "stddev": pstdev(intervals),
+        }
+
+    @property
     def delivered_fps(self) -> float | None:
         """Observed frame arrivals over a rolling window, not sensor FPS."""
         with self._arrival_lock:
@@ -152,7 +187,10 @@ class WindowsUsbCamera:
         if self._camera is not None:
             raise RuntimeError("camera shutdown is still in progress")
         self._validate_settings()
-        if self._factory is None:
+        if self._identity_factory is not None:
+            factory = self._identity_factory
+            properties = (3, 4, 5)
+        elif self._factory is None:
             try:
                 import cv2  # pylint: disable=import-outside-toplevel
             except ImportError as exc:
@@ -165,10 +203,26 @@ class WindowsUsbCamera:
             properties = (3, 4, 5)
         self.negotiated = None
         self._reported_controls = {}
-        camera = factory(self.settings.device_index)
+        self._opened_identity = None
+        if self._selected_identity:
+            self._identity_status = "opening"
+        try:
+            camera = factory(self._selected_identity if self._identity_factory else self.settings.device_index)
+        except Exception:
+            if self._selected_identity:
+                self._identity_status = "identity_unavailable"
+            raise
         try:
             if not camera.isOpened():
                 raise RuntimeError(f"USB camera index {self.settings.device_index} could not be opened")
+            if self._selected_identity:
+                identity = getattr(camera, "opened_identity", None)
+                if (not isinstance(identity, str)
+                        or identity.casefold() != self._selected_identity.casefold()):
+                    self._identity_status = "identity_mismatch"
+                    raise RuntimeError("Opened camera identity does not match selected camera")
+                self._opened_identity = identity
+                self._identity_status = "fixture_match" if identity.startswith("fixture:") else "handle_match"
             for prop, value in zip(properties, (self.settings.width, self.settings.height, self.settings.requested_fps)):
                 camera.set(prop, value)
             reported_mode = (camera.get(prop) for prop in properties)
@@ -179,6 +233,9 @@ class WindowsUsbCamera:
             self._reported_controls = self._read_controls(camera)
         except Exception:
             camera.release()
+            self._opened_identity = None
+            if self._selected_identity and self._identity_status != "identity_mismatch":
+                self._identity_status = "identity_unavailable"
             raise
         # The previous reader is fully stopped before a new session starts.
         # Reuse the same ring while discarding stale frames and shot identity.
@@ -228,6 +285,9 @@ class WindowsUsbCamera:
                     self._frames += 1
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._last_error = str(exc)
+            if self._selected_identity:
+                self._opened_identity = None
+                self._identity_status = "continuity_lost"
         finally:
             self._stop.set()
 
@@ -252,6 +312,9 @@ class WindowsUsbCamera:
             self._camera.release()
             self._camera = None
         self._thread = None
+        self._opened_identity = None
+        if self._selected_identity:
+            self._identity_status = "not_opened"
 
     @property
     def last_frame_age_ms(self) -> float | None:

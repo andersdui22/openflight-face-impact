@@ -1,5 +1,6 @@
 import io
 import json
+from hashlib import sha256
 from pathlib import Path
 from time import monotonic, sleep
 from zipfile import ZipFile
@@ -17,7 +18,7 @@ def test_fixture_reconnect_and_diagnostic_archive(monkeypatch, tmp_path):
     monkeypatch.setattr("openflight.camera.camera_setup_routes._producer_sha", lambda: "a" * 40)
     client = server.app.test_client()
     settings = {"identity": "fixture:camera-setup-v1", "width": 320, "height": 200, "fps": 60,
-                "exposure": -6, "gain": 10}
+                "exposure": -6, "gain": 10, "pre_frames": 4, "post_frames": 5}
     assert client.post(BASE + "start", json=settings, headers=HEADERS).status_code == 200
     first = server.windows_usb_runtime
     try:
@@ -27,20 +28,26 @@ def test_fixture_reconnect_and_diagnostic_archive(monkeypatch, tmp_path):
         assert client.post(BASE + "start", json=settings, headers=HEADERS).status_code == 200
         assert not first.is_running
         deadline = monotonic() + 2
-        while server.windows_usb_runtime.frames_received < 4 and monotonic() < deadline:
+        while server.windows_usb_runtime.frames_received < 6 and monotonic() < deadline:
             sleep(.01)
         status = client.get("/api/camera/usb/status").json
         assert status["requested"]["requested_fps"] == 60
         assert status["delivered_size"] == [320, 200]
         assert status["driver_controls"]["exposure"]["reported"] == -6
-        export = client.post(BASE + "record", json={}, headers=HEADERS)
+        export = client.post(BASE + "record", json={"purpose": "checkerboard"}, headers=HEADERS)
         assert export.status_code == 200, export.json
         with ZipFile(io.BytesIO(export.data)) as package:
             meta = json.loads(package.read("diagnostic.json"))
             path = Path(tmp_path) / "capture.zip"
             path.write_bytes(package.read("capture.zip"))
         capture = load_offline_capture(path).capture
-        assert capture.pre_trigger_count == capture.post_trigger_count == 3
+        assert (capture.pre_trigger_count, capture.post_trigger_count) == (4, 5)
+        assert meta["capture_zip_sha256"] == sha256(path.read_bytes()).hexdigest()
+        assert meta["purpose"] == "checkerboard"
+        assert meta["identity"]["opened"] == "fixture:camera-setup-v1"
+        assert meta["identity"]["status"] == "fixture_match"
+        assert len(meta["host_intervals_ns"]) == 8
+        assert all(interval > 0 for interval in meta["host_intervals_ns"])
         assert all(frame.sensor_timestamp_is_host_alias for frame in capture.frames)
         assert meta["session_id"] == capture.session_id and meta["shot_id"] == capture.shot_id
         assert meta["sensor_exposure_timestamp"] is None

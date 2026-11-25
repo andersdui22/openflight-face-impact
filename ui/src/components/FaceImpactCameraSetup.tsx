@@ -13,6 +13,10 @@ export interface CameraDiagnostics {
   last_frame_age_ms?: number | null;
   frames_received?: number;
   timestamp_source?: string;
+  identity?: { selected: string | null; opened: string | null; status: string; backend: string } | null;
+  host_frame_intervals_ms?: { count: number; min: number; max: number; mean: number; stddev: number } | null;
+  sample_timestamp_source?: string | null;
+  sensor_timestamp_available?: boolean;
   driver_controls?: Record<string, { accepted_by_driver: boolean; reported: number | null }>;
 }
 
@@ -36,6 +40,9 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
   );
   const [resolution, setResolution] = useState('320x200');
   const [fps, setFps] = useState('30');
+  const [preFrames, setPreFrames] = useState('3');
+  const [postFrames, setPostFrames] = useState('3');
+  const [purpose, setPurpose] = useState('diagnostic');
   const [exposure, setExposure] = useState('');
   const [gain, setGain] = useState('');
   const [profile, setProfile] = useState<File | null>(null);
@@ -117,6 +124,26 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
         <label>
           Gain (driver units) <input type="number" value={gain} onChange={(event) => setGain(event.target.value)} />
         </label>
+        <label>
+          Frames before trigger{' '}
+          <input
+            type="number"
+            min="1"
+            max="16"
+            value={preFrames}
+            onChange={(event) => setPreFrames(event.target.value)}
+          />
+        </label>
+        <label>
+          Frames after trigger{' '}
+          <input
+            type="number"
+            min="1"
+            max="16"
+            value={postFrames}
+            onChange={(event) => setPostFrames(event.target.value)}
+          />
+        </label>
         <button
           disabled={busy || identity !== fixture}
           onClick={() =>
@@ -127,6 +154,8 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
                 width,
                 height,
                 fps: Number(fps),
+                pre_frames: Number(preFrames),
+                post_frames: Number(postFrames),
                 exposure: exposure === '' ? null : Number(exposure),
                 gain: gain === '' ? null : Number(gain),
               });
@@ -147,11 +176,20 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
         >
           Stop fixture
         </button>
+        <label>
+          Capture purpose
+          <select value={purpose} onChange={(event) => setPurpose(event.target.value)}>
+            <option value="diagnostic">General diagnostics</option>
+            <option value="checkerboard">Checkerboard reference</option>
+            <option value="club_landmarks">Club landmark reference</option>
+            <option value="setup_reference">Camera setup reference</option>
+          </select>
+        </label>
         <button
           disabled={busy || identity !== fixture || !diagnostics?.delivered_size}
           onClick={() =>
             void run(async () => {
-              const blob = await (await setupRequest('record')).blob();
+              const blob = await (await setupRequest('record', { purpose })).blob();
               const url = URL.createObjectURL(blob);
               const link = document.createElement('a');
               link.href = url;
@@ -166,6 +204,25 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
         </button>
       </div>
       <dl>
+        <dt>Capture backend / identity status</dt>
+        <dd>
+          {diagnostics?.identity
+            ? `${diagnostics.identity.backend} · ${diagnostics.identity.status}`
+            : 'Camera inactive'}
+        </dd>
+        <dt>Selected by capture / opened handle</dt>
+        <dd>
+          {diagnostics?.identity?.selected ?? 'Unknown'} / {diagnostics?.identity?.opened ?? 'Unknown'}
+        </dd>
+        <dt>Host interval mean / variation (ms)</dt>
+        <dd>
+          {finite(diagnostics?.host_frame_intervals_ms?.mean)} / {finite(diagnostics?.host_frame_intervals_ms?.stddev)}
+        </dd>
+        <dt>Driver sample timestamp source / sensor time</dt>
+        <dd>
+          {diagnostics?.sample_timestamp_source ?? 'Unavailable'} /{' '}
+          {diagnostics?.sensor_timestamp_available ? 'Available' : 'Unknown'}
+        </dd>
         <dt>Requested mode</dt>
         <dd>
           {diagnostics?.requested
