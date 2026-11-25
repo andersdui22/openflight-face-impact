@@ -12,8 +12,12 @@ test('configures the diagnostic camera and exports buffered host-timed frames', 
   await setup.getByLabel('Requested resolution').selectOption('640x400');
   await setup.getByLabel('Exposure (driver units)').fill('-6');
   await setup.getByLabel('Gain (driver units)').fill('10');
+  await setup.getByLabel('Frames before trigger').fill('4');
+  await setup.getByLabel('Frames after trigger').fill('5');
+  await setup.getByLabel('Capture purpose').selectOption('checkerboard');
   await setup.getByRole('button', { name: 'Start or reconnect fixture' }).click();
   try {
+    await expect(setup.getByText('fixture · fixture_match')).toBeVisible({ timeout: 11000 });
     await expect(setup.getByText('640 × 400', { exact: true })).toBeVisible({ timeout: 11000 });
     await expect(setup.getByText('Host arrival only · independent exposure timing unavailable')).toBeVisible();
     const [recording] = await Promise.all([

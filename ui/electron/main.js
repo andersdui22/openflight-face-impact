@@ -341,7 +341,7 @@ async function runDashboardSmoke(win) {
           const start = [...setup.querySelectorAll('button')].find(button => button.textContent.trim() === 'Start or reconnect fixture');
           start.click();
           for (let attempt = 0; attempt < 100; attempt++) {
-            if (setup.textContent.includes('320 × 200')) {
+            if (setup.textContent.includes('320 × 200') && setup.textContent.includes('fixture · fixture_match')) {
               const response = await call('record', {});
               if (!response.ok || (await response.blob()).size < 1000) throw new Error('Packaged diagnostic ZIP unavailable');
               const stopped = await call('stop', {});

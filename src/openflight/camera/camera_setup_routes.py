@@ -6,6 +6,7 @@ import math
 import re
 import subprocess
 from dataclasses import asdict
+from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Lock
@@ -21,10 +22,13 @@ camera_setup_routes = Blueprint("camera_setup", __name__, url_prefix="/api/face-
 _lock = Lock()
 _fixture = None
 FIXTURE_ID = "fixture:camera-setup-v1"
+CAPTURE_PURPOSES = ("diagnostic", "checkerboard", "club_landmarks", "setup_reference")
 
 
 class DiagnosticFixture:
     """Monochrome test source for the ordinary Windows adapter."""
+
+    opened_identity = FIXTURE_ID
 
     def __init__(self, settings):
         import numpy as np
@@ -63,13 +67,18 @@ def _settings(data):
             or any(value is not None and (type(value) not in (int, float) or not math.isfinite(value)
                                           or abs(value) > 10000) for value in controls)):
         raise ValueError("Unsupported fixture settings")
+    pre, post = data.get("pre_frames", 3), data.get("post_frames", 3)
+    if any(type(value) is not int or not 1 <= value <= 16 for value in (pre, post)):
+        raise ValueError("Pre-trigger and post-trigger frame counts must each be 1 to 16")
     return UsbCameraSettings(width=int(width), height=int(height), requested_fps=float(fps),
-                             pre_frames=3, post_frames=3, driver_exposure=controls[0], driver_gain=controls[1])
+                             pre_frames=pre, post_frames=post, driver_exposure=controls[0], driver_gain=controls[1])
 
 
-def _record(camera):
+def _record(camera, purpose):
     from .offline_capture_recording import save_offline_capture
 
+    if purpose not in CAPTURE_PURPOSES:
+        raise ValueError("Unknown diagnostic capture purpose")
     if not camera.trigger():
         raise ValueError("Wait for fresh pre-trigger frames before recording")
     capture = camera.ring.wait_for_capture(2)
@@ -80,10 +89,18 @@ def _record(camera):
         path = save_offline_capture(Path(tmp), capture, app_sha=producer, source="usb_preview_adapter")
         combined = io.BytesIO()
         with ZipFile(combined, "w") as package:
-            package.write(path, "capture.zip")
+            payload = path.read_bytes()
+            package.writestr("capture.zip", payload)
             package.writestr("diagnostic.json", json.dumps({
                 "schema_version": 1, "source": "synthetic_camera_setup_fixture",
                 "physically_validated": False, "camera_identity": FIXTURE_ID,
+                "purpose": purpose, "capture_zip_sha256": sha256(payload).hexdigest(),
+                "identity": camera.identity_diagnostics,
+                "delivered_dimensions": [capture.frames[0].image.shape[1], capture.frames[0].image.shape[0]],
+                "host_intervals_ns": [later.host_timestamp_ns - earlier.host_timestamp_ns
+                                      for earlier, later in zip(capture.frames, capture.frames[1:])],
+                "observed_host_fps": camera.delivered_fps,
+                "sample_timestamp_source": None,
                 "timing_source": "host_arrival_monotonic",
                 "sensor_exposure_timestamp": None,
                 "app_sha": producer, "session_id": capture.session_id, "shot_id": capture.shot_id,
@@ -156,12 +173,14 @@ def _camera_action(action, server):
         if action == "record":
             if current is None:
                 raise ValueError("Start the diagnostic fixture first")
-            return _record(current)
+            return _record(current, data.get("purpose", "diagnostic"))
         if action == "start":
             settings = _settings(data)
             if current is not None:
                 current.stop()
-            _fixture = WindowsUsbCamera(settings, camera_factory=lambda _index: DiagnosticFixture(settings))
+            _fixture = WindowsUsbCamera(
+                settings, selected_identity=FIXTURE_ID, identity_factory=lambda _identity: DiagnosticFixture(settings),
+            )
             server.windows_usb_runtime = _fixture
             _fixture.start()
             return {"source": FIXTURE_ID}
