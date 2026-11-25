@@ -332,6 +332,10 @@ async function runDashboardSmoke(win) {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'X-OpenFlight-Camera-Setup': '1' },
             body: JSON.stringify(body),
           });
+          const inventory = await call('inventory', {});
+          if (!inventory.ok || !Array.isArray((await inventory.json()).devices)) {
+            throw new Error('Packaged Windows PnP inventory unavailable');
+          }
           const setup = document.querySelector('[aria-label="Face Impact camera setup"]');
           setup.querySelector('summary').click();
           const start = [...setup.querySelectorAll('button')].find(button => button.textContent.trim() === 'Start or reconnect fixture');

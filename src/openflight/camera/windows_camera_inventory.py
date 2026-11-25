@@ -8,7 +8,7 @@ from pathlib import Path
 
 _QUERY = """
 $ErrorActionPreference = 'Stop'
-Get-PnpDevice -PresentOnly -Class Camera,Image |
+Get-PnpDevice -PresentOnly | Where-Object { $_.Class -in 'Camera','Image' } |
     Select-Object FriendlyName,InstanceId,Status |
     ConvertTo-Json -Compress
 """
