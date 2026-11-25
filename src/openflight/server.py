@@ -76,6 +76,7 @@ from .sim import (
     load_sim_config,
     resolve_shot,
 )
+from .camera.offline_recording_routes import recording_routes
 from .speed_correction import correct_ball_speed
 from .spin_estimate import calculated_spin_rpm
 from .startup_status import StartupStatusReporter, configured_startup_components
@@ -87,9 +88,6 @@ logger = logging.getLogger(__name__)
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FRONTEND_DIST_DIR = REPO_ROOT / "ui" / "dist"
 FRONTEND_SOURCE_DIR = REPO_ROOT / "ui"
-
-
-from .camera.offline_recording_routes import recording_routes
 
 app = Flask(__name__, static_folder=str(FRONTEND_DIST_DIR), static_url_path="")
 CORS(app)

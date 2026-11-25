@@ -147,7 +147,7 @@ async function verifyPackagedRecordingImport(win) {
       await wait(() => panel.textContent.includes('Synthetic replay accepted and saved'), 'Replay did not save');
       panel.scrollIntoView({ block: 'start' });
       await new Promise(requestAnimationFrame);
-      return true;
+      return digest;
     })()
   `);
 }
@@ -309,7 +309,21 @@ async function runDashboardSmoke(win) {
     result.exported_session = expectsSavedSession;
     result.reconnected = expectsBackend && !expectsSavedSession;
     if (result.reconnected) await verifyRendererReconnect(win);
-    if (expectsRejectedShot) result.recording_import = await verifyPackagedRecordingImport(win);
+    if (expectsRejectedShot) {
+      const digest = await verifyPackagedRecordingImport(win);
+      await verifyRendererReconnect(win);
+      result.recording_import = await win.webContents.executeJavaScript(`
+        (async () => {
+          const response = await fetch('http://127.0.0.1:8080/api/face-impact/recordings', {
+            headers: { 'X-OpenFlight-Recording': '1' },
+          });
+          if (!response.ok) return false;
+          const { recordings } = await response.json();
+          return recordings.some((item) => item.zip_sha === ${JSON.stringify(digest)});
+        })()
+      `);
+      if (!result.recording_import) throw new Error('Imported recording was lost after backend restart');
+    }
     const shot = await win.webContents.capturePage();
     const { width, height } = shot.getSize();
     if (width < 800 || height < 400) {
