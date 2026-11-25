@@ -24,7 +24,7 @@ export function startBackend(executable, options = {}) {
     cwd: options.cwd,
     windowsHide: true,
     shell: false,
-    env: { ...process.env, OPENFLIGHT_DESKTOP_INSTANCE: instance },
+    env: { ...process.env, OPENFLIGHT_DESKTOP_INSTANCE: instance, OPENFLIGHT_PHYSICAL_CAMERA_TOKEN: options.cameraToken ?? '' },
     stdio: ['pipe', 'ignore', 'ignore'],
   });
   child.openFlightInstance = instance;

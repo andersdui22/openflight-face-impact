@@ -54,6 +54,7 @@ export function FaceImpactCameraPreview({
   onDiagnostics,
 }: { onDiagnostics?: (value: CameraDiagnostics | null) => void } = {}) {
   const origin = getServerOrigin();
+  const [physical, setPhysical] = useState(false);
   const [state, setState] = useState<CameraState>('checking');
   const [error, setError] = useState<string | null>(null);
   const [previewFailed, setPreviewFailed] = useState(false);
@@ -63,6 +64,7 @@ export function FaceImpactCameraPreview({
   useEffect(() => {
     const controller = new AbortController();
     let mounted = true;
+    let physicalPreview = false;
     let requestInFlight = false;
     const check = async () => {
       if (requestInFlight) {
@@ -83,6 +85,7 @@ export function FaceImpactCameraPreview({
         }
         const nextState: CameraState = status.enabled ? status.state : 'disabled';
         setState(nextState);
+        setPhysical((physicalPreview = nextState === 'running' && status.identity?.backend === 'media_foundation'));
         onDiagnostics?.(status.enabled ? status : null);
         setCalibration(status.calibration ?? null);
         setError(nextState === 'error' ? (status.last_error ?? 'Camera error') : null);
@@ -93,6 +96,8 @@ export function FaceImpactCameraPreview({
       } catch {
         if (mounted && !controller.signal.aborted) {
           setState('offline');
+          physicalPreview = false;
+          setPhysical(false);
           onDiagnostics?.(null);
           setCalibration(null);
           setError(null);
@@ -103,8 +108,12 @@ export function FaceImpactCameraPreview({
     };
     void check();
     const timer = window.setInterval(() => void check(), 5000);
+    const previewTimer = window.setInterval(() => {
+      if (physicalPreview) setFrameKey((key) => key + 1);
+    }, 500);
     return () => {
       mounted = false;
+      window.clearInterval(previewTimer);
       controller.abort();
       window.clearInterval(timer);
     };
@@ -125,6 +134,7 @@ export function FaceImpactCameraPreview({
         <span>{previewFailed ? 'Camera preview unavailable' : `Camera: ${state}`}</span>
       )}
       {error && <span role="alert">{error}</span>}
+      {physical && <small>Physical camera · diagnostic image</small>}
       <small>USB preview only · no impact measurement</small>
       <small aria-label="Camera calibration status">{calibrationLabel(calibration)}</small>
     </div>

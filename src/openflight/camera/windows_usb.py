@@ -60,6 +60,8 @@ class WindowsUsbCamera:
         self._recovery_stop = threading.Event()
         self._recovery = None
         self._reported_controls = {}
+        self.reported_native_mode = None
+        self.reported_exposure_mode = None
 
     @property
     def reported_controls(self) -> dict:
@@ -149,9 +151,9 @@ class WindowsUsbCamera:
             "selected": self._selected_identity,
             "opened": self._opened_identity,
             "status": self._identity_status,
-            "backend": ("fixture" if (self._selected_identity or "").startswith("fixture:") else
+            "backend": (getattr(self._camera, "capture_backend", None) or ("fixture" if (self._selected_identity or "").startswith("fixture:") else
                         "identity_provider" if self._identity_factory else
-                        "injected_fixture" if self._factory else "opencv_directshow"),
+                        "injected_fixture" if self._factory else "opencv_directshow")),
         }
 
     @property
@@ -203,6 +205,8 @@ class WindowsUsbCamera:
             properties = (3, 4, 5)
         self.negotiated = None
         self._reported_controls = {}
+        self.reported_native_mode = None
+        self.reported_exposure_mode = None
         self._opened_identity = None
         if self._selected_identity:
             self._identity_status = "opening"
@@ -231,6 +235,9 @@ class WindowsUsbCamera:
                 for label, value in zip(("width", "height", "reported_fps"), reported_mode)
             }
             self._reported_controls = self._read_controls(camera)
+            if hasattr(camera, "mode_diagnostics"):
+                self.reported_native_mode = camera.mode_diagnostics()
+                self.reported_exposure_mode = camera.exposure_diagnostics()
         except Exception:
             camera.release()
             self._opened_identity = None
@@ -279,6 +286,8 @@ class WindowsUsbCamera:
                     exposure_us=0,  # unknown until hardware controls are validated
                     analogue_gain=0.0,  # unknown
                     sensor_timestamp_is_host_alias=True,
+                    driver_sample=getattr(self._camera, "sample_metadata", None),
+                    native_payload=getattr(self._camera, "native_payload", None),
                 ))
                 with self._arrival_lock:
                     self._arrival_times_ns.append(host_ns)
