@@ -77,6 +77,7 @@ from .sim import (
     resolve_shot,
 )
 from .camera.offline_recording_routes import recording_routes
+from .camera.camera_setup_routes import camera_setup_routes
 from .speed_correction import correct_ball_speed
 from .spin_estimate import calculated_spin_rpm
 from .startup_status import StartupStatusReporter, configured_startup_components
@@ -92,6 +93,7 @@ FRONTEND_SOURCE_DIR = REPO_ROOT / "ui"
 app = Flask(__name__, static_folder=str(FRONTEND_DIST_DIR), static_url_path="")
 CORS(app)
 app.register_blueprint(recording_routes)
+app.register_blueprint(camera_setup_routes)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # Global state
@@ -1709,6 +1711,7 @@ def windows_usb_camera_status():
         "enabled": True,
         "state": state,
         "frames_received": camera.frames_received,
+        "requested": vars(camera.settings) if getattr(camera, "settings", None) is not None else None,
         "last_error": error,
         "last_frame_age_ms": getattr(camera, "last_frame_age_ms", None),
         "negotiated": camera.negotiated,
