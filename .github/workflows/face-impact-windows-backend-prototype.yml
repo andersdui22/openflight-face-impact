@@ -8,6 +8,7 @@ on:
       - scripts/build-face-impact-windows.ps1
       - scripts/face-impact-backend-entry.py
       - tests/windows_packaged_smoke.ps1
+      - tests/face_impact_usb_fixture_server.py
       - ui/electron/main.js
       - ui/electron/backendProcess.js
       - ui/src/utils/serverOrigin.ts
@@ -85,6 +86,19 @@ jobs:
       - name: Verify packaged connection, shutdown, backend loss and archive recovery
         shell: pwsh
         run: ./tests/windows_packaged_smoke.ps1 -WithBackend -EvidenceDirectory "$env:RUNNER_TEMP/packaged-backend"
+      - name: Verify packaged renderer with the Windows USB adapter fixture
+        shell: pwsh
+        run: |
+          ./scripts/build-face-impact-backend-windows.ps1 -UsbFixture
+          $fixture = 'out/face-impact-usb-fixture/OpenFlightFaceImpactBackend/OpenFlightFaceImpactBackend.exe'
+          ./tests/windows_packaged_smoke.ps1 -WithBackend -UsbFixtureExecutable $fixture -EvidenceDirectory "$env:RUNNER_TEMP/packaged-usb-fixture"
+      - name: Upload packaged USB fixture evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: packaged-windows-usb-fixture
+          path: ${{ runner.temp }}/packaged-usb-fixture/
+          if-no-files-found: warn
       - name: Upload packaged Electron renderer evidence
         if: always()
         uses: actions/upload-artifact@v7
