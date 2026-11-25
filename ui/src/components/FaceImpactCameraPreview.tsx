@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { FaceImpactCameraSetup, type CameraDiagnostics } from './FaceImpactCameraSetup';
 import { getServerOrigin } from '../utils/serverOrigin';
 
 type CameraState = 'checking' | 'disabled' | 'starting' | 'running' | 'stopped' | 'error' | 'offline';
@@ -21,7 +22,7 @@ interface CalibrationStatus {
   validation_rms_px: number[] | null;
 }
 
-interface UsbStatus {
+interface UsbStatus extends CameraDiagnostics {
   enabled: boolean;
   state: 'disabled' | 'starting' | 'running' | 'stopped' | 'error';
   last_error?: string | null;
@@ -55,6 +56,7 @@ export function FaceImpactCameraPreview() {
   const [error, setError] = useState<string | null>(null);
   const [previewFailed, setPreviewFailed] = useState(false);
   const [frameKey, setFrameKey] = useState(0);
+  const [diagnostics, setDiagnostics] = useState<CameraDiagnostics | null>(null);
   const [calibration, setCalibration] = useState<CalibrationStatus | null>(null);
 
   useEffect(() => {
@@ -80,6 +82,7 @@ export function FaceImpactCameraPreview() {
         }
         const nextState: CameraState = status.enabled ? status.state : 'disabled';
         setState(nextState);
+        setDiagnostics(status.enabled ? status : null);
         setCalibration(status.calibration ?? null);
         setError(nextState === 'error' ? (status.last_error ?? 'Camera error') : null);
         setPreviewFailed(false);
@@ -89,6 +92,7 @@ export function FaceImpactCameraPreview() {
       } catch {
         if (mounted && !controller.signal.aborted) {
           setState('offline');
+          setDiagnostics(null);
           setCalibration(null);
           setError(null);
         }
@@ -107,21 +111,24 @@ export function FaceImpactCameraPreview() {
 
   const active = state === 'running' && !previewFailed;
   return (
-    <div className="impact-workspace__empty" aria-label="USB camera preview">
-      {active ? (
-        <img
-          alt="Live USB camera preview — not calibrated or measured"
-          src={`${origin}/api/camera/preview.jpg?frame=${frameKey}`}
-          onLoad={() => setPreviewFailed(false)}
-          onError={() => setPreviewFailed(true)}
-          style={{ maxWidth: '100%', maxHeight: 180, objectFit: 'contain' }}
-        />
-      ) : (
-        <span>{previewFailed ? 'Camera preview unavailable' : `Camera: ${state}`}</span>
-      )}
-      {error && <span role="alert">{error}</span>}
-      <small>USB preview only · no impact measurement</small>
-      <small aria-label="Camera calibration status">{calibrationLabel(calibration)}</small>
-    </div>
+    <>
+      <div className="impact-workspace__empty" aria-label="USB camera preview">
+        {active ? (
+          <img
+            alt="Live USB camera preview — not calibrated or measured"
+            src={`${origin}/api/camera/preview.jpg?frame=${frameKey}`}
+            onLoad={() => setPreviewFailed(false)}
+            onError={() => setPreviewFailed(true)}
+            style={{ maxWidth: '100%', maxHeight: 180, objectFit: 'contain' }}
+          />
+        ) : (
+          <span>{previewFailed ? 'Camera preview unavailable' : `Camera: ${state}`}</span>
+        )}
+        {error && <span role="alert">{error}</span>}
+        <small>USB preview only · no impact measurement</small>
+        <small aria-label="Camera calibration status">{calibrationLabel(calibration)}</small>
+      </div>
+      <FaceImpactCameraSetup diagnostics={diagnostics} />
+    </>
   );
 }
