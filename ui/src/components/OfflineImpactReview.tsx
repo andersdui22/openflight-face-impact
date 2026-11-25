@@ -5,6 +5,7 @@ import { useSystemStore } from '../stores/useSystemStore';
 import { useOfflineImpactStore } from '../stores/useOfflineImpactStore';
 import type { OfflineImpactEvidence, OfflineReplayCase } from '../types/offlineImpactEvidence';
 import type { OfflineSessionAnalysis as SessionReport } from '../types/offlineSessionAnalysis';
+import { OfflineRecordingImport } from './OfflineRecordingImport';
 import { FaceImpactView } from './FaceImpactView';
 import { OfflineSessionAnalysis } from './OfflineSessionAnalysis';
 
@@ -88,14 +89,18 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
     }
   }
 
+  async function showSession(session: string) {
+    const restored = await loadOfflineSession(session);
+    useOfflineImpactStore.getState().restore(session, restored.evidence);
+    setAnalysis(restored);
+    setSelectedShotId(null);
+  }
+
   async function restoreSession() {
     setHistoryBusy(true);
     setHistoryError(null);
     try {
-      const restored = await loadOfflineSession(savedSession);
-      useOfflineImpactStore.getState().restore(savedSession, restored.evidence);
-      setAnalysis(restored);
-      setSelectedShotId(null);
+      await showSession(savedSession);
     } catch (error) {
       setHistoryError(error instanceof Error ? error.message : 'Saved session could not be loaded');
     } finally {
@@ -180,6 +185,13 @@ export function OfflineImpactReview({ evidence }: { evidence?: OfflineImpactEvid
           </button>
         </div>
       </details>
+      <OfflineRecordingImport
+        connected={connected}
+        onSaved={async (session) => {
+          await showSession(session);
+          await refreshSessions(session);
+        }}
+      />
       {historyError && <p role="alert">{historyError}</p>}
       <p role="status">
         OFFLINE RESULTS: {entries.length} · SYNTHETIC ACCEPTED: {accepted.length}
