@@ -380,3 +380,100 @@ def test_usb_restart_waits_for_current_session_frames_before_reporting_delivery(
     finally:
         allow_read.set()
         camera.stop()
+
+
+def test_recovery_retries_open_then_reconnects_without_overlapping_handles():
+    unavailable = FakeCamera(opened=False)
+    first = FakeCamera(fail_after=2, pixel_value=35)
+    second = FakeCamera(pixel_value=170)
+    devices = [unavailable, first, second]
+    opened = []
+
+    def factory(_index):
+        if opened:
+            assert opened[-1].released
+        device = devices[len(opened)]
+        opened.append(device)
+        return device
+
+    camera = WindowsUsbCamera(camera_factory=factory)
+    old_session = camera.ring.session_id
+    camera.start_reconnecting(interval_s=0.02)
+    try:
+        wait_until(lambda: len(opened) == 3 and camera.frames_received >= 4)
+        assert camera.reconnect_enabled
+        assert camera.last_error is None
+        assert camera.ring.session_id != old_session
+        assert camera.ring.latest_frame.image[0, 0] == 170
+        assert unavailable.released and first.released and not second.released
+    finally:
+        camera.stop()
+    assert second.released
+    assert not camera.reconnect_enabled
+    assert not camera.is_running
+
+
+def test_driver_controls_are_kept_separate_from_physical_metadata():
+    class SelectiveCamera(FakeCamera):
+        def set(self, prop, value):
+            return prop != 14 and super().set(prop, value)
+
+    device = SelectiveCamera()
+    camera = WindowsUsbCamera(
+        UsbCameraSettings(driver_exposure=-7.0, driver_gain=10.0),
+        camera_factory=lambda _index: device,
+    )
+    camera.start()
+    try:
+        wait_until(lambda: camera.frames_received > 0)
+        assert camera.reported_controls == {
+            "exposure": {"requested": -7.0, "accepted_by_driver": True, "reported": -7.0},
+            "gain": {"requested": 10.0, "accepted_by_driver": False, "reported": None},
+        }
+        frame = camera.ring.latest_frame
+        assert frame.sensor_timestamp_is_host_alias
+        assert frame.exposure_us == 0 and frame.analogue_gain == 0
+    finally:
+        camera.stop()
+
+
+def test_stalled_live_reader_hides_old_preview_and_refuses_trigger(monkeypatch):
+    allow_read = Event()
+
+    class StalledCamera(FakeCamera):
+        def read(self):
+            if self.reads:
+                allow_read.wait(2)
+            return super().read()
+
+    camera = WindowsUsbCamera(
+        UsbCameraSettings(pre_frames=1), camera_factory=lambda _index: StalledCamera(),
+    )
+    camera.start()
+    try:
+        wait_until(lambda: camera.frames_received > 0)
+        arrival = camera.ring.latest_frame.host_timestamp_ns
+        monkeypatch.setattr(time, "monotonic_ns", lambda: arrival + 2_000_000_000)
+        assert camera.is_running and camera.delivery_stale
+        assert camera.capture_preview_jpeg() is None
+        assert camera.trigger() is False
+    finally:
+        allow_read.set()
+        camera.stop()
+
+
+def test_reader_rejects_shape_change_before_a_capture_can_mix_rasters():
+    class ShapeChangingCamera(FakeCamera):
+        def read(self):
+            ok, image = super().read()
+            return ok, image if self.reads == 1 else image[:, :4]
+
+    camera = WindowsUsbCamera(camera_factory=lambda _index: ShapeChangingCamera())
+    camera.start()
+    try:
+        wait_until(lambda: camera.last_error is not None)
+        assert camera.last_error == "USB frame dimensions changed during acquisition"
+        assert camera.frames_received == 1
+        assert camera.trigger() is False
+    finally:
+        camera.stop()

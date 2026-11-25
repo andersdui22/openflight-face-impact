@@ -144,3 +144,19 @@ def test_usb_status_valid_offline_profile_never_claims_physical_mode(monkeypatch
     assert response.json["calibration"]["state"] == "mode_unknown"
     assert response.json["calibration"]["mode_compatible"] is False
     assert response.json["calibration"]["physical_validation"] is False
+
+
+def test_usb_status_reports_stale_delivery_without_sensor_metadata(monkeypatch):
+    camera = SimpleNamespace(
+        is_running=True, last_error=None, frames_received=7, negotiated=None,
+        delivery_stale=True, delivered_size=(640, 400), delivered_fps=120.,
+        last_frame_age_ms=2100., reconnect_enabled=True, reported_controls={},
+    )
+    monkeypatch.setattr(server, "windows_usb_runtime", camera)
+    status = server.app.test_client().get("/api/camera/usb/status").json
+    assert status["state"] == "error"
+    assert status["last_error"] == "USB frame delivery stalled"
+    assert status["last_frame_age_ms"] == 2100.
+    assert status["delivered_size"] is status["delivered_fps"] is None
+    assert status["sensor_exposure_us"] is status["sensor_analogue_gain"] is None
+    assert status["reconnect_enabled"] is True
