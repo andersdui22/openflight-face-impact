@@ -8,7 +8,7 @@ Project Law V1 and MDP V1.2 limit this iteration to software preparation.
 1. Unzip the portable package, keep its directory together and double-click
    **OpenFlight Face Impact.exe**.
 2. Open the Face Impact dashboard and expand **Camera setup and diagnostics**
-   in Camera Preview. Connect the ELP OV9281 and click **Scan Windows cameras**.
+   below the dashboard grid. Connect the ELP OV9281 and click **Scan Windows cameras**.
    This inventory scan does not open a camera. Record which identity appears and
    disappears on unplug and replug. Reopen the app and scan again. If experimenting
    with a different USB port, record the returned identity again.

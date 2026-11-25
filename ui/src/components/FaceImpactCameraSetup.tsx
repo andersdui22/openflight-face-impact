@@ -61,7 +61,7 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
   }
 
   return (
-    <details aria-label="Face Impact camera setup">
+    <details className="impact-controls" aria-label="Face Impact camera setup">
       <summary>Camera setup and diagnostics</summary>
       <div className="impact-controls__fields">
         <button

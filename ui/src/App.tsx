@@ -17,6 +17,7 @@ import { OfflineImpactReview } from './components/OfflineImpactReview';
 import { FaceImpactControls } from './components/FaceImpactControls';
 import { SyntheticMotionDiagnostics } from './components/SyntheticMotionDiagnostics';
 import { useSyntheticMotionStore } from './stores/useSyntheticMotionStore';
+import { FaceImpactCameraSetup, type CameraDiagnostics } from './components/FaceImpactCameraSetup';
 import { FaceImpactCameraPreview } from './components/FaceImpactCameraPreview';
 import { DisplayMode } from './components/DisplayMode';
 import { SimShotBadges } from './components/SimShotBadges';
@@ -63,6 +64,7 @@ function FaceImpactDashboard({
   const contentRef = useRef<HTMLDivElement>(null);
   const contentDragScroll = useDragScroll(contentRef);
   const syntheticMotion = useSyntheticMotionStore((state) => state.payload);
+  const [cameraDiagnostics, setCameraDiagnostics] = useState<CameraDiagnostics | null>(null);
   const [demoEnabled, setDemoEnabled] = useState(false);
   const [demoShots, setDemoShots] = useState<DemoShot[]>([]);
   const demoAverage = (axis: 'x' | 'y') =>
@@ -190,7 +192,7 @@ function FaceImpactDashboard({
                   )}
                 </div>
               ) : panel.content === 'camera' ? (
-                <FaceImpactCameraPreview />
+                <FaceImpactCameraPreview onDiagnostics={setCameraDiagnostics} />
               ) : panel.content === 'replay' ? (
                 <div className="impact-workspace__empty">
                   <span className="impact-workspace__play">▷</span>No shot replay selected
@@ -212,6 +214,7 @@ function FaceImpactDashboard({
           shots={demoShots}
           setShots={setDemoShots}
         />
+        <FaceImpactCameraSetup diagnostics={cameraDiagnostics} />
         <OfflineImpactReview />
         <FaceImpactControls />
         <details className="impact-controls" aria-label="Advanced synthetic motion diagnostics">
