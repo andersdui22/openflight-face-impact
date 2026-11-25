@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - scripts/build-face-impact-backend-windows.ps1
+      - scripts/face-impact-windows-backend-requirements.txt
       - scripts/build-face-impact-windows.ps1
       - scripts/face-impact-backend-entry.py
       - tests/windows_packaged_smoke.ps1

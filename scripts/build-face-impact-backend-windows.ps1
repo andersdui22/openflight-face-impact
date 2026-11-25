@@ -13,12 +13,14 @@ if (!(Test-Path $python)) {
   py -3.12 -m venv $venv
   if ($LASTEXITCODE -ne 0) { throw 'Python 3.12 virtual environment creation failed' }
 }
-& $python -m pip install --upgrade pip
+& $python -m pip install pip==26.3
 if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 # The inherited OpenFlight project includes optional and legacy hardware drivers.
 # Install from source with explicit dependencies for this mock-only backend.
-& $python -m pip install pyinstaller flask flask-cors flask-socketio numpy scipy pyserial opencv-python-headless
+& $python -m pip install --only-binary=:all: -r (Join-Path $root 'scripts/face-impact-windows-backend-requirements.txt')
 if ($LASTEXITCODE -ne 0) { throw 'Python backend dependency installation failed' }
+& $python -m pip check
+if ($LASTEXITCODE -ne 0) { throw 'Pinned backend dependency check failed' }
 $env:PYTHONPATH = Join-Path $root 'src'
 # A one-directory backend runs directly as the process owned by Electron.
 & $python -m PyInstaller --noconfirm --clean --onedir --name OpenFlightFaceImpactBackend --paths (Join-Path $root 'src') --hidden-import engineio.async_drivers.threading --distpath $dist --workpath $work --specpath $work (Join-Path $root $entry)
