@@ -24,20 +24,51 @@ let backendReady = false;
 let quitting = false;
 let backendStopped = false;
 let smokeResult = null;
+let backendRestartTimer = null;
+let backendRestartsRemaining = 3;
+let backendRecoveryEnabled = true;
 
-async function launchOptInBackend() {
+function scheduleBackendRecovery() {
+  if (quitting || !backendRecoveryEnabled || backendRestartTimer || backendRestartsRemaining === 0) return;
+  backendRestartTimer = setTimeout(async () => {
+    backendRestartTimer = null;
+    if (quitting) return;
+    backendRestartsRemaining -= 1;
+    await launchOptInBackend(true);
+    if (!backendReady && !quitting) {
+      try {
+        const shutdown = await stopBackend(backendChild);
+        if (shutdown !== 'timeout') scheduleBackendRecovery();
+      } catch (error) {
+        console.error('Could not clean up failed backend recovery', error);
+      }
+    }
+  }, 1500);
+}
+
+async function launchOptInBackend(recovering = false) {
+  backendReady = false;
+  backendStartupError = null;
   try {
     const executable = resolveBackendExecutable(process.env, app.isPackaged ? process.resourcesPath : null);
     backendChild = startBackend(executable, {
       onError: (error) => { backendStartupError = error; console.error(error); },
     });
-    if (backendChild) {
-      backendReady = await waitForBackendReady({
-        probe: () => probeBackendHealth({ instance: backendChild.openFlightInstance }),
-        isRunning: () => !!backendChild.pid && backendChild.exitCode === null &&
-          backendChild.signalCode === null && !backendStartupError && !quitting,
+    const child = backendChild;
+    if (child) {
+      child.once('exit', () => {
+        if (backendChild !== child) return;
+        const wasReady = backendReady;
+        backendReady = false;
+        // Failed recovery attempts are handled after their readiness probe settles.
+        if (wasReady) scheduleBackendRecovery();
       });
-      if (!backendReady) console.error("Face Impact backend readiness check failed");
+      backendReady = await waitForBackendReady({
+        probe: () => probeBackendHealth({ instance: child.openFlightInstance }),
+        isRunning: () => !!child.pid && child.exitCode === null &&
+          child.signalCode === null && !backendStartupError && !quitting,
+      });
+      if (!backendReady && !recovering) console.error("Face Impact backend readiness check failed");
     }
   } catch (error) {
     backendStartupError = error;
@@ -248,6 +279,8 @@ async function runDashboardSmoke(win) {
     writeFileSync(process.env.OPENFLIGHT_GATE11_SCREENSHOT, shot.toPNG());
     if (closeMode === 'backend-loss') {
       await replayBeforeBackendLoss(win);
+      // This scenario exercises exit while the owned backend is already down.
+      backendRecoveryEnabled = false;
       backendChild.kill('SIGKILL');
       await waitForRendererDisconnect(win);
     }
@@ -291,13 +324,14 @@ async function verifyRendererReconnect(win) {
       throw new Error('Expected Socket.IO state: ' + ${JSON.stringify(message)});
     })()
   `);
-  if (await stopBackend(backendChild) !== 'graceful') {
-    throw new Error('Owned backend did not exit gracefully before restart');
-  }
-  await expectConnection('Synthetic replay requires a backend connection');
-  await launchOptInBackend();
-  if (!backendReady) throw new Error('Owned backend did not restart');
+  const crashed = backendChild;
+  const disconnected = expectConnection('Synthetic replay requires a backend connection');
+  crashed.kill('SIGKILL');
+  await disconnected;
   await expectConnection('Python backend connected for replay');
+  if (!backendReady || backendChild === crashed || backendChild.openFlightInstance === crashed.openFlightInstance) {
+    throw new Error('Owned backend did not recover with a new process identity');
+  }
 }
 
 function replayBeforeBackendLoss(win) {
@@ -384,10 +418,12 @@ app.whenReady().then(async () => {
 });
 
 app.on('before-quit', (event) => {
-  if (backendStopped || !backendChild) return;
-  event.preventDefault();
+  if (backendStopped) return;
+  if (backendChild) event.preventDefault();
   if (quitting) return;
   quitting = true;
+  clearTimeout(backendRestartTimer);
+  if (!backendChild) return;
   void stopBackend(backendChild).then((outcome) => {
     backendStopped = true;
     if (smokeResult) {

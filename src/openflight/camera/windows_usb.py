@@ -5,9 +5,10 @@ tests. Timestamps are host arrival times, never camera exposure timestamps.
 """
 from __future__ import annotations
 
+import math
 import threading
-from collections import deque
 import time
+from collections import deque
 from dataclasses import dataclass
 from typing import Callable
 
@@ -24,6 +25,8 @@ class UsbCameraSettings:
     requested_fps: float = 120.0
     pre_frames: int = 18
     post_frames: int = 6
+    driver_exposure: float | None = None
+    driver_gain: float | None = None
 
 
 class WindowsUsbCamera:
@@ -40,8 +43,73 @@ class WindowsUsbCamera:
         self._last_error: str | None = None
         self.negotiated: dict[str, float] | None = None
         self._frames = 0
+        self._started_ns = None
         self._arrival_times_ns = deque(maxlen=256)
         self._arrival_lock = threading.Lock()
+        self._lifecycle_lock = threading.Lock()
+        self._recovery_stop = threading.Event()
+        self._recovery = None
+        self._reported_controls = {}
+
+    @property
+    def reported_controls(self) -> dict:
+        """Unverified driver control values, without conversion to sensor units."""
+        return self._reported_controls
+
+    @property
+    def reconnect_enabled(self) -> bool:
+        """Whether this adapter owns a recovery worker."""
+        return self._recovery is not None and self._recovery.is_alive()
+
+    def start_reconnecting(self, *, interval_s: float = 2.0) -> None:
+        """Retry the selected device index without owning two camera handles."""
+        if not math.isfinite(interval_s) or interval_s <= 0:
+            raise ValueError("invalid reconnect interval")
+        self._validate_settings()
+        with self._lifecycle_lock:
+            if self.reconnect_enabled:
+                return
+            if self._camera is not None:
+                raise RuntimeError("stop the existing reader before enabling recovery")
+            self._recovery_stop.clear()
+            self._recovery = threading.Thread(
+                target=self._recover, args=(interval_s,), name="openflight-usb-recovery", daemon=True,
+            )
+            self._recovery.start()
+
+    def _recover(self, interval_s):
+        while not self._recovery_stop.is_set():
+            if not self.is_running:
+                try:
+                    self._stop_reader(0)
+                    if not self._recovery_stop.is_set():
+                        self._start_reader()
+                except Exception as exc:  # pylint: disable=broad-exception-caught
+                    self._last_error = str(exc)
+            self._recovery_stop.wait(interval_s)
+
+    def _validate_settings(self):
+        if (self.settings.device_index < 0 or self.settings.width < 1 or self.settings.height < 1
+                or not math.isfinite(self.settings.requested_fps) or self.settings.requested_fps <= 0
+                or any(value is not None and not math.isfinite(value)
+                       for value in (self.settings.driver_exposure, self.settings.driver_gain))):
+            raise ValueError("invalid USB camera settings")
+
+    def _read_controls(self, camera):
+        result = {}
+        # CAP_PROP_EXPOSURE and CAP_PROP_GAIN are driver-dependent, including their units.
+        for label, prop, value in (
+            ("exposure", 15, self.settings.driver_exposure),
+            ("gain", 14, self.settings.driver_gain),
+        ):
+            if value is not None:
+                applied = bool(camera.set(prop, value))
+                reported = camera.get(prop) if applied else None
+                result[label] = {
+                    "requested": value, "accepted_by_driver": applied,
+                    "reported": reported if reported is not None and math.isfinite(reported) else None,
+                }
+        return result
 
     @property
     def last_error(self) -> str | None:
@@ -74,12 +142,16 @@ class WindowsUsbCamera:
         return (len(samples) - 1) * 1_000_000_000 / (samples[-1] - samples[0])
 
     def start(self) -> None:
+        with self._lifecycle_lock:
+            if not self.reconnect_enabled:
+                self._start_reader()
+
+    def _start_reader(self):
         if self.is_running:
             return
         if self._camera is not None:
             raise RuntimeError("camera shutdown is still in progress")
-        if self.settings.device_index < 0 or self.settings.width < 1 or self.settings.height < 1 or self.settings.requested_fps <= 0:
-            raise ValueError("invalid USB camera settings")
+        self._validate_settings()
         if self._factory is None:
             try:
                 import cv2  # pylint: disable=import-outside-toplevel
@@ -91,17 +163,20 @@ class WindowsUsbCamera:
             factory = self._factory
             # OpenCV's stable numeric CAP_PROP_* IDs; fixtures use the same.
             properties = (3, 4, 5)
+        self.negotiated = None
+        self._reported_controls = {}
         camera = factory(self.settings.device_index)
         try:
             if not camera.isOpened():
                 raise RuntimeError(f"USB camera index {self.settings.device_index} could not be opened")
             for prop, value in zip(properties, (self.settings.width, self.settings.height, self.settings.requested_fps)):
                 camera.set(prop, value)
+            reported_mode = (camera.get(prop) for prop in properties)
             self.negotiated = {
-                "width": camera.get(properties[0]),
-                "height": camera.get(properties[1]),
-                "reported_fps": camera.get(properties[2]),
+                label: value if math.isfinite(value) and value > 0 else None
+                for label, value in zip(("width", "height", "reported_fps"), reported_mode)
             }
+            self._reported_controls = self._read_controls(camera)
         except Exception:
             camera.release()
             raise
@@ -113,26 +188,33 @@ class WindowsUsbCamera:
         with self._arrival_lock:
             self._arrival_times_ns.clear()
             self._frames = 0
+            self._started_ns = time.monotonic_ns()
         self._stop.clear()
         self._thread = threading.Thread(target=self._read_loop, name="openflight-usb-reader", daemon=True)
         self._thread.start()
 
     def _read_loop(self) -> None:
+        shape = None
         try:
             while not self._stop.is_set():
                 ok, image = self._camera.read()
                 host_ns = time.monotonic_ns()
                 if not ok or image is None:
                     raise RuntimeError("USB camera read failed or disconnected")
-                if image.ndim == 3 and image.shape[2] >= 3:
+                if not isinstance(image, np.ndarray) or image.dtype != np.uint8 or image.size == 0:
+                    raise RuntimeError("unsupported USB frame format")
+                if image.ndim == 3 and image.shape[2] in (3, 4):
                     # BGR to grayscale without requiring another OpenCV call.
                     image = np.clip(np.rint(
                         image[:, :, 0].astype(np.float32) * 0.114
                         + image[:, :, 1].astype(np.float32) * 0.587
                         + image[:, :, 2].astype(np.float32) * 0.299
                     ), 0, 255).astype(np.uint8)
-                if image.ndim != 2 or image.dtype != np.uint8:
+                if image.ndim != 2:
                     raise RuntimeError("unsupported USB frame format")
+                if shape is not None and shape != image.shape:
+                    raise RuntimeError("USB frame dimensions changed during acquisition")
+                shape = image.shape
                 self.ring.add_frame(CameraFrame(
                     image=np.array(image, copy=True, order="C"),
                     sensor_timestamp_ns=host_ns,  # host-clock alias; NOT sensor exposure
@@ -150,6 +232,16 @@ class WindowsUsbCamera:
             self._stop.set()
 
     def stop(self, timeout_s: float = 3.0) -> None:
+        with self._lifecycle_lock:
+            self._recovery_stop.set()
+            if self._recovery is not None:
+                self._recovery.join(timeout_s)
+                if self._recovery.is_alive():
+                    raise TimeoutError("USB camera recovery did not stop; device still owned")
+                self._recovery = None
+            self._stop_reader(timeout_s)
+
+    def _stop_reader(self, timeout_s):
         self._stop.set()
         thread = self._thread
         if thread is not None:
@@ -161,13 +253,29 @@ class WindowsUsbCamera:
             self._camera = None
         self._thread = None
 
+    @property
+    def last_frame_age_ms(self) -> float | None:
+        """Host-clock age of the last frame delivered by this session."""
+        with self._arrival_lock:
+            if not self._arrival_times_ns:
+                return None
+            return (time.monotonic_ns() - self._arrival_times_ns[-1]) / 1_000_000
+
+    @property
+    def delivery_stale(self) -> bool:
+        """Reject old frames even if the underlying driver is still blocked in read."""
+        with self._arrival_lock:
+            last = self._arrival_times_ns[-1] if self._arrival_times_ns else self._started_ns
+        return (last is not None
+                and time.monotonic_ns() - last > max(1e9, 3e9 / self.settings.requested_fps))
+
     def capture_preview_jpeg(self) -> bytes | None:
         """Encode the latest buffered frame; never read the device twice.
 
         OpenCV is only needed when preview is requested. This method never
         owns a camera handle or consumes a triggered capture.
         """
-        if not self.is_running or self._stop.is_set():
+        if not self.is_running or self._stop.is_set() or self.delivery_stale:
             return None
         frame = self.ring.latest_frame
         if frame is None:
@@ -183,4 +291,5 @@ class WindowsUsbCamera:
 
     def trigger(self) -> bool:
         """Explicit software trigger; shot detection is outside Gate 03."""
-        return self.is_running and not self._stop.is_set() and self.ring.trigger(time.monotonic_ns())
+        return (self.is_running and not self._stop.is_set() and not self.delivery_stale
+                and self.ring.trigger(time.monotonic_ns()))

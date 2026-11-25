@@ -1690,7 +1690,10 @@ def windows_usb_camera_status():
     if camera is None:
         calibration = load_revision_bound_calibration_status(profile_path or None, binding_path or None)
         return jsonify({"enabled": False, "state": "disabled", "calibration": calibration})
-    if camera.last_error:
+    error = camera.last_error
+    if camera.is_running and getattr(camera, "delivery_stale", False):
+        error = error or "USB frame delivery stalled"
+    if error:
         state = "error"
     elif camera.is_running:
         state = "running" if camera.frames_received > 0 else "starting"
@@ -1705,12 +1708,17 @@ def windows_usb_camera_status():
         "enabled": True,
         "state": state,
         "frames_received": camera.frames_received,
-        "last_error": camera.last_error,
+        "last_error": error,
+        "last_frame_age_ms": getattr(camera, "last_frame_age_ms", None),
         "negotiated": camera.negotiated,
         "timestamp_source": "host_arrival_monotonic",
         "actual_fps_measured": measured_fps is not None,
         "delivered_fps": measured_fps,
         "delivered_size": delivered_size,
+        "reconnect_enabled": getattr(camera, "reconnect_enabled", False),
+        "driver_controls": getattr(camera, "reported_controls", {}),
+        "sensor_exposure_us": None,
+        "sensor_analogue_gain": None,
         "calibration": calibration,
     })
 
@@ -5144,6 +5152,12 @@ def main():
     parser.add_argument("--windows-usb-width", type=int, default=640)
     parser.add_argument("--windows-usb-height", type=int, default=400)
     parser.add_argument("--windows-usb-fps", type=float, default=120.0)
+    parser.add_argument("--windows-usb-reconnect", action="store_true",
+                        help="Retry the configured USB index for preview after read or open failure")
+    parser.add_argument("--windows-usb-driver-exposure", type=float,
+                        help="Optional DirectShow exposure property in driver units")
+    parser.add_argument("--windows-usb-driver-gain", type=float,
+                        help="Optional DirectShow gain property in driver units")
     parser.add_argument(
         "--mock-swing-speed",
         action="store_true",
@@ -5779,9 +5793,14 @@ def main():
             width=args.windows_usb_width,
             height=args.windows_usb_height,
             requested_fps=args.windows_usb_fps,
+            driver_exposure=args.windows_usb_driver_exposure,
+            driver_gain=args.windows_usb_driver_gain,
         ))
-        windows_usb_runtime.start()
-        logger.info("[CAMERA] Windows USB camera reported mode: %s", windows_usb_runtime.negotiated)
+        if args.windows_usb_reconnect:
+            windows_usb_runtime.start_reconnecting()
+        else:
+            windows_usb_runtime.start()
+        logger.info("[CAMERA] Windows USB preview configured at index %s", args.windows_usb_camera)
 
     if args.camera_capture:
         startup_status.start("camera", "Connecting high-speed camera")
