@@ -47,3 +47,21 @@ def test_fixture_reconnect_and_diagnostic_archive(monkeypatch, tmp_path):
         assert meta["physically_validated"] is False
     finally:
         assert client.post(BASE + "stop", json={}, headers=HEADERS).status_code == 200
+
+
+def test_pnp_inventory_preserves_identity_without_capture_index(monkeypatch):
+    from types import SimpleNamespace
+
+    from openflight.camera import windows_camera_inventory as inventory
+
+    rows = [
+        {"FriendlyName": "USB Camera", "InstanceId": "USB\\VID_A\\PORT_1", "Status": "OK"},
+        {"FriendlyName": "USB Camera", "InstanceId": "USB\\VID_A\\PORT_2", "Status": "OK"},
+        {"FriendlyName": "USB Camera", "InstanceId": "usb\\vid_a\\port_2", "Status": "OK"},
+    ]
+    monkeypatch.setattr(inventory.sys, "platform", "win32")
+    monkeypatch.setattr(inventory.subprocess, "CREATE_NO_WINDOW", 0, raising=False)
+    monkeypatch.setattr(inventory.subprocess, "run", lambda *_a, **_kw: SimpleNamespace(stdout=json.dumps(rows)))
+    result = inventory.windows_camera_inventory()
+    assert {item["identity"].casefold() for item in result} == {"usb\\vid_a\\port_1", "usb\\vid_a\\port_2"}
+    assert all(item["capture_identity_verified"] is False and "index" not in item for item in result)

@@ -31,7 +31,9 @@ async function setupRequest(action: string, data: object = {}) {
 
 export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiagnostics | null }) {
   const [devices, setDevices] = useState<Device[]>([]);
-  const [identity, setIdentity] = useState(() => localStorage.getItem(storageKey) ?? fixture);
+  const [identity, setIdentity] = useState(() =>
+    typeof window === 'undefined' ? fixture : (window.localStorage.getItem(storageKey) ?? fixture)
+  );
   const [resolution, setResolution] = useState('320x200');
   const [fps, setFps] = useState('30');
   const [exposure, setExposure] = useState('');
