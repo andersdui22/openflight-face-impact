@@ -329,9 +329,15 @@ async function verifyRendererReconnect(win) {
   crashed.kill('SIGKILL');
   await disconnected;
   await expectConnection('Python backend connected for replay');
-  if (!backendReady || backendChild === crashed || backendChild.openFlightInstance === crashed.openFlightInstance) {
-    throw new Error('Owned backend did not recover with a new process identity');
-  }
+  // The renderer can reconnect before Electron's next independent health probe.
+  const newBackendReady = await waitForBackendReady({
+    probe: async () => backendReady && backendChild !== crashed &&
+      backendChild.openFlightInstance !== crashed.openFlightInstance,
+    isRunning: () => !quitting,
+    attempts: 30,
+    delayMs: 100,
+  });
+  if (!newBackendReady) throw new Error('Owned backend did not recover with a new process identity');
 }
 
 function replayBeforeBackendLoss(win) {

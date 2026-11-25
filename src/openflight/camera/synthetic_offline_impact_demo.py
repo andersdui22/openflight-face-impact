@@ -3,13 +3,26 @@
 from collections.abc import Callable
 from dataclasses import asdict, replace
 from hashlib import sha256
+from pathlib import Path
 
 import cv2 as cv
 import numpy as np
 
+from .calibration_club_binding import CalibrationClubBinding
+from .calibration_profile import CameraCalibrationProfile
+from .calibration_revision import calibration_revision
 from .checkerboard_calibration import CheckerboardCalibration
+from .club_face_model import ClubFaceModel, ClubFamily, FaceSurface
+from .club_geometry_revision import club_geometry_revision
+from .offline_capture_batch import capture_fingerprint
 from .offline_capture_preflight import preflight_offline_capture
+from .offline_capture_recording import save_offline_capture
 from .offline_marker_runner import analyze_marker_observed_offline_capture
+from .offline_recorded_replay import (
+    RecordedCaptureAdmission,
+    RecordedReplayRejected,
+    prepare_recorded_replay,
+)
 from .synthetic_face_polygon import SyntheticFacePolygon
 from .triggered_buffer import CameraFrame, TriggeredFrameBuffer
 
@@ -32,6 +45,9 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
     case_id: str, emit: Callable, *, recipient: str,
     session_id: str = "synthetic-offline-demo-v1", save: Callable | None = None,
     request_id: str | None = None,
+    recording_path: Path | None = None,
+    recording_directory: Path | None = None,
+    app_sha: str | None = None,
 ) -> dict | None:
     """Publish one fixed synthetic case through the actual offline runner."""
     if case_id not in _CASES:
@@ -103,10 +119,29 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
     # Public replay identities are stable for retries, including legacy clients.
     capture = replace(buffered, shot_id=shot_id, session_id=session_id)
     timing = {"max_sensor_gap_ns": 8_000_000, "max_host_gap_ns": 8_000_000}
-    try:
-        preflight = preflight_offline_capture(capture, **timing)
-    except ValueError as error:
-        raise SyntheticReplayRejected("Synthetic capture rejected") from error
+    if recording_path is None:
+        try:
+            preflight = preflight_offline_capture(capture, **timing)
+        except ValueError as error:
+            raise SyntheticReplayRejected("Synthetic capture rejected") from error
+        if recording_directory is not None:
+            save_offline_capture(recording_directory, capture, app_sha=app_sha, source="synthetic_fixture")
+    else:
+        # The known fixture and its reference observations supply independent
+        # evidence. The ZIP never selects its own profile, mode or demo case.
+        mode = "fixture:brown-five-640x400-v1"
+        identity = "fixture:offline-raster-v1"
+        profile = CameraCalibrationProfile(replace(calibration, validation_rms_px=(0.,)), mode)
+        club = ClubFaceModel(ClubFamily.IRON, model_id, FaceSurface.PLANAR,
+                             90. * face_scale, 50. * face_scale, evidence_source="synthetic fixture")
+        binding = CalibrationClubBinding(calibration_revision(profile), model_id, club_geometry_revision(club))
+        admission = RecordedCaptureAdmission(
+            capture_fingerprint(capture), app_sha, "synthetic_fixture", identity, mode, binding,
+        )
+        recording, preflight = prepare_recorded_replay(
+            recording_path, admission=admission, camera_identity=identity, profile=profile, club=club, **timing,
+        )
+        capture = recording.capture
 
     marker_images = {0: marker_image, 1: marker_image}
     if case_id == "missing-markers":
@@ -127,7 +162,8 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
                             "camera_matrix": calibration.camera_matrix.tolist(),
                             "distortion": calibration.distortion.tolist()},
             "capture": {"sha256": preflight.source_fingerprint,
-                        "acquisition": "synthetic-triggered-ring-v1",
+                        "acquisition": ("synthetic-recording-v1" if recording_path is not None
+                                        else "synthetic-triggered-ring-v1"),
                         "marker_raster_sha256": sha256(marker_image.tobytes()).hexdigest(),
                         "pre_trigger_count": capture.pre_trigger_count,
                         "trigger_host_timestamp_ns": capture.trigger_host_timestamp_ns,
@@ -155,6 +191,8 @@ def publish_synthetic_offline_impact_demo(  # pylint: disable=no-member
             recipient=recipient, **parameters,
         )
     except ValueError as error:
+        if recording_path is not None:
+            raise RecordedReplayRejected("landmark_or_geometry", str(error)) from error
         raise SyntheticReplayRejected("Synthetic marker or geometry analysis rejected") from error
     (event, evidence, to), = events
     if save is not None:
