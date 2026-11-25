@@ -1,3 +1,19 @@
+# Active Change Gate — native Media Foundation diagnostics (2026-11-25)
+
+The project owner explicitly approved one native Windows Media Foundation
+provider behind the existing camera owner and opt-in physical diagnostic
+preview, controls, manual recording and lossless export for ELP OV9281,
+including calibration, club and landmark material. The verified baseline is
+draft PR #51 at `b8f54dddbc75d9624a1a4fccc4dcfbe03c801df5`.
+This is a bounded Gates 25–28 implementation under Project Law V1 and MDP V1.2.
+Require exact symbolic-link activation, handle continuity, no index fallback,
+same-SHA Windows packaging and retained measurement rejection. Physical
+measurement publication, estimator changes, gate closure, merge and release
+remain outside this authority. See the [decision register](DECISION_REGISTER.md)
+and [verification evidence](../evidence/MDP_V1_2_GATES25_28_MEDIA_FOUNDATION.md).
+
+---
+
 # Active software completion and camera readiness (2026-11-13)
 
 The user authorized software-only implementation for Gates 20–28 on draft PR #45. The audited starting HEAD was `7624ccdd6ed8a89297fe9ec48dd7e0971c5e4b3a` with all nine latest workflows green. Exercise the existing single-camera buffer, trigger, marker and calibrated geometry chain with synthetic input, and verify the packaged Windows application. Keep physical acquisition and formal Gate closure pending. Review the [Gate evidence](MDP_V1_2_PHASE5_SOFTWARE_ACCEPTANCE_GAP_AUDIT.md).
