@@ -1,6 +1,7 @@
 param(
   [Parameter(Mandatory)] [string] $EvidenceDirectory,
-  [switch] $WithBackend
+  [switch] $WithBackend,
+  [string] $UsbFixtureExecutable
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,7 +23,12 @@ function Wait-BackendPortReleased {
 }
 
 Wait-BackendPortReleased
-$closeModes = if ($WithBackend) { @('internal', 'window', 'backend-loss', 'window') } else { @('internal') }
+if ($UsbFixtureExecutable) {
+  if (!$WithBackend) { throw 'USB fixture smoke requires the backend' }
+  $env:OPENFLIGHT_BACKEND_EXECUTABLE = (Resolve-Path $UsbFixtureExecutable).Path
+  $env:OPENFLIGHT_GATE11_USB_FIXTURE = '1'
+}
+$closeModes = if ($WithBackend -and !$UsbFixtureExecutable) { @('internal', 'window', 'backend-loss', 'window') } else { @('internal') }
 for ($launch = 1; $launch -le $closeModes.Count; $launch++) {
   $env:OPENFLIGHT_GATE11_SCREENSHOT = Join-Path $EvidenceDirectory "dashboard-$launch.png"
   $env:OPENFLIGHT_GATE11_RESULT = Join-Path $EvidenceDirectory "result-$launch.json"
@@ -39,7 +45,8 @@ for ($launch = 1; $launch -le $closeModes.Count; $launch++) {
     if ($result.panels -ne 6 -or $result.backend_ready -ne $WithBackend.IsPresent -or
         $result.restored_session -ne ($launch -gt 1) -or $result.exported_session -ne ($launch -gt 1) -or
         $result.restored_rejection -ne ($launch -eq 4) -or $result.close_mode -ne $closeMode -or
-        $result.reconnected -ne ($WithBackend -and $launch -eq 1)) {
+        $result.reconnected -ne ($WithBackend -and $launch -eq 1) -or
+        $result.usb_fixture -ne [bool]$UsbFixtureExecutable) {
       throw 'Unexpected dashboard or backend state'
     }
     if (!(Test-Path -LiteralPath $env:OPENFLIGHT_GATE11_SCREENSHOT)) { throw 'Missing dashboard screenshot' }

@@ -30,6 +30,9 @@ def calibration_status(
     if profile is None:
         return result
     result["evidence_kind"] = profile.evidence_kind
+    if image_size is not None and image_size != profile.calibration.image_size:
+        result["state"] = "mode_incompatible"
+        return result
     if camera_mode_id is None or image_size is None:
         result["state"] = "mode_unknown"
         return result

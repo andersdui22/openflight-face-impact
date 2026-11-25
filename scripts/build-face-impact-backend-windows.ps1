@@ -1,10 +1,13 @@
 # Development-only Windows Python backend build. Not a validated release.
 # Run from repository root on Windows with Python 3.12 and pip available.
+param([switch] $UsbFixture)
+
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $venv = Join-Path $root '.venv-face-impact-backend-build'
 $python = Join-Path $venv 'Scripts/python.exe'
-$dist = Join-Path $root 'out/face-impact-backend'
+$dist = if ($UsbFixture) { Join-Path $root 'out/face-impact-usb-fixture' } else { Join-Path $root 'out/face-impact-backend' }
+$entry = if ($UsbFixture) { 'tests/face_impact_usb_fixture_server.py' } else { 'scripts/face-impact-backend-entry.py' }
 $work = Join-Path $root 'out/face-impact-backend-build'
 if (!(Test-Path $python)) {
   py -3.12 -m venv $venv
@@ -18,7 +21,7 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Python backend dependency installation failed' }
 $env:PYTHONPATH = Join-Path $root 'src'
 # A one-directory backend runs directly as the process owned by Electron.
-& $python -m PyInstaller --noconfirm --clean --onedir --name OpenFlightFaceImpactBackend --paths (Join-Path $root 'src') --hidden-import engineio.async_drivers.threading --distpath $dist --workpath $work --specpath $work (Join-Path $root 'scripts/face-impact-backend-entry.py')
+& $python -m PyInstaller --noconfirm --clean --onedir --name OpenFlightFaceImpactBackend --paths (Join-Path $root 'src') --hidden-import engineio.async_drivers.threading --distpath $dist --workpath $work --specpath $work (Join-Path $root $entry)
 if ($LASTEXITCODE -ne 0) { throw 'PyInstaller backend build failed' }
 $exe = Join-Path $dist 'OpenFlightFaceImpactBackend/OpenFlightFaceImpactBackend.exe'
 if (!(Test-Path $exe -PathType Leaf)) { throw 'Missing backend EXE' }

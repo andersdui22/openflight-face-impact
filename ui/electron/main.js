@@ -89,12 +89,13 @@ async function runDashboardSmoke(win) {
   const expectsRejectedShot = process.env.OPENFLIGHT_GATE11_EXPECT_REJECTED_SHOT === '1';
   const closeMode = process.env.OPENFLIGHT_GATE11_CLOSE_MODE ?? 'internal';
   const resultPath = process.env.OPENFLIGHT_GATE11_RESULT;
+  const usbFixture = process.env.OPENFLIGHT_GATE11_USB_FIXTURE === '1';
   try {
     if (backendReady !== expectsBackend) {
       throw new Error(`Expected mock backend ready=${expectsBackend}, got ${backendReady}`);
     }
     const result = await win.webContents.executeJavaScript(`
-      (async (expectsBackend, expectsSavedSession, expectsRejectedShot) => {
+      (async (expectsBackend, expectsSavedSession, expectsRejectedShot, usbFixture) => {
         const waitFor = async (predicate, message) => {
           for (let attempt = 0; attempt < 100; attempt++) {
             const value = predicate();
@@ -121,8 +122,44 @@ async function runDashboardSmoke(win) {
           throw new Error('Expected six dashboard panels');
         }
         const preview = dashboard.querySelector('[aria-label="USB camera preview"]');
-        const cameraStatus = expectsBackend ? 'Camera: disabled' : 'Camera: offline';
-        await waitFor(() => preview?.textContent.includes(cameraStatus), 'Expected ' + cameraStatus);
+        let cameraStatus = expectsBackend ? 'Camera: disabled' : 'Camera: offline';
+        if (usbFixture) {
+          const control = async (action) => {
+            const response = await fetch('http://127.0.0.1:8080/api/test/usb-camera/' + action, {
+              method: 'POST',
+              headers: { 'X-OpenFlight-Smoke': 'usb-fixture' },
+            });
+            if (!response.ok) throw new Error('USB fixture action failed: ' + action);
+            return response.json();
+          };
+          const width = () => preview.querySelector('img')?.naturalWidth;
+          await waitFor(() => width() === 96, 'Expected delivered USB fixture preview at 96 pixels');
+          const capture = await control('trigger');
+          if (JSON.stringify(capture.frame_sizes) !== '[[96,64],[96,64]]' ||
+              !capture.host_clock_aliases.every(Boolean) ||
+              capture.rejection !== 'independent sensor timestamp unavailable') {
+            throw new Error('USB trigger lost raster or timing provenance');
+          }
+          await control('disconnect');
+          await waitFor(() => !width() && preview.textContent.includes('disconnected'),
+            'USB fixture disconnect did not clear preview');
+          if (!(await control('restart')).previous_handle_released) {
+            throw new Error('USB fixture reopened without releasing the old handle');
+          }
+          await waitFor(() => width() === 80 && !preview.querySelector('[role="alert"]'),
+            'USB fixture recovery did not deliver the new raster');
+          if (!preview.textContent.includes('Calibration profile incompatible with camera mode') ||
+              !dashboard.textContent.includes('No measured impacts yet')) {
+            throw new Error('USB fixture did not report incompatible calibration without measurements');
+          }
+          cameraStatus = 'Camera: recovered USB fixture';
+          const recovered = await control('trigger');
+          if (JSON.stringify(recovered.frame_sizes) !== '[[80,48],[80,48]]') {
+            throw new Error('USB fixture recovery retained a stale raster');
+          }
+        } else {
+          await waitFor(() => preview?.textContent.includes(cameraStatus), 'Expected ' + cameraStatus);
+        }
         const marker = () => dashboard.querySelector('[data-testid="synthetic-impact-marker"]');
         if (expectsBackend) {
           await waitFor(marker, 'Mock backend did not render a synthetic impact marker');
@@ -193,9 +230,9 @@ async function runDashboardSmoke(win) {
           if (marker()) throw new Error('Disconnected dashboard displayed a synthetic marker');
         }
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        return { ok: true, panels: panels.length, backend_ready: expectsBackend,
+        return { ok: true, panels: panels.length, backend_ready: expectsBackend, usb_fixture: usbFixture,
           camera: cameraStatus, restored_session: expectsSavedSession };
-      })(${JSON.stringify(expectsBackend)}, ${JSON.stringify(expectsSavedSession)}, ${JSON.stringify(expectsRejectedShot)})
+      })(${JSON.stringify(expectsBackend)}, ${JSON.stringify(expectsSavedSession)}, ${JSON.stringify(expectsRejectedShot)}, ${JSON.stringify(usbFixture)})
     `);
     if (expectsSavedSession) {
       await verifySessionDownload(win, join(dirname(resultPath), 'exported-session-' + basename(resultPath)), expectsRejectedShot);

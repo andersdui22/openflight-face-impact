@@ -1,5 +1,6 @@
 """Hardware-free tests of the Windows USB adapter."""
 import time
+from threading import Event
 
 import numpy as np
 import pytest
@@ -346,3 +347,36 @@ def test_usb_copies_reused_grayscale_source_and_blocks_trigger_after_stop():
     image.fill(255)
     assert not before.image.any()
     assert not camera.trigger()
+
+
+def test_usb_restart_waits_for_current_session_frames_before_reporting_delivery():
+    first = FakeCamera(fail_after=2)
+    allow_read = Event()
+
+    class DelayedCamera(FakeCamera):
+        def read(self):
+            if not allow_read.wait(2):
+                return False, None
+            return super().read()
+
+    devices = iter((first, DelayedCamera()))
+    camera = WindowsUsbCamera(camera_factory=lambda _index: next(devices))
+    camera.start()
+    try:
+        wait_until(lambda: camera.frames_received == 2)
+        assert camera.delivered_size == (12, 8)
+        camera.stop()
+        camera.start()
+
+        assert first.released
+        assert camera.is_running
+        assert camera.frames_received == 0
+        assert camera.delivered_size is None
+        assert camera.ring.latest_frame is None
+
+        allow_read.set()
+        wait_until(lambda: camera.frames_received > 0)
+        assert camera.delivered_size == (12, 8)
+    finally:
+        allow_read.set()
+        camera.stop()

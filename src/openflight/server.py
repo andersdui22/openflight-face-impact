@@ -1686,11 +1686,9 @@ def windows_usb_camera_status():
     # proves physical camera mode/crop identity or club geometry compatibility.
     profile_path = os.environ.get("OPENFLIGHT_FACE_IMPACT_CALIBRATION_PROFILE")
     binding_path = os.environ.get("OPENFLIGHT_FACE_IMPACT_CALIBRATION_CLUB_BINDING")
-    calibration = load_revision_bound_calibration_status(
-        profile_path or None, binding_path or None
-    )
     camera = windows_usb_runtime
     if camera is None:
+        calibration = load_revision_bound_calibration_status(profile_path or None, binding_path or None)
         return jsonify({"enabled": False, "state": "disabled", "calibration": calibration})
     if camera.last_error:
         state = "error"
@@ -1699,6 +1697,10 @@ def windows_usb_camera_status():
     else:
         state = "stopped"
     measured_fps = getattr(camera, "delivered_fps", None) if state == "running" else None
+    delivered_size = getattr(camera, "delivered_size", None) if state == "running" else None
+    calibration = load_revision_bound_calibration_status(
+        profile_path or None, binding_path or None, image_size=delivered_size
+    )
     return jsonify({
         "enabled": True,
         "state": state,
@@ -1708,6 +1710,7 @@ def windows_usb_camera_status():
         "timestamp_source": "host_arrival_monotonic",
         "actual_fps_measured": measured_fps is not None,
         "delivered_fps": measured_fps,
+        "delivered_size": delivered_size,
         "calibration": calibration,
     })
 

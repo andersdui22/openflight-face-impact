@@ -6,10 +6,9 @@ const PORT = 5173;
 const HOST = '127.0.0.1';
 const BASE_URL = `http://${HOST}:${PORT}`;
 const CONFIG_DIR = fileURLToPath(new URL('.', import.meta.url));
-const BACKEND_ARGS = `--mock --host ${HOST} --web-port 8080 --no-logging`;
 // Synthetic Face Impact imports OpenCV from the existing optional camera extra.
 // This installs the dependency for CI without initializing or opening a camera.
-const BACKEND_COMMAND = `uv run --extra camera openflight-server ${BACKEND_ARGS}`;
+const BACKEND_COMMAND = 'uv run --extra camera python tests/face_impact_usb_fixture_server.py';
 
 const E2E_PROFILES_PATH = uniqueE2eProfilesPath();
 

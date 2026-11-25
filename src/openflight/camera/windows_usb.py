@@ -56,6 +56,15 @@ class WindowsUsbCamera:
         return self._frames
 
     @property
+    def delivered_size(self) -> tuple[int, int] | None:
+        """Width and height of the latest delivered frame, in pixels."""
+        frame = self.ring.latest_frame
+        if frame is None:
+            return None
+        height, width = frame.image.shape
+        return width, height
+
+    @property
     def delivered_fps(self) -> float | None:
         """Observed frame arrivals over a rolling window, not sensor FPS."""
         with self._arrival_lock:
@@ -103,6 +112,7 @@ class WindowsUsbCamera:
         self._last_error = None
         with self._arrival_lock:
             self._arrival_times_ns.clear()
+            self._frames = 0
         self._stop.clear()
         self._thread = threading.Thread(target=self._read_loop, name="openflight-usb-reader", daemon=True)
         self._thread.start()
