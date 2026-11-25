@@ -10,6 +10,7 @@ on:
       - scripts/face-impact-backend-entry.py
       - src/openflight/camera/offline_capture_recording.py
       - src/openflight/camera/offline_recorded_replay.py
+      - src/openflight/camera/offline_marker_runner.py
       - src/openflight/camera/offline_recording_cli.py
       - src/openflight/camera/synthetic_offline_impact_demo.py
       - tests/windows_packaged_smoke.ps1

@@ -136,3 +136,11 @@ def test_extra_plausible_marker_rejects_entire_raster_batch():
     cv.circle(ambiguous, (110, 120), 5, 255, -1)
     with pytest.raises(ValueError, match="unexpected blob count"):
         _run({0: image, 1: ambiguous})
+
+
+@pytest.mark.parametrize("point", [(-0.1, 50.), (320., 50.), (40., 240.)])
+def test_out_of_raster_reference_is_rejected_before_correspondence(point):
+    image, *_, reference = _inputs()
+    reference[1] = point
+    with pytest.raises(ValueError, match="reference pixels outside capture frame"):
+        _run({0: image}, reference=reference)

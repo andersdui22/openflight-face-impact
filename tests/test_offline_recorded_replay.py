@@ -109,3 +109,22 @@ def test_replay_rejects_identity_profile_geometry_and_host_alias(tmp_path):
     ]:
         with pytest.raises(RecordedReplayRejected, match=message):
             prepare_recorded_replay(path, **(options | patch))
+
+
+def test_replay_rejects_monotonic_frames_when_trigger_is_outside_capture(tmp_path):
+    scene = np.tile(np.arange(32, dtype=np.uint8) * 4 + 16, (16, 1))
+    first = CameraFrame(scene, 100, 200, 1, 1.)
+    second = replace(first, sensor_timestamp_ns=150, host_timestamp_ns=250)
+    capture = TriggeredCapture((first, second), 1, 199, "shot", "session")
+    path = save_offline_capture(tmp_path, capture, app_sha=SHA, source="synthetic_fixture")
+    mode = "fixture:mode"
+    profile = CameraCalibrationProfile(
+        CheckerboardCalibration((32, 16), np.diag([30., 30., 1.]), np.zeros(5), 0., (0.,)), mode,
+    )
+    club = ClubFaceModel(ClubFamily.IRON, "fixture", FaceSurface.PLANAR, 80., 40., evidence_source="fixture")
+    binding = CalibrationClubBinding(calibration_revision(profile), club.model_id, club_geometry_revision(club))
+    admission = RecordedCaptureAdmission(capture_fingerprint(capture), SHA, "synthetic_fixture",
+                                         "fixture:camera", mode, binding)
+    with pytest.raises(RecordedReplayRejected, match="trigger not bracketed"):
+        prepare_recorded_replay(path, admission=admission, camera_identity="fixture:camera",
+                                profile=profile, club=club, max_sensor_gap_ns=100, max_host_gap_ns=100)

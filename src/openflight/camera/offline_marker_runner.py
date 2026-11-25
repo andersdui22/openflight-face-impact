@@ -66,6 +66,10 @@ def analyze_marker_observed_offline_capture(
         if (not isinstance(image, np.ndarray)
                 or image.shape[:2] != capture.frames[frame_index].image.shape[:2]):
             raise ValueError("marker image dimensions differ from capture frame")
+        height, width = image.shape[:2]
+        if (np.any(reference_pixels_px < 0) or np.any(reference_pixels_px[:, 0] >= width)
+                or np.any(reference_pixels_px[:, 1] >= height)):
+            raise ValueError("marker reference pixels outside capture frame")
         observation = extract_unlabelled_bright_markers(
             image,
             threshold=marker_threshold,

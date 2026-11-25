@@ -20,7 +20,9 @@ uncompressed members without filesystem extraction. A ZIP is self-consistent
 evidence and is not a trusted receipt by itself.
 
 The existing marker runner still detects and associates fiducials against the
-controlled per-frame reference. It receives identical stored raster bytes and
+controlled per-frame reference. The reference must lie within the captured
+raster, and host frames must bracket the trigger before landmark or geometry
+analysis. The runner receives identical stored raster bytes and
 runs the existing pose, geometry and result quality contracts. Diagnostics
 identify integrity, independent provenance, camera identity, binding, timing
 or frame quality, and marker or geometry failure. An unadmitted capture cannot

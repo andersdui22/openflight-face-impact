@@ -10,6 +10,7 @@ from .calibration_profile import CameraCalibrationProfile
 from .club_face_model import ClubFaceModel
 from .offline_capture_preflight import preflight_offline_capture
 from .offline_capture_recording import load_offline_capture
+from .trigger_timing_quality import assess_trigger_timing
 
 
 @dataclass(frozen=True)
@@ -68,6 +69,10 @@ def prepare_recorded_replay(
         require_calibration_club_binding(admission.binding, profile=profile, club_model=club)
     except ValueError as error:
         raise RecordedReplayRejected("calibration_binding", str(error)) from error
+
+    timing = assess_trigger_timing(recording.capture)
+    if not timing.valid:
+        raise RecordedReplayRejected("timing_or_frame_quality", timing.reason)
 
     try:
         preflight = preflight_offline_capture(
