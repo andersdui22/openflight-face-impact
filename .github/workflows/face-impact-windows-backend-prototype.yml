@@ -8,6 +8,10 @@ on:
       - scripts/face-impact-windows-backend-requirements.txt
       - scripts/build-face-impact-windows.ps1
       - scripts/face-impact-backend-entry.py
+      - src/openflight/camera/offline_capture_recording.py
+      - src/openflight/camera/offline_recorded_replay.py
+      - src/openflight/camera/offline_recording_cli.py
+      - src/openflight/camera/synthetic_offline_impact_demo.py
       - tests/windows_packaged_smoke.ps1
       - tests/face_impact_usb_fixture_server.py
       - ui/electron/main.js
@@ -24,6 +28,8 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
@@ -35,6 +41,30 @@ jobs:
       - name: Build development-only backend EXE
         shell: pwsh
         run: ./scripts/build-face-impact-backend-windows.ps1
+      - name: Verify frozen offline recording replay and session archive
+        shell: pwsh
+        run: |
+          $exe = Resolve-Path 'out/face-impact-backend/OpenFlightFaceImpactBackend/OpenFlightFaceImpactBackend.exe'
+          $evidence = Join-Path $env:RUNNER_TEMP 'offline-recording'
+          $appSha = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot identify packaged backend source' }
+          $recorded = & $exe --offline-recording --record $evidence --app-sha $appSha
+          if ($LASTEXITCODE -ne 0) { throw 'Frozen fixture recording failed' }
+          $zip = Get-ChildItem -LiteralPath $evidence -Filter '*.zip'
+          if (@($zip).Count -ne 1) { throw 'Expected one lossless recording' }
+          $database = Join-Path $evidence 'face-impact.sqlite3'
+          $replayed = & $exe --offline-recording --replay $zip.FullName --app-sha $appSha --archive $database
+          if ($LASTEXITCODE -ne 0 -or $recorded -cne $replayed) { throw 'Frozen replay differed from fresh analysis' }
+          $result = $replayed | ConvertFrom-Json
+          if (!$result.accepted -or $result.physically_validated -ne $false -or !(Test-Path $database)) {
+            throw 'Expected archived synthetic impact evidence'
+          }
+          Set-Content -LiteralPath (Join-Path $evidence 'replay-result.json') -Value $replayed
+      - name: Upload frozen replay evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: face-impact-offline-recording-replay
+          path: ${{ runner.temp }}/offline-recording/
       - name: Verify backend health over loopback
         shell: pwsh
         run: |
