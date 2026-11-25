@@ -477,3 +477,32 @@ def test_reader_rejects_shape_change_before_a_capture_can_mix_rasters():
         assert camera.trigger() is False
     finally:
         camera.stop()
+
+
+def test_bound_provider_rejects_other_handle_after_disconnect():
+    expected = "USB\\VID_0001\\CAMERA-A"
+    first = FakeCamera(fail_after=3)
+    first.opened_identity = expected
+    other = FakeCamera()
+    other.opened_identity = "USB\\VID_0001\\CAMERA-B"
+    candidate = first
+    requested = []
+
+    def open_identity(identity):
+        requested.append(identity)
+        return candidate
+
+    camera = WindowsUsbCamera(selected_identity=expected, identity_factory=open_identity)
+    camera.start()
+    wait_until(lambda: not camera.is_running)
+    assert camera.identity_diagnostics["status"] == "continuity_lost"
+    assert camera.identity_diagnostics["opened"] is None
+    camera.stop()
+    candidate = other
+    with pytest.raises(RuntimeError, match="does not match"):
+        camera.start()
+    assert first.released and other.released
+    assert camera.identity_diagnostics["status"] == "identity_mismatch"
+    assert camera.capture_preview_jpeg() is None
+    assert not camera.trigger()
+    assert requested == [expected, expected]
