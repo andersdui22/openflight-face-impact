@@ -36,6 +36,7 @@ export function OfflineRecordingImport({
   const id = useId();
   const [file, setFile] = useState<File | null>(null);
   const [items, setItems] = useState<Recording[]>([]);
+  const [confirmRemoval, setConfirmRemoval] = useState(false);
   const [selected, setSelected] = useState('');
   const [fixtureCase, setFixtureCase] = useState('contact');
   const [pending, setPending] = useState(false);
@@ -145,7 +146,14 @@ export function OfflineRecordingImport({
         </button>
         <label>
           Imported recording
-          <select value={selected} disabled={disabled} onChange={(event) => setSelected(event.target.value)}>
+          <select
+            value={selected}
+            disabled={disabled}
+            onChange={(event) => {
+              setSelected(event.target.value);
+              setConfirmRemoval(false);
+            }}
+          >
             <option value="">Select a recording</option>
             {items.map((item) => (
               <option key={item.zip_sha} value={item.zip_sha}>
@@ -161,6 +169,37 @@ export function OfflineRecordingImport({
           Replay recording
         </button>
       </div>
+      {recording && (
+        <div className="impact-controls__fields">
+          {confirmRemoval ? (
+            <>
+              <button
+                disabled={disabled}
+                onClick={() =>
+                  void run(async () => {
+                    await recordingRequest('/remove-import', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ digest: selected }),
+                    });
+                    setSelected('');
+                    setConfirmRemoval(false);
+                    await refresh();
+                    setStatus('Imported ZIP removed. Receipt and session history retained.');
+                  })
+                }
+              >
+                Confirm remove imported ZIP
+              </button>
+              <button onClick={() => setConfirmRemoval(false)}>Cancel</button>
+            </>
+          ) : (
+            <button disabled={disabled} onClick={() => setConfirmRemoval(true)}>
+              Remove imported ZIP
+            </button>
+          )}
+        </div>
+      )}
       {recording && (
         <dl aria-label="Recording revisions" style={{ overflowWrap: 'anywhere' }}>
           <dt>Status</dt>
