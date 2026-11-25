@@ -6,9 +6,14 @@ const PORT = 5173;
 const HOST = '127.0.0.1';
 const BASE_URL = `http://${HOST}:${PORT}`;
 const CONFIG_DIR = fileURLToPath(new URL('.', import.meta.url));
+const BACKEND_ARGS = `--mock --host ${HOST} --web-port 8080 --no-logging`;
+const USB_FIXTURE = process.env.OPENFLIGHT_PLAYWRIGHT_USB_FIXTURE === '1';
+const USB_FIXTURE_SPEC = '**/face-impact-usb-fixture.spec.ts';
 // Synthetic Face Impact imports OpenCV from the existing optional camera extra.
 // This installs the dependency for CI without initializing or opening a camera.
-const BACKEND_COMMAND = 'uv run --extra camera python tests/face_impact_usb_fixture_server.py';
+const BACKEND_COMMAND = USB_FIXTURE
+  ? 'uv run --extra camera python tests/face_impact_usb_fixture_server.py'
+  : `uv run --extra camera openflight-server ${BACKEND_ARGS}`;
 
 const E2E_PROFILES_PATH = uniqueE2eProfilesPath();
 
@@ -23,11 +28,15 @@ function backendEnv(): { [key: string]: string } {
 
 export default defineConfig({
   testDir: './tests/e2e',
-  testMatch: '**/*.spec.ts',
+  testMatch: USB_FIXTURE ? USB_FIXTURE_SPEC : '**/*.spec.ts',
+  testIgnore: USB_FIXTURE ? [] : [USB_FIXTURE_SPEC],
+  ...(USB_FIXTURE && { outputDir: 'test-results/usb-fixture' }),
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 2 : 0,
-  reporter: process.env.CI ? [['html', { outputFolder: 'playwright-report', open: 'never' }], ['github']] : 'list',
+  reporter: process.env.CI
+    ? [['html', { outputFolder: USB_FIXTURE ? 'playwright-report-usb' : 'playwright-report', open: 'never' }], ['github']]
+    : 'list',
   use: {
     baseURL: BASE_URL,
     trace: 'retain-on-failure',
