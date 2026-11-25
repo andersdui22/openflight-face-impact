@@ -114,6 +114,44 @@ async function verifySessionDownload(win, path, expectsRejectedShot) {
   }
 }
 
+async function verifyPackagedRecordingImport(win) {
+  return win.webContents.executeJavaScript(`
+    (async () => {
+      const api = 'http://127.0.0.1:8080/api/face-impact/recordings';
+      const headers = { 'X-OpenFlight-Recording': '1', 'Content-Type': 'application/json' };
+      const response = await fetch(api + '/fixtures', { method: 'POST', headers, body: '{"case":"contact"}' });
+      if (!response.ok) throw new Error('Packaged recording receipt creation failed');
+      const { digest } = await response.json();
+      const zip = await fetch(api + '/' + digest, { headers });
+      if (!zip.ok) throw new Error('Packaged sample ZIP unavailable');
+      const panel = document.querySelector('[aria-label="Recorded synthetic captures"]');
+      panel.querySelector('summary').click();
+      const findButton = (label) => [...panel.querySelectorAll('button')].find((item) => item.textContent.trim() === label);
+      const wait = async (predicate, message) => {
+        for (let attempt = 0; attempt < 100; attempt++) {
+          if (predicate()) return;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        throw new Error(message + ': ' + (panel.querySelector('[role="alert"]')?.textContent || 'timeout'));
+      };
+      const input = panel.querySelector('input[type="file"]');
+      await wait(() => !input.disabled, 'Recording picker unavailable');
+      const files = new DataTransfer();
+      files.items.add(new File([await zip.blob()], 'fixture.zip', { type: 'application/zip' }));
+      input.files = files.files;
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      await wait(() => !findButton('Import recording').disabled, 'Import action unavailable');
+      findButton('Import recording').click();
+      await wait(() => panel.textContent.includes('Independent synthetic receipt matched'), 'Receipt did not match');
+      findButton('Replay recording').click();
+      await wait(() => panel.textContent.includes('Synthetic replay accepted and saved'), 'Replay did not save');
+      panel.scrollIntoView({ block: 'start' });
+      await new Promise(requestAnimationFrame);
+      return true;
+    })()
+  `);
+}
+
 async function runDashboardSmoke(win) {
   const expectsBackend = process.env.OPENFLIGHT_GATE11_EXPECT_BACKEND === '1';
   const expectsSavedSession = process.env.OPENFLIGHT_GATE11_EXPECT_SAVED_SESSION === '1';
@@ -271,6 +309,7 @@ async function runDashboardSmoke(win) {
     result.exported_session = expectsSavedSession;
     result.reconnected = expectsBackend && !expectsSavedSession;
     if (result.reconnected) await verifyRendererReconnect(win);
+    if (expectsRejectedShot) result.recording_import = await verifyPackagedRecordingImport(win);
     const shot = await win.webContents.capturePage();
     const { width, height } = shot.getSize();
     if (width < 800 || height < 400) {

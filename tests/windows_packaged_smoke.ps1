@@ -44,7 +44,7 @@ for ($launch = 1; $launch -le $closeModes.Count; $launch++) {
     if (!$result.ok) { throw "Packaged Electron smoke failed: $($result.error)" }
     if ($result.panels -ne 6 -or $result.backend_ready -ne $WithBackend.IsPresent -or
         $result.restored_session -ne ($launch -gt 1) -or $result.exported_session -ne ($launch -gt 1) -or
-        $result.restored_rejection -ne ($launch -eq 4) -or $result.close_mode -ne $closeMode -or
+        $result.restored_rejection -ne ($launch -eq 4) -or [bool]$result.recording_import -ne ($launch -eq 4) -or $result.close_mode -ne $closeMode -or
         $result.reconnected -ne ($WithBackend -and $launch -eq 1) -or
         $result.usb_fixture -ne [bool]$UsbFixtureExecutable) {
       throw 'Unexpected dashboard or backend state'
