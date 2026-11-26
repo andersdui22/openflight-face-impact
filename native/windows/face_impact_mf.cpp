@@ -212,7 +212,8 @@ OFI_API const wchar_t* ofi_identity(Session* session) { return session->identity
 
 struct FrameInfo {
     LONGLONG time_100ns, duration_100ns, callback_time_100ns;
-    DWORD bytes, flags, discontinuity;
+    DWORD bytes, flags;
+    UINT32 discontinuity;
 };
 OFI_API HRESULT ofi_read(Session* session, BYTE* output, DWORD capacity, FrameInfo* info) {
     ComScope com;
