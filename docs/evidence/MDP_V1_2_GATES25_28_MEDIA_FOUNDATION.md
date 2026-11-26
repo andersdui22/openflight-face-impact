@@ -72,3 +72,39 @@ Gate 22 still needs a verified exposure clock and trigger relation. At
 subframe inference in this diagnostic feature. Physical checkerboard
 quality, camera/lens revision and club/landmark evidence remain pending.
 Gates 20–28 stay open.
+
+## Operator observations from the PR #52 portable build
+
+The project owner reported the following from the physical ELP OV9281 on
+Windows against the PR #52 baseline
+[`9b33dda`](https://github.com/andersdui22/openflight-face-impact/commit/9b33ddab71698625e058c10d8a2cc64a2c0a908a):
+
+- Windows enumerated **Global Shutter Camera**. The native provider listed
+  the advertised modes, opened the chosen device and reported a matching
+  capture handle. The physical preview reacted to changing light and to
+  the operator covering and uncovering the camera.
+- Preview started at **160 × 120, 640 FPS, NV12** and at
+  **640 × 480, 30 FPS, YUY2**. These are selected mode labels. Sustained
+  delivery rates were not measured.
+- **640 × 480 at 210.00021000021 FPS** and **1280 × 800 at
+  120.00048000192001 FPS** returned “Select a valid advertised camera mode”.
+  The failed attempts do not establish whether the driver can stream those
+  modes.
+
+The baseline Python API rejected native mode integers above 65,535 before
+opening the camera. Controlled regression inputs reproduce the reported
+decimals using numerators of 10,000,000 and denominators of 47,619 and
+83,333, respectively. A third case uses 23,809 for 420.0092402032845 FPS.
+The controlled ratios reproduce the labels without asserting the operator's
+unrecorded native metadata. The corrected boundary accepts positive
+unsigned 32-bit fields. The selection key includes the exact ratio,
+dimensions and pixel format. Native negotiation still requires an exact
+match. Test evidence for the fix must be checked on its own commit.
+
+This is partial physical evidence for enumeration, identity binding and
+preview. Gates 20–28 remain open. Retest the fractional modes and record
+one diagnostic ZIP per mode. Note the selected ratio, format, delivered
+dimensions and observed FPS. Verify start after stopping, then unplug and
+reconnect, rescan if the link changes and repeat with the same physical
+device. Sustained delivery, physical export, timing, calibration and
+measurement accuracy remain open physical acceptance items.

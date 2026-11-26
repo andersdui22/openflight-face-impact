@@ -126,6 +126,29 @@ jobs:
           if (!(Test-Path 'out/OpenFlight-Face-Impact-Windows/resources/backend/_internal' -PathType Container)) {
             throw 'Packaged Electron resources missing Python backend dependencies'
           }
+      - name: Verify exact native mode round trip in the staged Windows backend
+        shell: pwsh
+        run: |
+          $exe = 'out/OpenFlight-Face-Impact-Windows/resources/backend/OpenFlightFaceImpactBackend.exe'
+          $modes = @(
+            @{width=640; height=480; numerator=30; denominator=1; format=1; pixel_format='YUY2'}
+            @{width=160; height=120; numerator=640; denominator=1; format=2; pixel_format='NV12'}
+            @{width=1280; height=800; numerator=10000000; denominator=83333; format=2; pixel_format='NV12'}
+            @{width=1280; height=800; numerator=10000000; denominator=83333; format=3; pixel_format='MJPG'}
+            @{width=640; height=480; numerator=10000000; denominator=47619; format=2; pixel_format='NV12'}
+            @{width=320; height=240; numerator=10000000; denominator=23809; format=3; pixel_format='MJPG'}
+          )
+          $json = ConvertTo-Json -InputObject $modes -Compress
+          $result = $json | & $exe --media-foundation-mode-contract
+          if ($LASTEXITCODE -ne 0) { throw 'Staged mode validation failed' }
+          $actual = $result | ConvertFrom-Json
+          if ($actual.Count -ne $modes.Count) { throw 'Staged mode count changed' }
+          for ($i = 0; $i -lt $modes.Count; $i++) {
+            foreach ($field in $modes[$i].Keys) {
+              if ($actual[$i].$field -cne $modes[$i][$field]) { throw "Staged mode $i changed $field" }
+            }
+          }
+          Write-Host 'Staged backend preserved all six exact native modes without opening a camera.'
       - name: Verify packaged connection, shutdown, backend loss and archive recovery
         shell: pwsh
         run: ./tests/windows_packaged_smoke.ps1 -WithBackend -EvidenceDirectory "$env:RUNNER_TEMP/packaged-backend"
