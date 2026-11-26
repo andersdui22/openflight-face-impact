@@ -1,6 +1,5 @@
 """Loopback camera preparation using the current adapter and ring."""
 
-import io
 import json
 import math
 import os
@@ -12,12 +11,12 @@ from dataclasses import asdict
 from hashlib import sha256
 from pathlib import Path
 from secrets import compare_digest
-from tempfile import TemporaryDirectory
+from tempfile import SpooledTemporaryFile, TemporaryDirectory
 from threading import Lock
 from time import sleep
 from zipfile import ZipFile
 
-from flask import Blueprint, Response, current_app, request
+from flask import Blueprint, current_app, request, send_file
 
 from .offline_recording_routes import _producer_sha
 from .offline_session_archive import OfflineSessionArchive
@@ -26,6 +25,7 @@ camera_setup_routes = Blueprint("camera_setup", __name__, url_prefix="/api/face-
 _lock = Lock()
 _managed = None
 FIXTURE_ID = "fixture:camera-setup-v1"
+_CAPTURE_PAYLOAD_BUDGET = 64 * 1024 * 1024
 CAPTURE_PURPOSES = ("diagnostic", "checkerboard", "club_landmarks", "setup_reference", "golf_diagnostic")
 
 
@@ -68,8 +68,7 @@ def _settings(data):
                                           or abs(value) > 10000) for value in controls):
         raise ValueError("Invalid camera control values")
     pre, post = data.get("pre_frames", 3), data.get("post_frames", 3)
-    if any(type(value) is not int or not 1 <= value <= 16 for value in (pre, post)):
-        raise ValueError("Pre-trigger and post-trigger frame counts must each be 1 to 16")
+    pre, post = (value if type(value) is int and 1 <= value <= 512 else 3 for value in (pre, post))
     if data.get("identity") == FIXTURE_ID and (
             (width, height) not in ((320, 200), (640, 400)) or fps not in (30, 60, 120)):
         raise ValueError("Unsupported fixture settings")
@@ -77,63 +76,118 @@ def _settings(data):
                              pre_frames=pre, post_frames=post, driver_exposure=controls[0], driver_gain=controls[1])
 
 
-def _record(camera, purpose):
-    from .offline_capture_recording import save_offline_capture
+def _capture_capacity(settings, pixel_format):
+    from .offline_capture_recording import MAX_RECORDING_FRAMES
 
+    pixels = settings.width * settings.height
+    native_bytes = {"YUY2": 2 * pixels, "NV12": 3 * pixels // 2, "MJPG": 4 * pixels}.get(pixel_format, 0)
+    return min(MAX_RECORDING_FRAMES, _CAPTURE_PAYLOAD_BUDGET // (pixels + native_bytes))
+
+
+def _recording_window(camera, data):
+    if "pre_ms" in data or "post_ms" in data:
+        if "pre_frames" in data or "post_frames" in data:
+            raise ValueError("Specify the recording window in frames or milliseconds")
+        durations = (data.get("pre_ms"), data.get("post_ms"))
+        if any(type(value) is not int or not 1 <= value <= 20_000 for value in durations):
+            raise ValueError("Enter 1 to 20000 milliseconds on each side of the trigger")
+        native = camera.reported_native_mode
+        if native is not None:
+            denominator = 1000 * native["denominator"]
+            pre, post = ((value * native["numerator"] + denominator - 1) // denominator for value in durations)
+        else:
+            pre, post = (math.ceil(value * camera.settings.requested_fps / 1000) for value in durations)
+    else:
+        pre = data.get("pre_frames", camera.settings.pre_frames)
+        post = data.get("post_frames", camera.settings.post_frames)
+    capacity = camera.ring.capture_capacity
+    if any(type(value) is not int or value < 1 for value in (pre, post)) or pre + post > capacity:
+        raise ValueError(f"This mode supports up to {capacity} total recording frames. Reduce the recording window.")
+    return pre, post
+
+
+def _record(camera, data):
+    from .offline_capture_recording import save_offline_capture
+    from .windows_usb import diagnostic_timing
+
+    purpose = data.get("purpose", "diagnostic")
     if purpose not in CAPTURE_PURPOSES:
         raise ValueError("Unknown diagnostic capture purpose")
-    if not camera.trigger():
-        raise ValueError("Wait for fresh pre-trigger frames before recording")
-    capture = camera.ring.wait_for_capture(2)
+    pre, post = _recording_window(camera, data)
+    if not camera.trigger(window=(pre, post)):
+        raise ValueError(f"Wait for {pre} fresh pre-trigger frames before recording")
+    capture = camera.ring.wait_for_capture(min(30, 2 + post / camera.settings.requested_fps))
     if capture is None:
+        camera.ring.cancel_capture()
         raise ValueError("No complete post-trigger frame sequence")
     producer = _producer_sha()
     identity = camera.identity_diagnostics
     physical = identity["status"] == "handle_match" and identity["backend"] == "media_foundation"
     if not physical and identity["status"] != "fixture_match":
         raise ValueError("Camera identity continuity was lost; capture cannot be exported")
-    with TemporaryDirectory() as tmp:
-        path = save_offline_capture(Path(tmp), capture, app_sha=producer, source="usb_preview_adapter")
-        combined = io.BytesIO()
-        with ZipFile(combined, "w") as package:
-            payload = path.read_bytes()
-            package.writestr("capture.zip", payload)
-            native = []
-            if physical:
-                for index, frame in enumerate(capture.frames):
-                    if frame.native_payload is None:
-                        raise ValueError("Native frame payload missing")
-                    name = f"native/{index:03}.{'jpg' if camera.reported_native_mode['pixel_format'] == 'MJPG' else 'bin'}"
-                    package.writestr(name, frame.native_payload)
-                    native.append({"file": name, "sha256": sha256(frame.native_payload).hexdigest(),
-                                   "driver_sample": frame.driver_sample,
-                                   "host_timestamp_ns": frame.host_timestamp_ns})
-            manifest = {
-                "schema_version": 1,
-                "source": "physical_camera_diagnostic" if physical else "synthetic_camera_setup_fixture",
-                "physically_validated": False, "camera_identity": identity["opened"],
-                "native_frames": native, "native_mode": camera.reported_native_mode,
-                "exposure_mode": camera.reported_exposure_mode,
-                "purpose": purpose, "capture_zip_sha256": sha256(payload).hexdigest(),
-                "identity": camera.identity_diagnostics,
-                "delivered_dimensions": [capture.frames[0].image.shape[1], capture.frames[0].image.shape[0]],
-                "host_intervals_ns": [later.host_timestamp_ns - earlier.host_timestamp_ns
-                                      for earlier, later in zip(capture.frames, capture.frames[1:])],
-                "observed_host_fps": camera.delivered_fps,
-                "sample_timestamp_source": "media_foundation_stream_sample" if physical else None,
-                "timing_source": "host_arrival_monotonic",
-                "sensor_exposure_timestamp": None,
-                "app_sha": producer, "session_id": capture.session_id, "shot_id": capture.shot_id,
-                "requested": asdict(camera.settings), "driver_reported": camera.negotiated,
-                "driver_controls": camera.reported_controls,
-            }
-            package.writestr("diagnostic.json", json.dumps(manifest, allow_nan=False))
-    archive_path = current_app.config.get("OFFLINE_IMPACT_ARCHIVE_PATH")
-    if archive_path is not None:
-        OfflineSessionArchive(archive_path).save_diagnostic_manifest(manifest)
-    return Response(combined.getvalue(), mimetype="application/zip", headers={
-        "Content-Disposition": 'attachment; filename="face-impact-diagnostic.zip"',
-    })
+    combined = SpooledTemporaryFile(max_size=1024 * 1024, mode="w+b")
+    try:
+        with TemporaryDirectory() as tmp:
+            path = save_offline_capture(Path(tmp), capture, app_sha=producer, source="usb_preview_adapter")
+            with ZipFile(combined, "w") as package:
+                with path.open("rb") as inner:
+                    digest = sha256()
+                    for block in iter(lambda: inner.read(1024 * 1024), b""):
+                        digest.update(block)
+                package.write(path, "capture.zip")
+                native = []
+                if physical:
+                    for index, frame in enumerate(capture.frames):
+                        if frame.native_payload is None:
+                            raise ValueError("Native frame payload missing")
+                        name = f"native/{index:03}.{'jpg' if camera.reported_native_mode['pixel_format'] == 'MJPG' else 'bin'}"
+                        package.writestr(name, frame.native_payload)
+                        native.append({"file": name, "sha256": sha256(frame.native_payload).hexdigest(),
+                                       "driver_sample": frame.driver_sample,
+                                       "host_timestamp_ns": frame.host_timestamp_ns})
+                manifest = {
+                    "schema_version": 1,
+                    "source": "physical_camera_diagnostic" if physical else "synthetic_camera_setup_fixture",
+                    "physically_validated": False, "camera_identity": identity["opened"],
+                    "capture_timing": diagnostic_timing(tuple((frame.host_timestamp_ns, frame.driver_sample)
+                                                               for frame in capture.frames)),
+                    "live_diagnostics": camera.native_diagnostics,
+                    "exported_frames": len(capture.frames),
+                    "adjacent_equal_native_payloads": sum(a["sha256"] == b["sha256"] for a, b in zip(native, native[1:]))
+                    if physical else None,
+                    "driver_ranges": camera.driver_ranges,
+                    "native_frames": native, "native_mode": camera.reported_native_mode,
+                    "exposure_mode": camera.reported_exposure_mode,
+                    "purpose": purpose, "capture_zip_sha256": digest.hexdigest(),
+                    "identity": camera.identity_diagnostics,
+                    "delivered_dimensions": [capture.frames[0].image.shape[1], capture.frames[0].image.shape[0]],
+                    "host_intervals_ns": [later.host_timestamp_ns - earlier.host_timestamp_ns
+                                          for earlier, later in zip(capture.frames, capture.frames[1:])],
+                    "observed_host_fps": camera.delivered_fps,
+                    "sample_timestamp_source": "media_foundation_stream_sample" if physical else None,
+                    "timing_source": "host_arrival_monotonic",
+                    "sensor_exposure_timestamp": None,
+                    "app_sha": producer, "session_id": capture.session_id, "shot_id": capture.shot_id,
+                    "recording_window": {"pre_frames": pre, "post_frames": post,
+                                         "requested_ms": [data["pre_ms"], data["post_ms"]] if "pre_ms" in data else None},
+                    "requested": asdict(camera.settings), "driver_reported": camera.negotiated,
+                    "driver_controls": camera.reported_controls,
+                }
+                package.writestr("diagnostic.json", json.dumps(manifest, allow_nan=False))
+        archive_path = current_app.config.get("OFFLINE_IMPACT_ARCHIVE_PATH")
+        if archive_path is not None:
+            OfflineSessionArchive(archive_path).save_diagnostic_manifest(manifest)
+        byte_count = combined.tell()
+        combined.seek(0)
+        response = send_file(combined, mimetype="application/zip", as_attachment=True,
+                             download_name="face-impact-diagnostic.zip")
+        response.content_length = byte_count
+        response.headers["X-OpenFlight-Exported-Frames"] = str(len(capture.frames))
+        response.headers["Access-Control-Expose-Headers"] = "X-OpenFlight-Exported-Frames"
+        return response
+    except Exception:
+        combined.close()
+        raise
 
 
 @camera_setup_routes.post("/<action>")
@@ -211,7 +265,7 @@ def _camera_action(action, server):
         if action == "record":
             if current is None:
                 raise ValueError("Start the diagnostic fixture first")
-            return _record(current, data.get("purpose", "diagnostic"))
+            return _record(current, data)
         if action == "modes":
             if data.get("activate_physical") is not True:
                 raise ValueError("Enable physical diagnostics before querying native modes")
@@ -223,14 +277,12 @@ def _camera_action(action, server):
             if identity == FIXTURE_ID:
                 settings = _settings(data)
                 factory = lambda _identity: DiagnosticFixture(settings)
+                pixel_format = None
             else:
                 identity = _physical_identity(data)
                 if data.get("activate_physical") is not True:
                     raise ValueError("Explicit physical diagnostic activation is required")
-                pre, post = data.get("pre_frames", 3), data.get("post_frames", 3)
-                if any(type(value) is not int or not 1 <= value <= 16 for value in (pre, post)):
-                    raise ValueError("Invalid diagnostic window")
-                mode = validated_mode(data.get("mode"), 2 * pre + post + 2)
+                mode = validated_mode(data.get("mode"))
                 if any(value is not None and type(value) is not int for value in (data.get("exposure"), data.get("gain"))):
                     raise ValueError("Native driver controls require integers")
                 exposure_mode = data.get("exposure_mode", "unchanged")
@@ -241,9 +293,11 @@ def _camera_action(action, server):
                 settings = _settings({**data, "width": mode.width, "height": mode.height,
                                       "fps": mode.numerator / mode.denominator})
                 factory = lambda link: MediaFoundationCamera(link, mode, exposure_mode)
+                pixel_format = mode.settings()["pixel_format"]
             if current is not None:
                 current.stop()
-            _managed = WindowsUsbCamera(settings, selected_identity=identity, identity_factory=factory)
+            _managed = WindowsUsbCamera(settings, selected_identity=identity, identity_factory=factory,
+                                        diagnostic_capacity=_capture_capacity(settings, pixel_format))
             server.windows_usb_runtime = _managed
             _managed.start()
             return {"source": identity}

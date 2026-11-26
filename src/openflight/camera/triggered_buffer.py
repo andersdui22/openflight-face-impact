@@ -45,7 +45,7 @@ class TriggeredCapture:
 class TriggeredFrameBuffer:
     """Continuously retain pre-trigger frames and freeze a post-trigger tail."""
 
-    def __init__(self, pre_trigger_frames: int, post_trigger_frames: int):
+    def __init__(self, pre_trigger_frames: int, post_trigger_frames: int, *, capacity: int | None = None):
         if pre_trigger_frames < 1:
             raise ValueError("pre_trigger_frames must be at least 1")
         if post_trigger_frames < 1:
@@ -53,7 +53,9 @@ class TriggeredFrameBuffer:
 
         self.pre_trigger_frames = pre_trigger_frames
         self.post_trigger_frames = post_trigger_frames
-        self._pre: Deque[CameraFrame] = deque(maxlen=pre_trigger_frames)
+        self._pre: Deque[CameraFrame] = deque(maxlen=capacity - 1 if capacity is not None else pre_trigger_frames)
+        self._capacity = capacity
+        self._active_post_count = post_trigger_frames
         self._post: list[CameraFrame] = []
         self._frozen_pre: tuple[CameraFrame, ...] = ()
         self._trigger_ns = 0
@@ -63,6 +65,7 @@ class TriggeredFrameBuffer:
         self._pending_shot_id: str | None = None
         self._condition = threading.Condition()
         self._reset_generation = 0
+        self._history_evictions = 0
 
     def reset(self) -> None:
         """Start a new acquisition session and discard stale capture state.
@@ -75,6 +78,7 @@ class TriggeredFrameBuffer:
             self._session_id = uuid.uuid4().hex
             self._pending_shot_id = None
             self._pre.clear()
+            self._history_evictions = 0
             self._post.clear()
             self._frozen_pre = ()
             self._trigger_ns = 0
@@ -118,11 +122,13 @@ class TriggeredFrameBuffer:
         """Add one frame from the camera callback."""
         with self._condition:
             if not self._capturing:
+                if len(self._pre) == self._pre.maxlen:
+                    self._history_evictions += 1
                 self._pre.append(frame)
                 return
 
             self._post.append(frame)
-            if len(self._post) < self.post_trigger_frames:
+            if len(self._post) < self._active_post_count:
                 return
 
             frames = self._frozen_pre + tuple(self._post)
@@ -140,16 +146,20 @@ class TriggeredFrameBuffer:
             self._frozen_pre = ()
             self._condition.notify_all()
 
-    def trigger(self, host_timestamp_ns: Optional[int] = None) -> bool:
+    def trigger(self, host_timestamp_ns: Optional[int] = None, *, window: tuple[int, int] | None = None) -> bool:
         """Freeze the current pre-trigger ring and begin collecting the tail."""
+        pre, post = window or (self.pre_trigger_frames, self.post_trigger_frames)
+        if window is not None and (self._capacity is None or min(pre, post) < 1 or pre + post > self._capacity):
+            raise ValueError("Requested capture window exceeds ring capacity")
         with self._condition:
             if (
                 self._capturing
                 or self._ready is not None
-                or len(self._pre) < self.pre_trigger_frames
+                or len(self._pre) < pre
             ):
                 return False
-            self._frozen_pre = tuple(self._pre)
+            self._frozen_pre = tuple(self._pre)[-pre:]
+            self._active_post_count = post
             self._pre.clear()
             self._post = []
             self._trigger_ns = host_timestamp_ns if host_timestamp_ns is not None else time.monotonic_ns()
@@ -170,6 +180,24 @@ class TriggeredFrameBuffer:
             capture = self._ready
             self._ready = None
             return capture
+
+    def cancel_capture(self) -> None:
+        with self._condition:
+            self._capturing = False
+            self._pending_shot_id = None
+            self._post.clear()
+            self._frozen_pre = ()
+            self._ready = None
+
+    def diagnostics(self) -> dict:
+        with self._condition:
+            return {"history_frames": len(self._pre), "history_capacity": self._pre.maxlen,
+                    "capture_capacity": self._capacity, "history_evictions": self._history_evictions,
+                    "capture_in_progress": self._capturing}
+
+    @property
+    def capture_capacity(self) -> int | None:
+        return self._capacity
 
     def pop_capture(self) -> Optional[TriggeredCapture]:
         """Consume a completed capture without blocking."""

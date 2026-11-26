@@ -1713,6 +1713,8 @@ def windows_usb_camera_status():
         "frames_received": camera.frames_received,
         "requested": vars(camera.settings) if getattr(camera, "settings", None) is not None else None,
         "last_error": error,
+        "capture_diagnostics": getattr(camera, "native_diagnostics", None),
+        "driver_ranges": getattr(camera, "driver_ranges", None),
         "last_frame_age_ms": getattr(camera, "last_frame_age_ms", None),
         "negotiated": camera.negotiated,
         "timestamp_source": "host_arrival_monotonic",

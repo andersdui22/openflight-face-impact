@@ -12,8 +12,8 @@ test('configures the diagnostic camera and exports buffered host-timed frames', 
   await setup.getByLabel('Requested resolution').selectOption('640x400');
   await setup.getByLabel('Exposure (driver units)').fill('-6');
   await setup.getByLabel('Gain (driver units)').fill('10');
-  await setup.getByLabel('Frames before trigger').fill('4');
-  await setup.getByLabel('Frames after trigger').fill('5');
+  await setup.getByLabel('Frames before trigger').fill('18');
+  await setup.getByLabel('Frames after trigger').fill('20');
   await setup.getByLabel('Capture purpose').selectOption('checkerboard');
   await setup.getByRole('button', { name: 'Start or reconnect fixture' }).click();
   try {
@@ -26,6 +26,9 @@ test('configures the diagnostic camera and exports buffered host-timed frames', 
     ]);
     expect(recording.suggestedFilename()).toBe('face-impact-diagnostic.zip');
     await expect(setup.getByText('Diagnostic capture exported', { exact: false })).toBeVisible();
+    await expect(setup.getByText(/Unknown \/ [0-9]+ \/ 38/)).toBeVisible();
+    await setup.getByLabel('Recording window units').selectOption('ms');
+    await expect(setup.getByLabel('Milliseconds before trigger')).toBeVisible();
     const screenshot = info.outputPath('camera-setup.png');
     await setup.screenshot({ path: screenshot });
     await info.attach('camera-setup', { path: screenshot, contentType: 'image/png' });

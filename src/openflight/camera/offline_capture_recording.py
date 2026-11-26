@@ -17,7 +17,7 @@ from .offline_capture_batch import capture_fingerprint
 from .triggered_buffer import CameraFrame, TriggeredCapture
 
 _MAX_CAPTURE_BYTES = 64 * 1024 * 1024
-_MAX_FRAMES = 512
+MAX_RECORDING_FRAMES = 512
 
 
 def save_offline_capture(
@@ -31,7 +31,7 @@ def save_offline_capture(
     if not re.fullmatch(r"[0-9a-f]{40}", app_sha) or source not in ("usb_preview_adapter", "synthetic_fixture"):
         raise ValueError("app SHA and known acquisition source required")
     if (not capture.shot_id or not capture.session_id
-            or not 0 < capture.pre_trigger_count < len(capture.frames) <= _MAX_FRAMES):
+            or not 0 < capture.pre_trigger_count < len(capture.frames) <= MAX_RECORDING_FRAMES):
         raise ValueError("complete capture and shot/session identity required")
 
     shape = capture.frames[0].image.shape
@@ -137,7 +137,7 @@ def _read_manifest(archive):
     width, height, pre, trigger = (manifest[key] for key in
                                     ("width", "height", "pre_trigger_count", "trigger_host_timestamp_ns"))
     if (not all(_uint(value) for value in (width, height, pre, trigger))
-            or not isinstance(frames, list) or not 0 < pre < len(frames) <= _MAX_FRAMES
+            or not isinstance(frames, list) or not 0 < pre < len(frames) <= MAX_RECORDING_FRAMES
             or not width or not height or width * height * len(frames) > _MAX_CAPTURE_BYTES):
         raise ValueError("invalid recording dimensions or capture window")
     expected = {"manifest.json", *(f"frames/{index:04d}.gray8" for index in range(len(frames)))}
