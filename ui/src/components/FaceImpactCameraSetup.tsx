@@ -11,9 +11,16 @@ type Mode = {
   format: number;
   pixel_format: string;
 };
+const fpsLabel = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1, useGrouping: false });
+
+function modeKey(mode: Mode) {
+  return [mode.width, mode.height, mode.numerator, mode.denominator, mode.format].join(':');
+}
+
 type Device = { identity: string; name: string; status: string };
 
 export interface CameraDiagnostics {
+  last_error?: string | null;
   requested?: { width: number; height: number; requested_fps: number } | null;
   negotiated?: { width: number | null; height: number | null; reported_fps: number | null } | null;
   delivered_size?: [number, number] | null;
@@ -74,6 +81,7 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
+  const selectedMode = modes.find((mode) => modeKey(mode) === nativeMode);
   const discovered = devices.some((device) => device.identity === identity);
   const finite = (value?: number | null) => (value == null ? 'Unknown' : value.toFixed(1));
 
@@ -112,6 +120,8 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
             value={identity}
             onChange={(event) => {
               setIdentity(event.target.value);
+              setModes([]);
+              setNativeMode('');
               localStorage.setItem(storageKey, event.target.value);
             }}
           >
@@ -134,8 +144,15 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
               onClick={() =>
                 void run(async () => {
                   const response = await (await setupRequest('modes', { identity, activate_physical: true })).json();
-                  setModes(response.modes);
-                  setNativeMode(response.modes.length ? '0' : '');
+                  const advertised: Mode[] = response.modes;
+                  setModes(advertised);
+                  setNativeMode(
+                    advertised.some((mode) => modeKey(mode) === nativeMode)
+                      ? nativeMode
+                      : advertised[0]
+                        ? modeKey(advertised[0])
+                        : ''
+                  );
                   setStatus(
                     response.modes.length ? 'Advertised native modes loaded.' : 'No supported native mode advertised.'
                   );
@@ -148,9 +165,10 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
               Advertised camera mode
               <select value={nativeMode} onChange={(event) => setNativeMode(event.target.value)}>
                 <option value="">Select a native mode</option>
-                {modes.map((mode, index) => (
-                  <option key={index} value={index}>
-                    {mode.width} × {mode.height} · {mode.numerator / mode.denominator} FPS · {mode.pixel_format}
+                {modes.map((mode) => (
+                  <option key={modeKey(mode)} value={modeKey(mode)} title={`${mode.numerator}/${mode.denominator} FPS`}>
+                    {mode.width} × {mode.height} · {fpsLabel.format(mode.numerator / mode.denominator)} FPS ·{' '}
+                    {mode.pixel_format}
                   </option>
                 ))}
               </select>
@@ -219,14 +237,14 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
           />
         </label>
         <button
-          disabled={busy || (physicalSelected && (!discovered || !activatePhysical || nativeMode === ''))}
+          disabled={busy || (physicalSelected && (!discovered || !activatePhysical || !selectedMode))}
           onClick={() =>
             void run(async () => {
               const [width, height] = resolution.split('x').map(Number);
               await setupRequest('start', {
                 identity,
                 activate_physical: physicalSelected && activatePhysical,
-                mode: physicalSelected ? modes[Number(nativeMode)] : undefined,
+                mode: physicalSelected ? selectedMode : undefined,
                 exposure_mode: exposureMode,
                 width,
                 height,
@@ -327,10 +345,16 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
           {diagnostics?.latest_driver_sample ? String(diagnostics.latest_driver_sample.discontinuity) : 'Unknown'} /{' '}
           {diagnostics?.latest_driver_sample?.sequence ?? 'Unknown'}
         </dd>
+        <dt>Selected native frame rate</dt>
+        <dd>
+          {selectedMode
+            ? `${selectedMode.numerator}/${selectedMode.denominator} FPS · ${selectedMode.pixel_format}`
+            : 'Unknown'}
+        </dd>
         <dt>Requested mode</dt>
         <dd>
           {diagnostics?.requested
-            ? `${diagnostics.requested.width} × ${diagnostics.requested.height} @ ${diagnostics.requested.requested_fps} FPS`
+            ? `${diagnostics.requested.width} × ${diagnostics.requested.height} @ ${fpsLabel.format(diagnostics.requested.requested_fps)} FPS`
             : 'Unknown'}
         </dd>
         <dt>Driver-reported mode</dt>
@@ -339,6 +363,12 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
             ? `${diagnostics.negotiated.width ?? '?'} × ${diagnostics.negotiated.height ?? '?'} @ ${finite(diagnostics.negotiated.reported_fps)} FPS`
             : 'Unknown'}
         </dd>
+        {diagnostics?.last_error && (
+          <>
+            <dt>Capture error</dt>
+            <dd>{diagnostics.last_error}</dd>
+          </>
+        )}
         <dt>Delivered dimensions</dt>
         <dd>{diagnostics?.delivered_size?.join(' × ') ?? 'Unknown'}</dd>
         <dt>Observed delivery FPS / frame age (ms)</dt>

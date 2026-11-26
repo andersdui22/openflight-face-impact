@@ -15,5 +15,9 @@ if __name__ == "__main__":
         from openflight.camera.windows_media_foundation import scan_devices
 
         print(json.dumps({"devices": scan_devices()}))
+    elif sys.argv[1:] == ["--media-foundation-mode-contract"]:
+        from openflight.camera.windows_media_foundation import validated_mode
+
+        print(json.dumps([validated_mode(mode, 11).settings() for mode in json.load(sys.stdin)]))
     else:
         main()

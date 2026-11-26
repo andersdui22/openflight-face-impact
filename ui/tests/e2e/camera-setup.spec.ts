@@ -37,6 +37,12 @@ test('configures the diagnostic camera and exports buffered host-timed frames', 
 test('physical setup requires explicit activation and uses advertised native modes', async ({ page }, info) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   let starts = 0;
+  let loads = 0;
+  const modes = [
+    { width: 1280, height: 800, numerator: 10_000_000, denominator: 83_333, format: 2, pixel_format: 'NV12' },
+    { width: 1280, height: 800, numerator: 10_000_000, denominator: 83_333, format: 3, pixel_format: 'MJPG' },
+    { width: 640, height: 480, numerator: 30, denominator: 1, format: 1, pixel_format: 'YUY2' },
+  ];
   await page.route('**/api/face-impact/camera-setup/inventory', (route) =>
     route.fulfill({
       json: {
@@ -46,15 +52,14 @@ test('physical setup requires explicit activation and uses advertised native mod
   );
   await page.route('**/api/face-impact/camera-setup/modes', (route) =>
     route.fulfill({
-      json: { modes: [{ width: 640, height: 400, numerator: 120, denominator: 1, format: 1, pixel_format: 'YUY2' }] },
+      json: { modes: loads++ === 0 ? modes : [...modes].reverse() },
     })
   );
   await page.route('**/api/face-impact/camera-setup/start', (route) => {
-    starts += 1;
     expect(route.request().postDataJSON()).toMatchObject({
       identity: 'test-symbolic-link',
       activate_physical: true,
-      mode: { width: 640, height: 400, numerator: 120, format: 1 },
+      mode: modes[starts++],
     });
     return route.fulfill({ status: 422, json: { error: 'Controlled test: no physical camera opened' } });
   });
@@ -70,12 +75,24 @@ test('physical setup requires explicit activation and uses advertised native mod
   await expect(setup.getByRole('button', { name: 'Start or reconnect physical camera' })).toBeDisabled();
   await setup.getByLabel('Enable physical diagnostics').check();
   await setup.getByRole('button', { name: 'Load advertised modes' }).click();
-  await expect(setup.getByLabel('Advertised camera mode')).toHaveValue('0');
+  const modePicker = setup.getByLabel('Advertised camera mode');
+  const load = setup.getByRole('button', { name: 'Load advertised modes' });
+  await expect(modePicker).toHaveValue('1280:800:10000000:83333:2');
+  await expect(modePicker.getByRole('option', { name: '1280 × 800 · 120 FPS · NV12' })).toHaveCount(1);
+  await load.click();
+  await expect(setup.getByText('Advertised native modes loaded.')).toBeVisible();
+  await expect(modePicker).toHaveValue('1280:800:10000000:83333:2');
   expect(starts).toBe(0);
   const screenshot = info.outputPath('physical-camera-controls.png');
   await setup.screenshot({ path: screenshot });
   await info.attach('physical-camera-controls', { path: screenshot, contentType: 'image/png' });
   await setup.getByRole('button', { name: 'Start or reconnect physical camera' }).click();
   await expect(setup.getByRole('alert')).toHaveText('Controlled test: no physical camera opened');
-  expect(starts).toBe(1);
+  await modePicker.selectOption({ label: '1280 × 800 · 120 FPS · MJPG' });
+  await setup.getByRole('button', { name: 'Start or reconnect physical camera' }).click();
+  await expect(setup.getByRole('alert')).toHaveText('Controlled test: no physical camera opened');
+  await modePicker.selectOption({ label: '640 × 480 · 30 FPS · YUY2' });
+  await setup.getByRole('button', { name: 'Start or reconnect physical camera' }).click();
+  await expect(setup.getByRole('alert')).toHaveText('Controlled test: no physical camera opened');
+  expect(starts).toBe(3);
 });

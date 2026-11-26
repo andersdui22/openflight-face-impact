@@ -84,16 +84,20 @@ def announced_modes(identity):
 
 def validated_mode(data, frame_count):
     keys = ("width", "height", "numerator", "denominator", "format")
-    if not isinstance(data, dict) or any(type(data.get(key)) is not int or not 0 < data[key] <= 65535
-                                         for key in keys):
-        raise ValueError("Select a valid advertised camera mode")
+    if not isinstance(data, dict):
+        raise ValueError("Select an advertised native camera mode")
+    for key in keys:
+        if type(data.get(key)) is not int or not 0 < data[key] <= 0xFFFFFFFF:
+            raise ValueError(f"Invalid native mode {key}: expected a positive 32-bit unsigned integer")
     mode = Mode(*(data[key] for key in keys))
     pixels = mode.width * mode.height
-    if (mode.format not in _FORMATS or pixels > 1920 * 1080
-            or (mode.format in (1, 2) and mode.width % 2)
-            or (mode.format == 2 and mode.height % 2)
-            or 5 * pixels * frame_count > MAX_WINDOW_BYTES):
-        raise ValueError("Mode exceeds supported raster or buffered memory limits")
+    if mode.format not in _FORMATS:
+        raise ValueError("Unsupported native pixel format")
+    if (pixels > 1920 * 1080 or (mode.format in (1, 2) and mode.width % 2)
+            or (mode.format == 2 and mode.height % 2)):
+        raise ValueError("Unsupported native raster dimensions for this pixel format")
+    if 5 * pixels * frame_count > MAX_WINDOW_BYTES:
+        raise ValueError("Mode exceeds buffered memory limits. Reduce the pre/post-trigger frame counts.")
     return mode
 
 
@@ -111,7 +115,10 @@ class MediaFoundationCamera:
         self.native_payload = None
         self.host_arrival_ns = None
         self._buffer = c.create_string_buffer(4 * mode.width * mode.height)
-        _check(self._dll.ofi_open(identity, c.byref(mode), c.byref(self._handle)), "exact-device open")
+        result = self._dll.ofi_open(identity, c.byref(mode), c.byref(self._handle))
+        if result & 0xFFFFFFFF == 0xC00D36B4:  # MF_E_INVALIDMEDIATYPE
+            raise RuntimeError("The exact native mode is unavailable or was rejected by the driver. Reload advertised modes.")
+        _check(result, "exact-device open")
         self.opened_identity = self._dll.ofi_identity(self._handle)
         self._auto_accepted = None
 
