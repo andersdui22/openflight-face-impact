@@ -11,7 +11,6 @@ from time import monotonic_ns
 import numpy as np
 
 _FORMATS = {1: "YUY2", 2: "NV12", 3: "MJPG"}
-MAX_WINDOW_BYTES = 64 * 1024 * 1024
 
 
 class Mode(c.Structure):
@@ -23,7 +22,8 @@ class Mode(c.Structure):
 
 class Sample(c.Structure):
     _fields_ = [("time_100ns", c.c_int64), ("duration_100ns", c.c_int64), ("callback_time_100ns", c.c_int64),
-                ("size", c.c_uint32), ("flags", c.c_uint32), ("discontinuity", c.c_uint32)]
+                ("size", c.c_uint32), ("flags", c.c_uint32), ("discontinuity", c.c_uint32),
+                ("callback_qpc_ticks", c.c_int64), ("qpc_frequency_hz", c.c_int64), ("readout_qpc_ticks", c.c_int64)]
 
 
 _DEVICE = c.CFUNCTYPE(None, c.c_wchar_p, c.c_wchar_p)
@@ -43,6 +43,7 @@ def _library():
         "ofi_identity": (c.c_wchar_p, [c.c_void_p]),
         "ofi_read": (c.c_int32, [c.c_void_p, c.c_void_p, c.c_uint32, c.POINTER(Sample)]),
         "ofi_control": (c.c_int32, [c.c_void_p, c.c_uint32, c.c_int32, c.POINTER(c.c_int32), c.POINTER(c.c_int32)]),
+        "ofi_control_range": (c.c_int32, [c.c_void_p, c.c_uint32, *([c.POINTER(c.c_int32)] * 5)]),
         "ofi_close": (None, [c.c_void_p]),
     }
     for name, (result, arguments) in signatures.items():
@@ -82,7 +83,7 @@ def announced_modes(identity):
     return sorted(modes.values(), key=lambda m: (-m["numerator"] / m["denominator"], m["width"], m["format"]))
 
 
-def validated_mode(data, frame_count):
+def validated_mode(data):
     keys = ("width", "height", "numerator", "denominator", "format")
     if not isinstance(data, dict):
         raise ValueError("Select an advertised native camera mode")
@@ -96,8 +97,6 @@ def validated_mode(data, frame_count):
     if (pixels > 1920 * 1080 or (mode.format in (1, 2) and mode.width % 2)
             or (mode.format == 2 and mode.height % 2)):
         raise ValueError("Unsupported native raster dimensions for this pixel format")
-    if 5 * pixels * frame_count > MAX_WINDOW_BYTES:
-        raise ValueError("Mode exceeds buffered memory limits. Reduce the pre/post-trigger frame counts.")
     return mode
 
 
@@ -112,6 +111,7 @@ class MediaFoundationCamera:
         self.mode = mode
         self._exposure_mode = exposure_mode
         self.sample_metadata = None
+        self.native_frames_received = 0
         self.native_payload = None
         self.host_arrival_ns = None
         self._buffer = c.create_string_buffer(4 * mode.width * mode.height)
@@ -142,6 +142,14 @@ class MediaFoundationCamera:
         control = self._control(prop, False)
         return control[0] if control is not None else math.nan
 
+    def control_range(self, prop):
+        values = [c.c_int32() for _ in range(5)]
+        if self._dll.ofi_control_range(self._handle, prop, *(c.byref(value) for value in values)) < 0:
+            return None
+        minimum, maximum, step, default, flags = (value.value for value in values)
+        return {"minimum": minimum, "maximum": maximum, "step": step, "default": default,
+                "supports_auto": bool(flags & 1), "supports_manual": bool(flags & 2)}
+
     def configure_driver_exposure(self):
         if self._exposure_mode == "auto":
             self._auto_accepted = self._control(15, True, 0, 1) is not None
@@ -161,6 +169,7 @@ class MediaFoundationCamera:
             _check(result, "sample read")
             if result == 0:
                 self.host_arrival_ns = monotonic_ns()
+                self.native_frames_received += 1
                 break
         else:
             raise RuntimeError("Media Foundation supplied no usable samples")
@@ -171,6 +180,10 @@ class MediaFoundationCamera:
             "sample_time_100ns": sample.time_100ns if sample.time_100ns >= 0 else None,
             "sample_duration_100ns": sample.duration_100ns if sample.duration_100ns >= 0 else None,
             "source_reader_time_100ns": sample.callback_time_100ns if sample.callback_time_100ns >= 0 else None,
+            "native_callback_qpc_ticks": sample.callback_qpc_ticks if sample.qpc_frequency_hz > 0 else None,
+            "native_readout_qpc_ticks": sample.readout_qpc_ticks if sample.qpc_frequency_hz > 0 else None,
+            "qpc_frequency_hz": sample.qpc_frequency_hz or None,
+            "frame_processed_monotonic_ns": monotonic_ns(),
             "flags": sample.flags, "discontinuity": bool(sample.discontinuity),
             "sequence": None, "provenance": "media_foundation_stream_sample",
         }

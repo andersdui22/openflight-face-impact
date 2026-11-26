@@ -506,3 +506,23 @@ def test_bound_provider_rejects_other_handle_after_disconnect():
     assert camera.capture_preview_jpeg() is None
     assert not camera.trigger()
     assert requested == [expected, expected]
+
+
+def test_burst_diagnostics_keep_clock_domains_and_missing_data_separate():
+    from openflight.camera.windows_usb import diagnostic_timing
+
+    samples = [
+        (0, {"sample_time_100ns": 0, "discontinuity": False}),
+        (16_000_000, {"sample_time_100ns": 20_000, "discontinuity": False}),
+        (16_200_000, {"sample_time_100ns": 20_000, "discontinuity": True}),
+        (32_000_000, None),
+    ]
+    result = diagnostic_timing(samples)
+    assert result["host_arrival_ms"]["max"] == 16
+    assert result["host_arrival_ms"]["median"] == 15.8
+    assert result["sample_timestamp_ms"]["count"] == 2
+    assert result["sample_timestamp_ms"]["min"] == 0
+    assert result["adjacent_equal_sample_timestamps"] == 1
+    assert result["discontinuities"] == 1
+    assert result["native_callback_ms"] is None
+    assert result["dropped_frames"] is None

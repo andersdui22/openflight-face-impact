@@ -12,20 +12,30 @@ test('configures the diagnostic camera and exports buffered host-timed frames', 
   await setup.getByLabel('Requested resolution').selectOption('640x400');
   await setup.getByLabel('Exposure (driver units)').fill('-6');
   await setup.getByLabel('Gain (driver units)').fill('10');
-  await setup.getByLabel('Frames before trigger').fill('4');
-  await setup.getByLabel('Frames after trigger').fill('5');
+  await setup.getByLabel('Frames before trigger').fill('18');
+  await setup.getByLabel('Frames after trigger').fill('20');
   await setup.getByLabel('Capture purpose').selectOption('checkerboard');
   await setup.getByRole('button', { name: 'Start or reconnect fixture' }).click();
   try {
     await expect(setup.getByText('fixture · fixture_match')).toBeVisible({ timeout: 11000 });
     await expect(setup.getByText('640 × 400', { exact: true })).toBeVisible({ timeout: 11000 });
     await expect(setup.getByText('Host arrival only · independent exposure timing unavailable')).toBeVisible();
+    const preview = page.getByLabel('USB camera preview');
+    await expect(preview.getByRole('img')).toBeVisible();
+    await preview.getByRole('button', { name: 'Pause preview' }).click();
+    await expect(preview.getByText('Preview paused · capture active')).toBeVisible();
+    await expect(preview.getByRole('img')).toHaveCount(0);
     const [recording] = await Promise.all([
       page.waitForEvent('download'),
       setup.getByRole('button', { name: 'Record and export diagnostic' }).click(),
     ]);
     expect(recording.suggestedFilename()).toBe('face-impact-diagnostic.zip');
     await expect(setup.getByText('Diagnostic capture exported', { exact: false })).toBeVisible();
+    await expect(setup.getByText(/Unknown \/ [0-9]+ \/ 38/)).toBeVisible();
+    await preview.getByRole('button', { name: 'Resume preview' }).click();
+    await expect(preview.getByRole('img')).toBeVisible();
+    await setup.getByLabel('Recording window units').selectOption('ms');
+    await expect(setup.getByLabel('Milliseconds before trigger')).toBeVisible();
     const screenshot = info.outputPath('camera-setup.png');
     await setup.screenshot({ path: screenshot });
     await info.attach('camera-setup', { path: screenshot, contentType: 'image/png' });

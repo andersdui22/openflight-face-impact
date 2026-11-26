@@ -707,3 +707,17 @@ def test_vertical_crop_update_rejects_unsafe_or_unaligned_offsets(tmp_path, offs
 
     with pytest.raises(ValueError, match="vertical crop"):
         runtime.update_vertical_crop(offset)
+
+
+def test_bounded_history_evicts_old_frames_and_accepts_smaller_trigger():
+    ring = TriggeredFrameBuffer(1, 1, capacity=6)
+    for index in range(10):
+        ring.add_frame(CameraFrame(np.zeros((2, 2), dtype=np.uint8), index, index, 0, 0.0))
+    assert ring.diagnostics()["history_evictions"] == 5
+    assert ring.trigger(10, window=(3, 2))
+    for index in (10, 11):
+        ring.add_frame(CameraFrame(np.zeros((2, 2), dtype=np.uint8), index, index, 0, 0.0))
+    capture = ring.pop_capture()
+    assert [frame.host_timestamp_ns for frame in capture.frames] == [7, 8, 9, 10, 11]
+    assert capture.pre_trigger_count == 3
+    assert capture.post_trigger_count == 2

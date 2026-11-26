@@ -10,12 +10,61 @@ import threading
 import time
 from collections import deque
 from dataclasses import dataclass
-from statistics import fmean, pstdev
+from statistics import fmean, median, pstdev, quantiles
 from typing import Callable
 
 import numpy as np
 
 from .triggered_buffer import CameraFrame, TriggeredFrameBuffer
+
+
+def interval_stats(values):
+    if not values:
+        return None
+    percentiles = quantiles(values, n=100, method="inclusive") if len(values) > 1 else [values[0]] * 99
+    return {"count": len(values), "min": min(values), "max": max(values), "mean": fmean(values),
+            "median": median(values), "stddev": pstdev(values), "p05": percentiles[4], "p95": percentiles[94],
+            "p99": percentiles[98]}
+
+
+def diagnostic_timing(samples):
+    """Compare adjacent samples in each clock domain independently."""
+    clocks = {"host_arrival_ms": [], "sample_timestamp_ms": [], "native_callback_ms": [],
+              "callback_to_readout_ms": [], "python_processing_ms": [], "sample_duration_ms": []}
+    repeated_sample_timestamps = []
+    discontinuities = []
+    for (host, sample), (previous_host, previous) in zip(samples[1:], samples):
+        clocks["host_arrival_ms"].append((host - previous_host) / 1e6)
+        previous, sample = previous or {}, sample or {}
+        old_time, new_time = previous.get("sample_time_100ns"), sample.get("sample_time_100ns")
+        if old_time is not None and new_time is not None:
+            clocks["sample_timestamp_ms"].append((new_time - old_time) / 10_000)
+            repeated_sample_timestamps.append(new_time == old_time)
+        old_tick, new_tick = previous.get("native_callback_qpc_ticks"), sample.get("native_callback_qpc_ticks")
+        frequency = sample.get("qpc_frequency_hz")
+        if old_tick is not None and new_tick is not None and frequency and frequency == previous.get("qpc_frequency_hz"):
+            clocks["native_callback_ms"].append((new_tick - old_tick) * 1000 / frequency)
+    for host, sample in samples:
+        if sample is None:
+            continue
+        callback, readout = sample.get("native_callback_qpc_ticks"), sample.get("native_readout_qpc_ticks")
+        frequency = sample.get("qpc_frequency_hz")
+        if callback is not None and readout is not None and frequency and readout >= callback:
+            clocks["callback_to_readout_ms"].append((readout - callback) * 1000 / frequency)
+        processed = sample.get("frame_processed_monotonic_ns")
+        if processed is not None and processed >= host:
+            clocks["python_processing_ms"].append((processed - host) / 1e6)
+        duration = sample.get("sample_duration_100ns")
+        if duration is not None:
+            clocks["sample_duration_ms"].append(duration / 10_000)
+        if sample.get("discontinuity") is not None:
+            discontinuities.append(sample["discontinuity"])
+    return {
+        **{key: interval_stats(values) for key, values in clocks.items()},
+        "adjacent_equal_sample_timestamps": sum(repeated_sample_timestamps) if repeated_sample_timestamps else None,
+        "discontinuities": sum(discontinuities) if discontinuities else None,
+        "dropped_frames": None,
+    }
 
 
 @dataclass(frozen=True)
@@ -35,7 +84,7 @@ class WindowsUsbCamera:
 
     def __init__(self, settings: UsbCameraSettings | None = None, *,
                  camera_factory: Callable | None = None, selected_identity: str | None = None,
-                 identity_factory: Callable | None = None):
+                 identity_factory: Callable | None = None, diagnostic_capacity: int | None = None):
         self.settings = settings or UsbCameraSettings()
         if identity_factory is not None and (camera_factory is not None or not selected_identity):
             raise ValueError("identity factory requires one selected device identity")
@@ -46,7 +95,8 @@ class WindowsUsbCamera:
         self._selected_identity = selected_identity
         self._opened_identity = None
         self._identity_status = "not_opened" if selected_identity else "unverified_index"
-        self.ring = TriggeredFrameBuffer(self.settings.pre_frames, self.settings.post_frames)
+        self.ring = TriggeredFrameBuffer(self.settings.pre_frames, self.settings.post_frames,
+                                         capacity=diagnostic_capacity)
         self._camera = None
         self._thread = None
         self._stop = threading.Event()
@@ -55,6 +105,13 @@ class WindowsUsbCamera:
         self._frames = 0
         self._started_ns = None
         self._arrival_times_ns = deque(maxlen=256)
+        self._timing_samples = deque(maxlen=256)
+        self._preview_lock = threading.Lock()
+        self._preview_count = 0
+        self._preview_wall_ns = 0
+        self._preview_cache = None
+        self._preview_at_ns = 0
+        self._driver_ranges = {}
         self._arrival_lock = threading.Lock()
         self._lifecycle_lock = threading.Lock()
         self._recovery_stop = threading.Event()
@@ -67,6 +124,22 @@ class WindowsUsbCamera:
     def reported_controls(self) -> dict:
         """Unverified driver control values, without conversion to sensor units."""
         return self._reported_controls
+
+    @property
+    def driver_ranges(self):
+        return self._driver_ranges
+
+    @property
+    def native_diagnostics(self):
+        with self._arrival_lock:
+            samples = tuple(self._timing_samples)
+        return {
+            "timing": diagnostic_timing(samples),
+            "buffer": self.ring.diagnostics(),
+            "preview": {"encodes": self._preview_count, "encode_wall_ms": self._preview_wall_ns / 1e6},
+            "processed_frames": self.frames_received,
+            "received_frames": getattr(self._camera, "native_frames_received", None),
+        }
 
     @property
     def reconnect_enabled(self) -> bool:
@@ -114,9 +187,10 @@ class WindowsUsbCamera:
             ("exposure", 15, self.settings.driver_exposure),
             ("gain", 14, self.settings.driver_gain),
         ):
-            if value is not None:
-                applied = bool(camera.set(prop, value))
-                reported = camera.get(prop) if applied else None
+            native = hasattr(camera, "control_range")
+            if value is not None or native:
+                applied = bool(camera.set(prop, value)) if value is not None else None
+                reported = camera.get(prop) if native or applied else None
                 result[label] = {
                     "requested": value, "accepted_by_driver": applied,
                     "reported": reported if reported is not None and math.isfinite(reported) else None,
@@ -162,12 +236,7 @@ class WindowsUsbCamera:
         with self._arrival_lock:
             samples = tuple(self._arrival_times_ns)
         intervals = [(later - earlier) / 1_000_000 for earlier, later in zip(samples, samples[1:])]
-        if not intervals:
-            return None
-        return {
-            "count": len(intervals), "min": min(intervals), "max": max(intervals),
-            "mean": fmean(intervals), "stddev": pstdev(intervals),
-        }
+        return interval_stats(intervals)
 
     @property
     def delivered_fps(self) -> float | None:
@@ -237,6 +306,10 @@ class WindowsUsbCamera:
             if hasattr(camera, "configure_driver_exposure"):
                 camera.configure_driver_exposure()
             self._reported_controls = self._read_controls(camera)
+            self._driver_ranges = (
+                {name: camera.control_range(prop) for name, prop in (("exposure", 15), ("gain", 14))}
+                if hasattr(camera, "control_range") else {}
+            )
             if hasattr(camera, "mode_diagnostics"):
                 self.reported_native_mode = camera.mode_diagnostics()
                 self.reported_exposure_mode = camera.exposure_diagnostics()
@@ -249,10 +322,16 @@ class WindowsUsbCamera:
         # The previous reader is fully stopped before a new session starts.
         # Reuse the same ring while discarding stale frames and shot identity.
         self.ring.reset()
+        with self._preview_lock:
+            self._preview_count = 0
+            self._preview_wall_ns = 0
+            self._preview_cache = None
+            self._preview_at_ns = 0
         self._camera = camera
         self._last_error = None
         with self._arrival_lock:
             self._arrival_times_ns.clear()
+            self._timing_samples.clear()
             self._frames = 0
             self._started_ns = time.monotonic_ns()
         self._stop.clear()
@@ -293,6 +372,7 @@ class WindowsUsbCamera:
                 ))
                 with self._arrival_lock:
                     self._arrival_times_ns.append(host_ns)
+                    self._timing_samples.append((host_ns, getattr(self._camera, "sample_metadata", None)))
                     self._frames += 1
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._last_error = str(exc)
@@ -358,12 +438,28 @@ class WindowsUsbCamera:
             import cv2  # pylint: disable=import-outside-toplevel
         except ImportError as exc:
             raise RuntimeError("USB preview requires opencv-python") from exc
-        ok, encoded = cv2.imencode(".jpg", frame.image)
-        if not ok:
-            raise RuntimeError("USB camera JPEG preview encoding failed")
-        return encoded.tobytes()
+        if self.ring.capture_capacity is None:
+            return _encode_preview(cv2, frame)
+        if not self._preview_lock.acquire(blocking=False):
+            return self._preview_cache
+        try:
+            start_ns = time.monotonic_ns()
+            if self._preview_cache is None or start_ns - self._preview_at_ns >= 100_000_000:
+                self._preview_cache = _encode_preview(cv2, frame)
+                self._preview_at_ns = time.monotonic_ns()
+                self._preview_count += 1
+                self._preview_wall_ns += self._preview_at_ns - start_ns
+            return self._preview_cache
+        finally:
+            self._preview_lock.release()
 
-    def trigger(self) -> bool:
+    def trigger(self, *, window: tuple[int, int] | None = None) -> bool:
         """Explicit software trigger; shot detection is outside Gate 03."""
         return (self.is_running and not self._stop.is_set() and not self.delivery_stale
-                and self.ring.trigger(time.monotonic_ns()))
+                and self.ring.trigger(time.monotonic_ns(), window=window))
+
+def _encode_preview(cv2, frame):
+    ok, encoded = cv2.imencode(".jpg", frame.image)
+    if not ok:
+        raise RuntimeError("USB camera JPEG preview encoding failed")
+    return encoded.tobytes()

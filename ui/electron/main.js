@@ -345,8 +345,16 @@ async function runDashboardSmoke(win) {
           start.click();
           for (let attempt = 0; attempt < 100; attempt++) {
             if (setup.textContent.includes('320 × 200') && setup.textContent.includes('fixture · fixture_match')) {
-              const response = await call('record', {});
-              if (!response.ok || (await response.blob()).size < 1000) throw new Error('Packaged diagnostic ZIP unavailable');
+              const status = await (await fetch('http://127.0.0.1:8080/api/camera/usb/status')).json();
+              if (status.capture_diagnostics?.buffer.history_frames < 18) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                continue;
+              }
+              const response = await call('record', { pre_frames: 18, post_frames: 20 });
+              if (!response.ok || response.headers.get('X-OpenFlight-Exported-Frames') !== '38' ||
+                  (await response.blob()).size < 1000) {
+                throw new Error('Packaged 38-frame diagnostic ZIP unavailable');
+              }
               const stopped = await call('stop', {});
               if (!stopped.ok) throw new Error('Packaged fixture did not stop');
               return;

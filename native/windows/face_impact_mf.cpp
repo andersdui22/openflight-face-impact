@@ -30,6 +30,7 @@ public:
     HRESULT status = S_OK;
     DWORD flags = 0;
     LONGLONG callback_time = -1;
+    LARGE_INTEGER callback_qpc{};
     ComPtr<IMFSample> sample;
 
     ~ReaderCallback() { if (event) CloseHandle(event); }
@@ -49,6 +50,7 @@ public:
         return remaining;
     }
     STDMETHODIMP OnReadSample(HRESULT result, DWORD, DWORD stream_flags, LONGLONG timestamp, IMFSample* frame) override {
+        QueryPerformanceCounter(&callback_qpc);
         status = result;
         flags = stream_flags;
         callback_time = frame ? timestamp : -1;
@@ -65,6 +67,7 @@ struct Session {
     ComPtr<IMFSourceReader> reader;
     ComPtr<ReaderCallback> callback;
     bool started = false;
+    LARGE_INTEGER qpc_frequency{};
     std::wstring identity;
     ~Session() {
         reader.Reset();
@@ -186,6 +189,7 @@ OFI_API HRESULT ofi_open(const wchar_t* link, const Mode* wanted, Session** outp
     std::unique_ptr<Session> session(new (std::nothrow) Session);
     if (!session) return E_OUTOFMEMORY;
     CHECK(connect(*session, link));
+    QueryPerformanceFrequency(&session->qpc_frequency);
     for (DWORD i = 0; ; ++i) {
         ComPtr<IMFMediaType> type;
         HRESULT hr = session->reader->GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, i, &type);
@@ -214,6 +218,7 @@ struct FrameInfo {
     LONGLONG time_100ns, duration_100ns, callback_time_100ns;
     DWORD bytes, flags;
     UINT32 discontinuity;
+    LONGLONG callback_qpc_ticks, qpc_frequency_hz, readout_qpc_ticks;
 };
 OFI_API HRESULT ofi_read(Session* session, BYTE* output, DWORD capacity, FrameInfo* info) {
     ComScope com;
@@ -230,6 +235,8 @@ OFI_API HRESULT ofi_read(Session* session, BYTE* output, DWORD capacity, FrameIn
         return MF_E_INVALIDSTREAMNUMBER;
     if (!sample) return S_FALSE;
     info->flags = flags;
+    info->callback_qpc_ticks = cb->callback_qpc.QuadPart;
+    info->qpc_frequency_hz = session->qpc_frequency.QuadPart;
     info->callback_time_100ns = cb->callback_time;
     if (FAILED(sample->GetSampleTime(&info->time_100ns))) info->time_100ns = -1;
     if (FAILED(sample->GetSampleDuration(&info->duration_100ns))) info->duration_100ns = -1;
@@ -241,7 +248,11 @@ OFI_API HRESULT ofi_read(Session* session, BYTE* output, DWORD capacity, FrameIn
     if (SUCCEEDED(buffer.As(&two_d))) {
         CHECK(two_d->GetContiguousLength(&info->bytes));
         if (info->bytes > capacity) return HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER);
-        return two_d->ContiguousCopyTo(output, info->bytes);
+        CHECK(two_d->ContiguousCopyTo(output, info->bytes));
+        LARGE_INTEGER readout{};
+        QueryPerformanceCounter(&readout);
+        info->readout_qpc_ticks = readout.QuadPart;
+        return S_OK;
     }
     BYTE* bytes = nullptr;
     CHECK(buffer->Lock(&bytes, nullptr, &info->bytes));
@@ -249,6 +260,9 @@ OFI_API HRESULT ofi_read(Session* session, BYTE* output, DWORD capacity, FrameIn
     if (info->bytes > capacity) result = HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER);
     else if (info->bytes) std::memcpy(output, bytes, info->bytes);
     buffer->Unlock();
+    LARGE_INTEGER readout{};
+    QueryPerformanceCounter(&readout);
+    info->readout_qpc_ticks = readout.QuadPart;
     return result;
 }
 
@@ -266,6 +280,22 @@ OFI_API HRESULT ofi_control(Session* session, UINT32 control, BOOL set, LONG* va
         CHECK(session->source.As(&camera));
         return set ? camera->Set(VideoProcAmp_Gain, *value, *flags)
                    : camera->Get(VideoProcAmp_Gain, value, flags);
+    }
+    return E_INVALIDARG;
+}
+OFI_API HRESULT ofi_control_range(Session* session, UINT32 control, LONG* minimum, LONG* maximum,
+                                  LONG* step, LONG* default_value, LONG* flags) {
+    ComScope com;
+    CHECK(com.result);
+    if (control == 15) {
+        ComPtr<IAMCameraControl> camera;
+        CHECK(session->source.As(&camera));
+        return camera->GetRange(CameraControl_Exposure, minimum, maximum, step, default_value, flags);
+    }
+    if (control == 14) {
+        ComPtr<IAMVideoProcAmp> camera;
+        CHECK(session->source.As(&camera));
+        return camera->GetRange(VideoProcAmp_Gain, minimum, maximum, step, default_value, flags);
     }
     return E_INVALIDARG;
 }

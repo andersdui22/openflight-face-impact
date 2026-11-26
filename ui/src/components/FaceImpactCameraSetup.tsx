@@ -19,6 +19,16 @@ function modeKey(mode: Mode) {
 
 type Device = { identity: string; name: string; status: string };
 
+type IntervalStats = { min: number; max: number; median: number; stddev: number; p95: number; p99: number };
+type ControlRange = {
+  minimum: number;
+  maximum: number;
+  step: number;
+  default: number;
+  supports_auto: boolean;
+  supports_manual: boolean;
+};
+
 export interface CameraDiagnostics {
   last_error?: string | null;
   requested?: { width: number; height: number; requested_fps: number } | null;
@@ -40,7 +50,23 @@ export interface CameraDiagnostics {
     sequence: number | null;
   } | null;
   sensor_timestamp_available?: boolean;
-  driver_controls?: Record<string, { accepted_by_driver: boolean; reported: number | null }>;
+  driver_controls?: Record<
+    string,
+    { requested: number | null; accepted_by_driver: boolean | null; reported: number | null }
+  >;
+  driver_ranges?: Record<string, ControlRange | null> | null;
+  capture_diagnostics?: {
+    timing: Record<string, IntervalStats | number | null>;
+    buffer: {
+      history_frames: number;
+      history_capacity: number;
+      capture_capacity: number | null;
+      history_evictions: number;
+    };
+    preview: { encodes: number; encode_wall_ms: number };
+    processed_frames: number;
+    received_frames: number | null;
+  } | null;
 }
 
 async function setupRequest(action: string, data: object = {}) {
@@ -70,6 +96,7 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
     diagnostics?.identity?.backend === 'media_foundation' && diagnostics.identity.status === 'handle_match';
   const [resolution, setResolution] = useState('320x200');
   const [fps, setFps] = useState('30');
+  const [windowUnit, setWindowUnit] = useState('frames');
   const [preFrames, setPreFrames] = useState('3');
   const [postFrames, setPostFrames] = useState('3');
   const [purpose, setPurpose] = useState('diagnostic');
@@ -80,9 +107,12 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
   const [revision, setRevision] = useState('');
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
+  const [exportedFrames, setExportedFrames] = useState<string | null>(null);
   const [error, setError] = useState('');
   const selectedMode = modes.find((mode) => modeKey(mode) === nativeMode);
   const discovered = devices.some((device) => device.identity === identity);
+  const capture = diagnostics?.capture_diagnostics;
+  const ranges = physicalRunning ? diagnostics?.driver_ranges : null;
   const finite = (value?: number | null) => (value == null ? 'Unknown' : value.toFixed(1));
 
   async function run(action: () => Promise<void>) {
@@ -209,29 +239,24 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
         )}
         <label>
           Exposure (driver units){' '}
-          <input type="number" value={exposure} onChange={(event) => setExposure(event.target.value)} />
-        </label>
-        <label>
-          Gain (driver units) <input type="number" value={gain} onChange={(event) => setGain(event.target.value)} />
-        </label>
-        <label>
-          Frames before trigger{' '}
           <input
             type="number"
-            min="1"
-            max="16"
-            value={preFrames}
-            onChange={(event) => setPreFrames(event.target.value)}
+            min={ranges?.exposure?.minimum}
+            max={ranges?.exposure?.maximum}
+            step={ranges?.exposure?.step || 1}
+            value={exposure}
+            onChange={(event) => setExposure(event.target.value)}
           />
         </label>
         <label>
-          Frames after trigger{' '}
+          Gain (driver units){' '}
           <input
             type="number"
-            min="1"
-            max="16"
-            value={postFrames}
-            onChange={(event) => setPostFrames(event.target.value)}
+            min={ranges?.gain?.minimum}
+            max={ranges?.gain?.maximum}
+            step={ranges?.gain?.step || 1}
+            value={gain}
+            onChange={(event) => setGain(event.target.value)}
           />
         </label>
         <button
@@ -247,8 +272,6 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
                 width,
                 height,
                 fps: Number(fps),
-                pre_frames: Number(preFrames),
-                post_frames: Number(postFrames),
                 exposure: exposure === '' ? null : Number(exposure),
                 gain: gain === '' ? null : Number(gain),
               });
@@ -274,6 +297,36 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
           {physicalSelected ? 'Stop physical camera' : 'Stop fixture'}
         </button>
         <label>
+          Recording window units
+          <select value={windowUnit} onChange={(event) => setWindowUnit(event.target.value)}>
+            <option value="frames">Frames</option>
+            <option value="ms">Milliseconds (nominal)</option>
+          </select>
+        </label>
+        <label>
+          {windowUnit === 'frames' ? 'Frames before trigger' : 'Milliseconds before trigger'}
+          <input
+            type="number"
+            min="1"
+            max={windowUnit === 'frames' ? (capture?.buffer.capture_capacity ?? 512) - 1 : 20000}
+            value={preFrames}
+            onChange={(event) => setPreFrames(event.target.value)}
+          />
+        </label>
+        <label>
+          {windowUnit === 'frames' ? 'Frames after trigger' : 'Milliseconds after trigger'}
+          <input
+            type="number"
+            min="1"
+            max={windowUnit === 'frames' ? (capture?.buffer.capture_capacity ?? 512) - 1 : 20000}
+            value={postFrames}
+            onChange={(event) => setPostFrames(event.target.value)}
+          />
+        </label>
+        {capture?.buffer.capture_capacity != null && (
+          <p>Recording limit for this mode: {capture.buffer.capture_capacity} total frames.</p>
+        )}
+        <label>
           Capture purpose
           <select value={purpose} onChange={(event) => setPurpose(event.target.value)}>
             <option value="diagnostic">General diagnostics</option>
@@ -287,7 +340,13 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
           disabled={busy || !diagnostics?.delivered_size || (physicalSelected && !physicalRunning)}
           onClick={() =>
             void run(async () => {
-              const blob = await (await setupRequest('record', { purpose })).blob();
+              const windowSettings =
+                windowUnit === 'frames'
+                  ? { pre_frames: Number(preFrames), post_frames: Number(postFrames) }
+                  : { pre_ms: Number(preFrames), post_ms: Number(postFrames) };
+              const response = await setupRequest('record', { purpose, ...windowSettings });
+              const blob = await response.blob();
+              setExportedFrames(response.headers.get('X-OpenFlight-Exported-Frames'));
               const url = URL.createObjectURL(blob);
               const link = document.createElement('a');
               link.href = url;
@@ -373,17 +432,70 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
         <dd>
           {finite(diagnostics?.delivered_fps)} / {finite(diagnostics?.last_frame_age_ms)}
         </dd>
-        <dt>Received frames / dropped frames</dt>
-        <dd>{diagnostics?.frames_received ?? 'Unknown'} / Unknown</dd>
+        <dt>Received / processed / last exported frames</dt>
+        <dd>
+          {capture?.received_frames ?? 'Unknown'} /{' '}
+          {capture?.processed_frames ?? diagnostics?.frames_received ?? 'Unknown'} / {exportedFrames ?? 'Unknown'}
+        </dd>
+        <dt>Buffer occupancy / history evictions</dt>
+        <dd>
+          {capture
+            ? `${capture.buffer.history_frames}/${capture.buffer.history_capacity} · ${capture.buffer.history_evictions}`
+            : 'Unknown'}
+        </dd>
+        <dt>Dropped frames / discontinuities / equal sample timestamps</dt>
+        <dd>
+          Unknown / {(capture?.timing.discontinuities as number) ?? 'Unknown'} /{' '}
+          {(capture?.timing.adjacent_equal_sample_timestamps as number) ?? 'Unknown'}
+        </dd>
+        <dt>Preview JPEG encodes / elapsed encoding time (ms)</dt>
+        <dd>
+          {capture?.preview.encodes ?? 'Unknown'} / {finite(capture?.preview.encode_wall_ms)}
+        </dd>
+        {Object.entries({
+          host_arrival_ms: 'Host arrival',
+          sample_timestamp_ms: 'Driver sample',
+          native_callback_ms: 'Native callback',
+          sample_duration_ms: 'Driver sample duration',
+          callback_to_readout_ms: 'Callback to native readout',
+          python_processing_ms: 'Python raster preparation',
+        }).map(([key, label]) => {
+          const stats = capture?.timing[key];
+          return (
+            <div key={key}>
+              <dt>{label} (ms), min / median / max / SD / P95 / P99</dt>
+              <dd>
+                {stats && typeof stats === 'object'
+                  ? [stats.min, stats.median, stats.max, stats.stddev, stats.p95, stats.p99].map(finite).join(' / ')
+                  : 'Unknown'}
+              </dd>
+            </div>
+          );
+        })}
         <dt>Timing quality</dt>
         <dd>
           {diagnostics?.timestamp_source ? 'Host arrival only · independent exposure timing unavailable' : 'Unknown'}
         </dd>
-        <dt>Reported exposure / gain</dt>
-        <dd>
-          {finite(diagnostics?.driver_controls?.exposure?.reported)} /{' '}
-          {finite(diagnostics?.driver_controls?.gain?.reported)}
-        </dd>
+        {(['exposure', 'gain'] as const).map((name) => {
+          const range = ranges?.[name];
+          const control = diagnostics?.driver_controls?.[name];
+          return (
+            <div key={name}>
+              <dt>{name} requested / driver accepted / readback (driver units)</dt>
+              <dd>
+                {control?.requested ?? 'Unknown'} /{' '}
+                {control?.accepted_by_driver == null ? 'Unknown' : String(control.accepted_by_driver)} /{' '}
+                {control?.reported ?? 'Unknown'}
+              </dd>
+              <dt>{name} range / step / auto / manual</dt>
+              <dd>
+                {range
+                  ? `${range.minimum} to ${range.maximum} / ${range.step} / ${range.supports_auto} / ${range.supports_manual}`
+                  : 'Unknown'}
+              </dd>
+            </div>
+          );
+        })}
       </dl>
       <div className="impact-controls__fields">
         <label>

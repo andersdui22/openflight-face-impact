@@ -12,13 +12,14 @@ from openflight.camera import camera_setup_routes, windows_media_foundation as m
 
 
 def test_announced_modes_are_bounded_and_raster_preserves_luminance():
-    mode = mf.validated_mode({"width": 4, "height": 2, "numerator": 120, "denominator": 1, "format": 1}, 8)
+    mode = mf.validated_mode({"width": 4, "height": 2, "numerator": 120, "denominator": 1, "format": 1})
     raw = bytes(range(16))
     assert np.array_equal(mf.analysis_raster(raw, mode), [[0, 2, 4, 6], [8, 10, 12, 14]])
     with pytest.raises(ValueError, match="stride"):
         mf.analysis_raster(raw + b"X", mode)
-    with pytest.raises(ValueError, match="memory"):
-        mf.validated_mode({"width": 1920, "height": 1080, "numerator": 120, "denominator": 1, "format": 1}, 32)
+    from openflight.camera.windows_usb import UsbCameraSettings
+
+    assert camera_setup_routes._capture_capacity(UsbCameraSettings(width=1920, height=1080), "YUY2") == 10
 
 
 def test_mjpg_is_kept_as_received_and_checks_negotiated_dimensions():
@@ -62,8 +63,22 @@ def test_physical_route_preserves_sample_times_without_publishing_impact(monkeyp
         def ofi_identity(self, _handle):
             return "selected-device"
 
-        def ofi_control(self, *_args):
+        def ofi_control(self, _handle, prop, setting, value, flags):
+            if prop == 15:
+                if setting:
+                    assert (value._obj.value, flags._obj.value) == (-6, 2)
+                else:
+                    value._obj.value = -5
+                    flags._obj.value = 2
+                return 0
             return -1
+
+        def ofi_control_range(self, _handle, prop, *outputs):
+            if prop != 15:
+                return -1
+            for field, value in zip(outputs, (-12, -2, 1, -6, 3)):
+                field._obj.value = value
+            return 0
 
         def ofi_read(self, _handle, output, _capacity, sample):
             sleep(0.01)
@@ -73,6 +88,9 @@ def test_physical_route_preserves_sample_times_without_publishing_impact(monkeyp
             sample._obj.duration_100ns = 200
             sample._obj.callback_time_100ns = 500
             sample._obj.discontinuity = 1
+            sample._obj.callback_qpc_ticks = 7_000
+            sample._obj.readout_qpc_ticks = 7_100
+            sample._obj.qpc_frequency_hz = 1_000_000
             return 0
 
         def ofi_close(self, handle):
@@ -89,6 +107,7 @@ def test_physical_route_preserves_sample_times_without_publishing_impact(monkeyp
     base = "/api/face-impact/camera-setup/"
     headers = {"X-OpenFlight-Camera-Setup": "1", "X-OpenFlight-Physical-Camera": "trusted-desktop"}
     config = {"identity": "selected-device", "activate_physical": True, "pre_frames": 2, "post_frames": 2,
+              "exposure_mode": "manual", "exposure": -6, "gain": 7,
               "mode": {"width": 4, "height": 2, "numerator": 10_000_000, "denominator": 83_333, "format": 1}}
     assert client.post(base + "start", json=config, headers={"X-OpenFlight-Camera-Setup": "1"}).status_code == 403
     assert client.post(base + "start", json={**config, "activate_physical": False}, headers=headers).status_code == 422
@@ -113,6 +132,17 @@ def test_physical_route_preserves_sample_times_without_publishing_impact(monkeyp
             assert manifest["physically_validated"] is False
             assert manifest["sensor_exposure_timestamp"] is None
             assert len(manifest["native_frames"]) == 4
+            assert manifest["capture_timing"]["callback_to_readout_ms"]["median"] == 0.1
+            assert manifest["adjacent_equal_native_payloads"] == 3
+            assert manifest["capture_timing"]["dropped_frames"] is None
+            assert manifest["driver_ranges"]["exposure"]["supports_auto"] is True
+            assert manifest["driver_ranges"]["gain"] is None
+            assert manifest["driver_controls"]["exposure"] == {
+                "requested": -6, "accepted_by_driver": True, "reported": -5,
+            }
+            assert manifest["driver_controls"]["gain"] == {
+                "requested": 7, "accepted_by_driver": False, "reported": None,
+            }
             for item in manifest["native_frames"]:
                 assert archive.read(item["file"]) == bytes(range(16))
                 assert item["driver_sample"]["sample_time_100ns"] is None
@@ -142,7 +172,7 @@ def test_physical_route_preserves_sample_times_without_publishing_impact(monkeyp
 def test_native_mode_preserves_advertised_ratio(numerator, denominator, pixel_format, fps):
     data = {"width": 640, "height": 480, "numerator": numerator,
             "denominator": denominator, "format": pixel_format}
-    mode = mf.validated_mode(json.loads(json.dumps(data)), 11)
+    mode = mf.validated_mode(json.loads(json.dumps(data)))
     assert mode.settings() == {**data, "pixel_format": mf._FORMATS[pixel_format]}
     assert mode.numerator / mode.denominator == fps
 
@@ -157,4 +187,31 @@ def test_native_mode_preserves_advertised_ratio(numerator, denominator, pixel_fo
 def test_rejects_invalid_native_mode(field, value, reason):
     data = {"width": 640, "height": 480, "numerator": 10_000_000, "denominator": 83_333, "format": 2}
     with pytest.raises(ValueError, match=reason):
-        mf.validated_mode({**data, field: value}, 11)
+        mf.validated_mode({**data, field: value})
+
+
+def test_large_recording_window_does_not_block_native_mode_validation():
+    data = {"width": 640, "height": 480, "numerator": 10_000_000, "denominator": 47_619, "format": 2}
+    assert mf.validated_mode(data).settings() == {**data, "pixel_format": "NV12"}
+
+
+@pytest.mark.parametrize(("data", "capacity", "ten_ms"), [
+    ((1280, 800, 10_000_000, 83_333, 2), 26, 2),
+    ((640, 480, 10_000_000, 47_619, 2), 87, 3),
+    ((320, 240, 10_000_000, 23_809, 3), 174, 5),
+    ((160, 120, 640, 1, 2), 512, 7),
+])
+def test_native_mode_record_capacity_and_nominal_ms(data, capacity, ten_ms):
+    from types import SimpleNamespace
+
+    from openflight.camera.triggered_buffer import TriggeredFrameBuffer
+    from openflight.camera.windows_usb import UsbCameraSettings
+
+    mode = mf.Mode(*data).settings()
+    settings = UsbCameraSettings(width=mode["width"], height=mode["height"])
+    assert camera_setup_routes._capture_capacity(settings, mode["pixel_format"]) == capacity
+    camera = SimpleNamespace(settings=settings, reported_native_mode=mode,
+                             ring=TriggeredFrameBuffer(3, 3, capacity=capacity))
+    assert camera_setup_routes._recording_window(camera, {"pre_ms": 10, "post_ms": 10}) == (ten_ms, ten_ms)
+    with pytest.raises(ValueError, match="total recording frames"):
+        camera_setup_routes._recording_window(camera, {"pre_frames": capacity, "post_frames": 1})

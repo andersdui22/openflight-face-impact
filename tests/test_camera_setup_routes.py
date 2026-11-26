@@ -72,3 +72,31 @@ def test_pnp_inventory_preserves_identity_without_capture_index(monkeypatch):
     result = inventory.windows_camera_inventory()
     assert {item["identity"].casefold() for item in result} == {"usb\\vid_a\\port_1", "usb\\vid_a\\port_2"}
     assert all(item["capture_identity_verified"] is False and "index" not in item for item in result)
+
+
+def test_recording_window_changes_without_reopening_or_exceeding_capacity(monkeypatch):
+    monkeypatch.setattr(server, "mock_mode", True)
+    monkeypatch.setattr(server, "windows_usb_runtime", None)
+    monkeypatch.setattr("openflight.camera.camera_setup_routes._producer_sha", lambda: "a" * 40)
+    client = server.app.test_client()
+    settings = {"identity": "fixture:camera-setup-v1", "width": 320, "height": 200, "fps": 120,
+                "pre_frames": 10000, "post_frames": 10000}
+    assert client.post(BASE + "start", json=settings, headers=HEADERS).status_code == 200
+    owner = server.windows_usb_runtime
+    try:
+        too_large = client.post(BASE + "record", json={"pre_frames": 512, "post_frames": 512}, headers=HEADERS)
+        assert too_large.status_code == 422
+        assert "512 total" in too_large.json["error"]
+        deadline = monotonic() + 2
+        while owner.ring.buffered_frames < 24 and monotonic() < deadline:
+            sleep(.01)
+        export = client.post(BASE + "record", json={"pre_ms": 200, "post_ms": 200}, headers=HEADERS)
+        assert export.status_code == 200
+        assert export.headers["X-OpenFlight-Exported-Frames"] == "48"
+        with ZipFile(io.BytesIO(export.data)) as package:
+            meta = json.loads(package.read("diagnostic.json"))
+            assert meta["recording_window"] == {"pre_frames": 24, "post_frames": 24, "requested_ms": [200, 200]}
+        assert owner is server.windows_usb_runtime
+        assert owner.is_running
+    finally:
+        assert client.post(BASE + "stop", json={}, headers=HEADERS).status_code == 200

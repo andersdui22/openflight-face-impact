@@ -108,3 +108,86 @@ dimensions and observed FPS. Verify start after stopping, then unplug and
 reconnect, rescan if the link changes and repeat with the same physical
 device. Sustained delivery, physical export, timing, calibration and
 measurement accuracy remain open physical acceptance items.
+
+## Operator observations from the PR #53 portable build
+
+The owner reported physical ELP OV9281 enumeration, correct device identity,
+live preview responding to motion, and successful diagnostic ZIP export
+from the PR #53 Windows build at
+[`88b40ae`](https://github.com/andersdui22/openflight-face-impact/commit/88b40aec68b357f164b99d60c3214d842aac6be5).
+
+| Selected resolution and nominal rate | Observed delivery FPS reported by the owner |
+| --- | ---: |
+| 1280 × 800 at 120 FPS | 120.91 |
+| 640 × 480 at 210 FPS | 209.19 |
+| 320 × 240 at 420 FPS | 418.72 |
+
+The owner reported that 13 pre + 13 post frames worked, 14 + 14 failed, and
+that exported data appeared to group frames around 16 ms. The original ZIPs
+were absent from this workspace and were not independently inspected. The
+reported rates represent observed delivery, not sensor measurement. No
+independent sample timing, sustained throughput, calibration or impact
+accuracy has been established.
+
+### Reproduced recording limit and replacement
+
+At 640 × 480 the old start route budgeted five bytes per pixel and
+`2 × pre + post + 2` slots. That is 62,976,000 bytes for 13 + 13,
+and 67,584,000 bytes for 14 + 14, above the 67,108,864-byte limit.
+An independent 16-frame limit applied to each side. The native readout
+scratch buffer was per frame. The offline raster ZIP already allowed up to
+512 frames, subject to its own byte ceiling. Mode startup now validates
+format and raster independently. Record validates the total window against
+the 64 MiB payload budget and the existing 512-frame format limit. NV12
+uses 2.5 bytes per pixel including the analysis raster, YUY2 uses 3, and
+MJPG reserves its bounded maximum of 5. At 640 × 480 NV12 the total is
+87 frames, and at 1280 × 800 NV12 it is 26. At 1280 × 800 MJPG the
+conservative limit is 13 total. Milliseconds convert to whole frames
+rounded up using the exact native ratio. They are nominal requested
+durations, with actual intervals recorded separately.
+
+While exporting, one completed window can coexist with the next rolling
+history, for at most two 64 MiB frame payload windows, plus per-frame
+scratch, metadata, one cached preview, and normal application overhead.
+The outer ZIP is spooled to disk above 1 MiB and streamed from the backend.
+The browser download still consumes the bounded archive as a Blob. One
+manual capture/export request is prepared at a time. Ring history eviction
+is expected and counted separately from unavailable device-drop counts.
+
+### Timing instrumentation and interpretation
+
+The earlier `source_reader_time_100ns` records the Media Foundation
+`OnReadSample` media timestamp, not the local execution time of the callback.
+The new export includes actual QPC callback and readout observations and
+their frequency, the sample timestamp and duration, Python monotonic
+arrival and raster preparation completion. Interval and segment statistics
+are computed within each clock domain, preserving repeated, negative and
+long intervals as observed. Payload hashes identify adjacent equal bytes
+in the ZIP. Equal bytes or timestamps alone cannot establish duplicate
+exposures. The diagnostic UI reports live statistics, buffer occupancy and
+evictions, received/processed/last exported counts, and JPEG encode count
+and wall time. A dropped-frame total and the sensor-exposure clock remain
+unknown.
+
+The Source Reader issues one async request at a time. It waits for its
+callback, copies the sample and prepares the raster before issuing another
+request. Thus USB/driver scheduling, callback dispatch, same-thread copy
+and decode, or host scheduling could influence the apparent cadence. A
+roughly 16 ms spacing alone does not identify USB batching or Windows timer
+resolution. Preview uses the existing ring on independent HTTP workers.
+Diagnostic preview now bounds JPEG encoding to one job at a time with a
+100 ms cache interval. It never submits a capture request. There is no
+timing repair, timer-resolution change, or second acquisition queue.
+
+The provider queries `IAMCameraControl::GetRange` and
+`IAMVideoProcAmp::GetRange` on the open source. Controls use native driver
+units. Range, step, default, auto/manual capability, acceptance and readback
+are reported only when the driver supplies them. Start/reconnect applies
+the operator's selected controls to the same exact device. Support on the
+physical ELP and its driver requires retest.
+
+For the next test, export an otherwise unchanged mode with **Pause preview**
+and again after **Resume preview**. The control only stops preview requests. Repeat at 120, 210 and 420 FPS. Preserve
+the original ZIPs. Compare adjacent sample, QPC callback and host intervals
+together with native readout, Python preparation and preview costs.
+Gates 20–28 remain open.
