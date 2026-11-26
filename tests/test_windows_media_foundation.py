@@ -64,6 +64,7 @@ def test_physical_route_preserves_sample_times_without_publishing_impact(monkeyp
             sample._obj.size = 16
             sample._obj.time_100ns = -1
             sample._obj.duration_100ns = 200
+            sample._obj.callback_time_100ns = 500
             sample._obj.discontinuity = 1
             return 0
 
@@ -104,6 +105,7 @@ def test_physical_route_preserves_sample_times_without_publishing_impact(monkeyp
                 assert archive.read(item["file"]) == bytes(range(16))
                 assert item["driver_sample"]["sample_time_100ns"] is None
                 assert item["driver_sample"]["sample_duration_100ns"] == 200
+                assert item["driver_sample"]["source_reader_time_100ns"] == 500
                 assert item["driver_sample"]["discontinuity"] is True
     finally:
         assert client.post(base + "stop", json={}, headers=headers).status_code == 200

@@ -236,6 +236,8 @@ def _camera_action(action, server):
                 exposure_mode = data.get("exposure_mode", "unchanged")
                 if exposure_mode not in ("unchanged", "auto", "manual"):
                     raise ValueError("Invalid exposure mode")
+                if exposure_mode == "manual" and data.get("exposure") is None:
+                    raise ValueError("Enter a manual exposure value in driver units")
                 settings = _settings({**data, "width": mode.width, "height": mode.height,
                                       "fps": mode.numerator / mode.denominator})
                 factory = lambda link: MediaFoundationCamera(link, mode, exposure_mode)

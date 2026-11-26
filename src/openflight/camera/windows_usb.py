@@ -234,6 +234,8 @@ class WindowsUsbCamera:
                 label: value if math.isfinite(value) and value > 0 else None
                 for label, value in zip(("width", "height", "reported_fps"), reported_mode)
             }
+            if hasattr(camera, "configure_driver_exposure"):
+                camera.configure_driver_exposure()
             self._reported_controls = self._read_controls(camera)
             if hasattr(camera, "mode_diagnostics"):
                 self.reported_native_mode = camera.mode_diagnostics()
@@ -262,7 +264,7 @@ class WindowsUsbCamera:
         try:
             while not self._stop.is_set():
                 ok, image = self._camera.read()
-                host_ns = time.monotonic_ns()
+                host_ns = getattr(self._camera, "host_arrival_ns", None) or time.monotonic_ns()
                 if not ok or image is None:
                     raise RuntimeError("USB camera read failed or disconnected")
                 if not isinstance(image, np.ndarray) or image.dtype != np.uint8 or image.size == 0:

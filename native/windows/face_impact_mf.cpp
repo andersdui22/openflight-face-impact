@@ -29,6 +29,7 @@ public:
     HANDLE event = CreateEventW(nullptr, FALSE, FALSE, nullptr);
     HRESULT status = S_OK;
     DWORD flags = 0;
+    LONGLONG callback_time = -1;
     ComPtr<IMFSample> sample;
 
     ~ReaderCallback() { if (event) CloseHandle(event); }
@@ -47,9 +48,10 @@ public:
         if (!remaining) delete this;
         return remaining;
     }
-    STDMETHODIMP OnReadSample(HRESULT result, DWORD, DWORD stream_flags, LONGLONG, IMFSample* frame) override {
+    STDMETHODIMP OnReadSample(HRESULT result, DWORD, DWORD stream_flags, LONGLONG timestamp, IMFSample* frame) override {
         status = result;
         flags = stream_flags;
+        callback_time = frame ? timestamp : -1;
         sample = frame;
         SetEvent(event);
         return S_OK;
@@ -100,7 +102,8 @@ static HRESULT enumerate(Devices& devices) {
 
 static HRESULT attribute(IMFActivate* entry, REFGUID key, std::unique_ptr<wchar_t, TaskMem>& value) {
     wchar_t* raw = nullptr;
-    HRESULT hr = entry->GetAllocatedString(key, &raw, nullptr);
+    UINT32 length = 0;
+    HRESULT hr = entry->GetAllocatedString(key, &raw, &length);
     value.reset(raw);
     return hr;
 }
@@ -208,7 +211,7 @@ OFI_API HRESULT ofi_open(const wchar_t* link, const Mode* wanted, Session** outp
 OFI_API const wchar_t* ofi_identity(Session* session) { return session->identity.c_str(); }
 
 struct FrameInfo {
-    LONGLONG time_100ns, duration_100ns;
+    LONGLONG time_100ns, duration_100ns, callback_time_100ns;
     DWORD bytes, flags, discontinuity;
 };
 OFI_API HRESULT ofi_read(Session* session, BYTE* output, DWORD capacity, FrameInfo* info) {
@@ -226,6 +229,7 @@ OFI_API HRESULT ofi_read(Session* session, BYTE* output, DWORD capacity, FrameIn
         return MF_E_INVALIDSTREAMNUMBER;
     if (!sample) return S_FALSE;
     info->flags = flags;
+    info->callback_time_100ns = cb->callback_time;
     if (FAILED(sample->GetSampleTime(&info->time_100ns))) info->time_100ns = -1;
     if (FAILED(sample->GetSampleDuration(&info->duration_100ns))) info->duration_100ns = -1;
     if (FAILED(sample->GetUINT32(MFSampleExtension_Discontinuity, &info->discontinuity)))

@@ -6,6 +6,7 @@ import ctypes as c
 import math
 import sys
 from pathlib import Path
+from time import monotonic_ns
 
 import numpy as np
 
@@ -21,7 +22,7 @@ class Mode(c.Structure):
 
 
 class Sample(c.Structure):
-    _fields_ = [("time_100ns", c.c_int64), ("duration_100ns", c.c_int64),
+    _fields_ = [("time_100ns", c.c_int64), ("duration_100ns", c.c_int64), ("callback_time_100ns", c.c_int64),
                 ("size", c.c_uint32), ("flags", c.c_uint32), ("discontinuity", c.c_uint32)]
 
 
@@ -108,11 +109,11 @@ class MediaFoundationCamera:
         self._exposure_mode = exposure_mode
         self.sample_metadata = None
         self.native_payload = None
+        self.host_arrival_ns = None
         self._buffer = c.create_string_buffer(4 * mode.width * mode.height)
         _check(self._dll.ofi_open(identity, c.byref(mode), c.byref(self._handle)), "exact-device open")
         self.opened_identity = self._dll.ofi_identity(self._handle)
-        if exposure_mode == "auto":
-            self._control(15, True, 0, 1)
+        self._auto_accepted = None
 
     def isOpened(self):
         return bool(self._handle)
@@ -134,20 +135,25 @@ class MediaFoundationCamera:
         control = self._control(prop, False)
         return control[0] if control is not None else math.nan
 
+    def configure_driver_exposure(self):
+        if self._exposure_mode == "auto":
+            self._auto_accepted = self._control(15, True, 0, 1) is not None
+
     def mode_diagnostics(self):
         return self.mode.settings()
 
     def exposure_diagnostics(self):
         reported = self._control(15, False)
-        return {"requested_mode": self._exposure_mode,
+        return {"requested_mode": self._exposure_mode, "auto_request_accepted": self._auto_accepted,
                 "reported_mode": {1: "auto", 2: "manual"}.get(reported[1]) if reported else None}
 
     def read(self):
         for _ in range(32):
-            sample = Sample()
+            sample = Sample(-1, -1, -1)
             result = self._dll.ofi_read(self._handle, self._buffer, len(self._buffer), c.byref(sample))
             _check(result, "sample read")
             if result == 0:
+                self.host_arrival_ns = monotonic_ns()
                 break
         else:
             raise RuntimeError("Media Foundation supplied no usable samples")
@@ -157,6 +163,7 @@ class MediaFoundationCamera:
         self.sample_metadata = {
             "sample_time_100ns": sample.time_100ns if sample.time_100ns >= 0 else None,
             "sample_duration_100ns": sample.duration_100ns if sample.duration_100ns >= 0 else None,
+            "source_reader_time_100ns": sample.callback_time_100ns if sample.callback_time_100ns >= 0 else None,
             "flags": sample.flags, "discontinuity": bool(sample.discontinuity),
             "sequence": None, "provenance": "media_foundation_stream_sample",
         }

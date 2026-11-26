@@ -37,7 +37,7 @@ JPEGs. YUY2 and NV12 samples are stored as packed native bytes, with format and
 dimensions in the manifest. For a directly viewable lossless grayscale copy,
 extract an inner `.gray8` raster and prepend the PGM header
 `P5\n<width> <height>\n255\n` without editing the pixel bytes. Keep the
-original packages and hashes. The manifest records sample time and duration
+original packages and hashes. The manifest records sample time, sample duration and Source Reader callback time
 in 100 ns units, flags, discontinuity, host timestamps, device identity,
 mode, controls, capture window and app SHA. Driver sequence is unknown.
 A metadata receipt is stored in the existing SQLite database, separately
