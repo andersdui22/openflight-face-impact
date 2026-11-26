@@ -118,6 +118,7 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
           Camera identity
           <select
             value={identity}
+            disabled={busy}
             onChange={(event) => {
               setIdentity(event.target.value);
               setModes([]);
@@ -145,14 +146,11 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
                 void run(async () => {
                   const response = await (await setupRequest('modes', { identity, activate_physical: true })).json();
                   const advertised: Mode[] = response.modes;
+                  const nextMode =
+                    advertised.find((mode) => modeKey(mode) === nativeMode) ??
+                    (modes.length ? undefined : advertised[0]);
                   setModes(advertised);
-                  setNativeMode(
-                    advertised.some((mode) => modeKey(mode) === nativeMode)
-                      ? nativeMode
-                      : advertised[0]
-                        ? modeKey(advertised[0])
-                        : ''
-                  );
+                  setNativeMode(nextMode ? modeKey(nextMode) : '');
                   setStatus(
                     response.modes.length ? 'Advertised native modes loaded.' : 'No supported native mode advertised.'
                   );
@@ -163,7 +161,7 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
             </button>
             <label>
               Advertised camera mode
-              <select value={nativeMode} onChange={(event) => setNativeMode(event.target.value)}>
+              <select value={nativeMode} disabled={busy} onChange={(event) => setNativeMode(event.target.value)}>
                 <option value="">Select a native mode</option>
                 {modes.map((mode) => (
                   <option key={modeKey(mode)} value={modeKey(mode)} title={`${mode.numerator}/${mode.denominator} FPS`}>

@@ -43,6 +43,7 @@ test('physical setup requires explicit activation and uses advertised native mod
     { width: 1280, height: 800, numerator: 10_000_000, denominator: 83_333, format: 3, pixel_format: 'MJPG' },
     { width: 640, height: 480, numerator: 30, denominator: 1, format: 1, pixel_format: 'YUY2' },
   ];
+  const inventories = [modes, [...modes].reverse(), modes.slice(0, 2)];
   await page.route('**/api/face-impact/camera-setup/inventory', (route) =>
     route.fulfill({
       json: {
@@ -52,7 +53,7 @@ test('physical setup requires explicit activation and uses advertised native mod
   );
   await page.route('**/api/face-impact/camera-setup/modes', (route) =>
     route.fulfill({
-      json: { modes: loads++ === 0 ? modes : [...modes].reverse() },
+      json: { modes: inventories[loads++] },
     })
   );
   await page.route('**/api/face-impact/camera-setup/start', (route) => {
@@ -95,4 +96,8 @@ test('physical setup requires explicit activation and uses advertised native mod
   await setup.getByRole('button', { name: 'Start or reconnect physical camera' }).click();
   await expect(setup.getByRole('alert')).toHaveText('Controlled test: no physical camera opened');
   expect(starts).toBe(3);
+  await load.click();
+  await expect(setup.getByText('Advertised native modes loaded.')).toBeVisible();
+  await expect(modePicker).toHaveValue('');
+  await expect(setup.getByRole('button', { name: 'Start or reconnect physical camera' })).toBeDisabled();
 });
