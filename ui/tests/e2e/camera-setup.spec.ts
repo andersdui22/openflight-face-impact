@@ -20,6 +20,11 @@ test('configures the diagnostic camera and exports buffered host-timed frames', 
     await expect(setup.getByText('fixture · fixture_match')).toBeVisible({ timeout: 11000 });
     await expect(setup.getByText('640 × 400', { exact: true })).toBeVisible({ timeout: 11000 });
     await expect(setup.getByText('Host arrival only · independent exposure timing unavailable')).toBeVisible();
+    const preview = page.getByLabel('USB camera preview');
+    await expect(preview.getByRole('img')).toBeVisible();
+    await preview.getByRole('button', { name: 'Pause preview' }).click();
+    await expect(preview.getByText('Preview paused · capture active')).toBeVisible();
+    await expect(preview.getByRole('img')).toHaveCount(0);
     const [recording] = await Promise.all([
       page.waitForEvent('download'),
       setup.getByRole('button', { name: 'Record and export diagnostic' }).click(),
@@ -27,6 +32,8 @@ test('configures the diagnostic camera and exports buffered host-timed frames', 
     expect(recording.suggestedFilename()).toBe('face-impact-diagnostic.zip');
     await expect(setup.getByText('Diagnostic capture exported', { exact: false })).toBeVisible();
     await expect(setup.getByText(/Unknown \/ [0-9]+ \/ 38/)).toBeVisible();
+    await preview.getByRole('button', { name: 'Resume preview' }).click();
+    await expect(preview.getByRole('img')).toBeVisible();
     await setup.getByLabel('Recording window units').selectOption('ms');
     await expect(setup.getByLabel('Milliseconds before trigger')).toBeVisible();
     const screenshot = info.outputPath('camera-setup.png');

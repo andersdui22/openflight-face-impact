@@ -57,6 +57,7 @@ export function FaceImpactCameraPreview({
   const [physical, setPhysical] = useState(false);
   const [state, setState] = useState<CameraState>('checking');
   const [error, setError] = useState<string | null>(null);
+  const [paused, setPaused] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
   const [frameKey, setFrameKey] = useState(0);
   const [calibration, setCalibration] = useState<CalibrationStatus | null>(null);
@@ -119,7 +120,7 @@ export function FaceImpactCameraPreview({
     };
   }, [origin, onDiagnostics]);
 
-  const active = state === 'running' && !previewFailed;
+  const active = state === 'running' && !paused && !previewFailed;
   return (
     <div className="impact-workspace__empty" aria-label="USB camera preview">
       {active ? (
@@ -131,7 +132,18 @@ export function FaceImpactCameraPreview({
           style={{ maxWidth: '100%', maxHeight: 180, objectFit: 'contain' }}
         />
       ) : (
-        <span>{previewFailed ? 'Camera preview unavailable' : `Camera: ${state}`}</span>
+        <span>
+          {state === 'running' && paused
+            ? 'Preview paused · capture active'
+            : previewFailed
+              ? 'Camera preview unavailable'
+              : `Camera: ${state}`}
+        </span>
+      )}
+      {state === 'running' && (
+        <button type="button" onClick={() => setPaused(!paused)}>
+          {paused ? 'Resume preview' : 'Pause preview'}
+        </button>
       )}
       {error && <span role="alert">{error}</span>}
       {physical && <small>Physical camera · diagnostic image</small>}

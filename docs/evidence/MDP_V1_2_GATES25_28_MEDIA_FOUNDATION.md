@@ -186,8 +186,8 @@ are reported only when the driver supplies them. Start/reconnect applies
 the operator's selected controls to the same exact device. Support on the
 physical ELP and its driver requires retest.
 
-For the next test, export an otherwise unchanged mode with preview idle
-and again with preview visible. Repeat at 120, 210 and 420 FPS. Preserve
+For the next test, export an otherwise unchanged mode with **Pause preview**
+and again after **Resume preview**. The control only stops preview requests. Repeat at 120, 210 and 420 FPS. Preserve
 the original ZIPs. Compare adjacent sample, QPC callback and host intervals
 together with native readout, Python preparation and preview costs.
 Gates 20–28 remain open.
