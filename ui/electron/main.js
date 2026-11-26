@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 // Kiosk shell for the OpenFlight React UI. Loads whatever URL the launcher
 // script gives it (the startup splash, then the app itself once it
 // navigates there) in a chromeless, fullscreen window — this replaces
@@ -18,6 +19,7 @@ const portable = app.isPackaged || process.env.OPENFLIGHT_PORTABLE === '1' ||
 
 Menu.setApplicationMenu(null);
 
+const cameraToken = randomUUID();
 let backendChild = null;
 let backendStartupError = null;
 let backendReady = false;
@@ -52,6 +54,7 @@ async function launchOptInBackend(recovering = false) {
   try {
     const executable = resolveBackendExecutable(process.env, app.isPackaged ? process.resourcesPath : null);
     backendChild = startBackend(executable, {
+      cameraToken,
       onError: (error) => { backendStartupError = error; console.error(error); },
     });
     const child = backendChild;
@@ -474,6 +477,17 @@ function createWindow() {
     },
   });
 
+  if (portable) {
+    win.webContents.session.webRequest.onBeforeSendHeaders(
+      { urls: ['http://127.0.0.1:8080/api/face-impact/camera-setup/*', 'http://127.0.0.1:8080/api/camera/preview.jpg*'] },
+      (details, callback) => {
+        if (details.webContentsId === win.webContents.id && win.webContents.getURL() === portableIndex.href) {
+          details.requestHeaders['X-OpenFlight-Physical-Camera'] = cameraToken;
+        }
+        callback({ requestHeaders: details.requestHeaders });
+      },
+    );
+  }
   win.setMenuBarVisibility(false);
   // The kiosk shell only ever shows the OpenFlight UI itself; deny any
   // attempt (e.g. target="_blank" links) to pop a second window.

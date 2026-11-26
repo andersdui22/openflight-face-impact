@@ -27,8 +27,15 @@ $sourceSha = git -C $root rev-parse HEAD
 if ($LASTEXITCODE -ne 0) { throw 'Cannot identify backend source revision' }
 $sourceFile = Join-Path $venv 'face-impact-source-sha.txt'
 Set-Content -LiteralPath $sourceFile -Value $sourceSha -Encoding ascii
+$nativeBuild = Join-Path $work 'media-foundation'
+& cmake -S (Join-Path $root 'native/windows') -B $nativeBuild -A x64
+if ($LASTEXITCODE -ne 0) { throw 'Media Foundation bridge configuration failed' }
+& cmake --build $nativeBuild --config Release
+if ($LASTEXITCODE -ne 0) { throw 'Media Foundation bridge build failed' }
+$nativeDll = Join-Path $nativeBuild 'Release/face_impact_mf.dll'
+if (!(Test-Path -LiteralPath $nativeDll -PathType Leaf)) { throw 'Missing Media Foundation bridge' }
 # A one-directory backend runs directly as the process owned by Electron.
-& $python -m PyInstaller --noconfirm --clean --onedir --name OpenFlightFaceImpactBackend --paths (Join-Path $root 'src') --add-data "$sourceFile;." --hidden-import engineio.async_drivers.threading --distpath $dist --workpath $work --specpath $work (Join-Path $root $entry)
+& $python -m PyInstaller --noconfirm --clean --onedir --name OpenFlightFaceImpactBackend --paths (Join-Path $root 'src') --add-binary "$nativeDll;." --add-data "$sourceFile;." --hidden-import engineio.async_drivers.threading --distpath $dist --workpath $work --specpath $work (Join-Path $root $entry)
 if ($LASTEXITCODE -ne 0) { throw 'PyInstaller backend build failed' }
 $exe = Join-Path $dist 'OpenFlightFaceImpactBackend/OpenFlightFaceImpactBackend.exe'
 if (!(Test-Path $exe -PathType Leaf)) { throw 'Missing backend EXE' }

@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - native/windows/**
+      - src/openflight/camera/windows_media_foundation.py
       - scripts/build-face-impact-backend-windows.ps1
       - scripts/face-impact-windows-backend-requirements.txt
       - scripts/build-face-impact-windows.ps1
@@ -42,6 +44,15 @@ jobs:
       - name: Build development-only backend EXE
         shell: pwsh
         run: ./scripts/build-face-impact-backend-windows.ps1
+      - name: Verify packaged Media Foundation device enumeration
+        shell: pwsh
+        run: |
+          $exe = Resolve-Path 'out/face-impact-backend/OpenFlightFaceImpactBackend/OpenFlightFaceImpactBackend.exe'
+          $result = & $exe --media-foundation-inventory
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled native Media Foundation scan failed' }
+          $inventory = $result | ConvertFrom-Json
+          if ($null -eq $inventory.devices) { throw 'Device inventory missing' }
+          Write-Host "Media Foundation API verified. Video devices present: $(@($inventory.devices).Count). No camera was opened."
       - name: Verify frozen offline recording replay and session archive
         shell: pwsh
         run: |

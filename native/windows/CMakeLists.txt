@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.20)
+project(face_impact_mf LANGUAGES CXX)
+add_library(face_impact_mf SHARED face_impact_mf.cpp)
+target_compile_features(face_impact_mf PRIVATE cxx_std_17)
+set_property(TARGET face_impact_mf PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+target_link_libraries(face_impact_mf PRIVATE mfplat mf mfreadwrite mfuuid ole32 strmiids)

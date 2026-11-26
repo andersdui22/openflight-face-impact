@@ -22,6 +22,8 @@ class CameraFrame:
     exposure_us: int
     analogue_gain: float
     sensor_timestamp_is_host_alias: bool = False
+    driver_sample: dict | None = None
+    native_payload: bytes | None = None
 
 
 @dataclass(frozen=True)

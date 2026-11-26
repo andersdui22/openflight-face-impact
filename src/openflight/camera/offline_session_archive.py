@@ -49,6 +49,19 @@ class OfflineSessionArchive:
             ).fetchone()
             return json.loads(row[0])["evidence"]
 
+    def save_diagnostic_manifest(self, manifest: dict) -> None:
+        """Retain an export receipt without creating or admitting an impact shot."""
+        with self._connection() as connection:
+            connection.execute("""
+                CREATE TABLE IF NOT EXISTS offline_diagnostic_exports (
+                    session_id TEXT NOT NULL, shot_id TEXT NOT NULL, manifest TEXT NOT NULL,
+                    PRIMARY KEY (session_id, shot_id)
+                )
+            """)
+            connection.execute("""
+                INSERT OR IGNORE INTO offline_diagnostic_exports VALUES (?, ?, ?)
+            """, (manifest["session_id"], manifest["shot_id"], json.dumps(manifest, allow_nan=False)))
+
     def contains_session(self, session_id: str) -> bool:
         """Check session identity without reading or decoding shot documents."""
         with self._connection() as connection:

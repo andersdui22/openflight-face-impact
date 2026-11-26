@@ -3,6 +3,14 @@ import { getServerOrigin } from '../utils/serverOrigin';
 
 const fixture = 'fixture:camera-setup-v1';
 const storageKey = 'openflight.face-impact.camera-identity';
+type Mode = {
+  width: number;
+  height: number;
+  numerator: number;
+  denominator: number;
+  format: number;
+  pixel_format: string;
+};
 type Device = { identity: string; name: string; status: string };
 
 export interface CameraDiagnostics {
@@ -16,6 +24,14 @@ export interface CameraDiagnostics {
   identity?: { selected: string | null; opened: string | null; status: string; backend: string } | null;
   host_frame_intervals_ms?: { count: number; min: number; max: number; mean: number; stddev: number } | null;
   sample_timestamp_source?: string | null;
+  native_mode?: Mode | null;
+  exposure_mode?: { requested_mode: string; reported_mode: string | null } | null;
+  latest_driver_sample?: {
+    sample_time_100ns: number | null;
+    sample_duration_100ns: number | null;
+    discontinuity: boolean;
+    sequence: number | null;
+  } | null;
   sensor_timestamp_available?: boolean;
   driver_controls?: Record<string, { accepted_by_driver: boolean; reported: number | null }>;
 }
@@ -38,6 +54,13 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
   const [identity, setIdentity] = useState(() =>
     typeof window === 'undefined' ? fixture : (window.localStorage.getItem(storageKey) ?? fixture)
   );
+  const [modes, setModes] = useState<Mode[]>([]);
+  const [nativeMode, setNativeMode] = useState('');
+  const [activatePhysical, setActivatePhysical] = useState(false);
+  const [exposureMode, setExposureMode] = useState('unchanged');
+  const physicalSelected = identity !== fixture;
+  const physicalRunning =
+    diagnostics?.identity?.backend === 'media_foundation' && diagnostics.identity.status === 'handle_match';
   const [resolution, setResolution] = useState('320x200');
   const [fps, setFps] = useState('30');
   const [preFrames, setPreFrames] = useState('3');
@@ -101,22 +124,73 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
             ))}
           </select>
         </label>
-        {identity !== fixture && <p>Windows device identity: {identity}. Capture association is unverified.</p>}
-        <label>
-          Requested resolution{' '}
-          <select value={resolution} onChange={(event) => setResolution(event.target.value)}>
-            <option>320x200</option>
-            <option>640x400</option>
-          </select>
-        </label>
-        <label>
-          Requested FPS{' '}
-          <select value={fps} onChange={(event) => setFps(event.target.value)}>
-            <option>30</option>
-            <option>60</option>
-            <option>120</option>
-          </select>
-        </label>
+        {identity !== fixture && (
+          <p>Windows device identity: {identity}. Physical capture requires an exact handle match.</p>
+        )}
+        {physicalSelected ? (
+          <>
+            <button
+              disabled={busy || !discovered || physicalRunning || !activatePhysical}
+              onClick={() =>
+                void run(async () => {
+                  const response = await (await setupRequest('modes', { identity, activate_physical: true })).json();
+                  setModes(response.modes);
+                  setNativeMode(response.modes.length ? '0' : '');
+                  setStatus(
+                    response.modes.length ? 'Advertised native modes loaded.' : 'No supported native mode advertised.'
+                  );
+                })
+              }
+            >
+              Load advertised modes
+            </button>
+            <label>
+              Advertised camera mode
+              <select value={nativeMode} onChange={(event) => setNativeMode(event.target.value)}>
+                <option value="">Select a native mode</option>
+                {modes.map((mode, index) => (
+                  <option key={index} value={index}>
+                    {mode.width} × {mode.height} · {mode.numerator / mode.denominator} FPS · {mode.pixel_format}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Exposure mode{' '}
+              <select value={exposureMode} onChange={(event) => setExposureMode(event.target.value)}>
+                <option value="unchanged">Driver default</option>
+                <option value="auto">Auto</option>
+                <option value="manual">Manual</option>
+              </select>
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={activatePhysical}
+                onChange={(event) => setActivatePhysical(event.target.checked)}
+              />{' '}
+              Enable physical diagnostics
+            </label>
+          </>
+        ) : (
+          <>
+            <label>
+              Requested resolution{' '}
+              <select value={resolution} onChange={(event) => setResolution(event.target.value)}>
+                <option>320x200</option>
+                <option>640x400</option>
+              </select>
+            </label>
+            <label>
+              Requested FPS{' '}
+              <select value={fps} onChange={(event) => setFps(event.target.value)}>
+                <option>30</option>
+                <option>60</option>
+                <option>120</option>
+              </select>
+            </label>
+          </>
+        )}
         <label>
           Exposure (driver units){' '}
           <input type="number" value={exposure} onChange={(event) => setExposure(event.target.value)} />
@@ -145,12 +219,15 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
           />
         </label>
         <button
-          disabled={busy || identity !== fixture}
+          disabled={busy || (physicalSelected && (!discovered || !activatePhysical || nativeMode === ''))}
           onClick={() =>
             void run(async () => {
               const [width, height] = resolution.split('x').map(Number);
               await setupRequest('start', {
                 identity,
+                activate_physical: physicalSelected && activatePhysical,
+                mode: physicalSelected ? modes[Number(nativeMode)] : undefined,
+                exposure_mode: exposureMode,
                 width,
                 height,
                 fps: Number(fps),
@@ -159,22 +236,26 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
                 exposure: exposure === '' ? null : Number(exposure),
                 gain: gain === '' ? null : Number(gain),
               });
-              setStatus('Diagnostic fixture started or reconnected.');
+              setStatus(
+                physicalSelected
+                  ? 'Physical diagnostic capture started or reconnected.'
+                  : 'Diagnostic fixture started or reconnected.'
+              );
             })
           }
         >
-          Start or reconnect fixture
+          {physicalSelected ? 'Start or reconnect physical camera' : 'Start or reconnect fixture'}
         </button>
         <button
           disabled={busy}
           onClick={() =>
             void run(async () => {
               await setupRequest('stop');
-              setStatus('Diagnostic fixture stopped.');
+              setStatus('Camera capture stopped.');
             })
           }
         >
-          Stop fixture
+          {physicalSelected ? 'Stop physical camera' : 'Stop fixture'}
         </button>
         <label>
           Capture purpose
@@ -183,10 +264,11 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
             <option value="checkerboard">Checkerboard reference</option>
             <option value="club_landmarks">Club landmark reference</option>
             <option value="setup_reference">Camera setup reference</option>
+            <option value="golf_diagnostic">Golf swing diagnostic</option>
           </select>
         </label>
         <button
-          disabled={busy || identity !== fixture || !diagnostics?.delivered_size}
+          disabled={busy || !diagnostics?.delivered_size || (physicalSelected && !physicalRunning)}
           onClick={() =>
             void run(async () => {
               const blob = await (await setupRequest('record', { purpose })).blob();
@@ -203,6 +285,13 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
           Record and export diagnostic
         </button>
       </div>
+      <p>
+        {physicalRunning
+          ? 'Physical camera · diagnostic only'
+          : diagnostics?.identity?.status === 'fixture_match'
+            ? 'Diagnostic fixture'
+            : 'Camera inactive'}
+      </p>
       <dl>
         <dt>Capture backend / identity status</dt>
         <dd>
@@ -222,6 +311,21 @@ export function FaceImpactCameraSetup({ diagnostics }: { diagnostics: CameraDiag
         <dd>
           {diagnostics?.sample_timestamp_source ?? 'Unavailable'} /{' '}
           {diagnostics?.sensor_timestamp_available ? 'Available' : 'Unknown'}
+        </dd>
+        <dt>Negotiated native pixel format / exposure mode</dt>
+        <dd>
+          {diagnostics?.native_mode?.pixel_format ?? 'Unknown'} /{' '}
+          {diagnostics?.exposure_mode?.reported_mode ?? 'Unknown'}
+        </dd>
+        <dt>Driver sample time / duration (100 ns)</dt>
+        <dd>
+          {diagnostics?.latest_driver_sample?.sample_time_100ns ?? 'Unknown'} /{' '}
+          {diagnostics?.latest_driver_sample?.sample_duration_100ns ?? 'Unknown'}
+        </dd>
+        <dt>Driver discontinuity / sequence</dt>
+        <dd>
+          {diagnostics?.latest_driver_sample ? String(diagnostics.latest_driver_sample.discontinuity) : 'Unknown'} /{' '}
+          {diagnostics?.latest_driver_sample?.sequence ?? 'Unknown'}
         </dd>
         <dt>Requested mode</dt>
         <dd>

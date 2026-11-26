@@ -77,7 +77,7 @@ from .sim import (
     resolve_shot,
 )
 from .camera.offline_recording_routes import recording_routes
-from .camera.camera_setup_routes import camera_setup_routes
+from .camera.camera_setup_routes import camera_setup_routes, physical_camera_authorized
 from .speed_correction import correct_ball_speed
 from .spin_estimate import calculated_spin_rpm
 from .startup_status import StartupStatusReporter, configured_startup_components
@@ -1718,7 +1718,12 @@ def windows_usb_camera_status():
         "timestamp_source": "host_arrival_monotonic",
         "identity": getattr(camera, "identity_diagnostics", None),
         "host_frame_intervals_ms": getattr(camera, "host_frame_intervals_ms", None) if state == "running" else None,
-        "sample_timestamp_source": None,
+        "native_mode": getattr(camera, "reported_native_mode", None),
+        "exposure_mode": getattr(camera, "reported_exposure_mode", None),
+        "latest_driver_sample": getattr(camera.ring.latest_frame, "driver_sample", None) if
+            state == "running" and getattr(camera, "ring", None) is not None else None,
+        "sample_timestamp_source": "media_foundation_stream_sample" if
+            getattr(camera, "reported_native_mode", None) and state == "running" else None,
         "sensor_timestamp_available": False,
         "actual_fps_measured": measured_fps is not None,
         "delivered_fps": measured_fps,
@@ -1741,6 +1746,8 @@ def camera_capture_preview():
     source = windows_usb_runtime if windows_usb_runtime is not None else camera_capture_runtime
     if source is None:
         return "Camera capture not enabled", 404
+    if getattr(source, "reported_native_mode", None) and not physical_camera_authorized():
+        return "Physical preview requires the portable desktop app", 403
     try:
         jpeg = source.capture_preview_jpeg()
     except RuntimeError as exc:
